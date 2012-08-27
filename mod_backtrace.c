@@ -18,6 +18,7 @@
 #include "http_core.h"
 #include "http_log.h"
 #include "http_main.h"
+#include "http_protocol.h"
 #include "ap_mmn.h"
 
 #include "mod_backtrace.h"
@@ -56,7 +57,7 @@ static void fmt2(void *user_data, const char *s)
         break;
     case BT_OUTPUT_FILE:
 #ifdef WIN32
-        XXX
+        WriteFile(p->outfile, s, strlen(s), NULL, NULL);
 #else
         write(p->outfile, s, strlen(s));
         write(p->outfile, "\n", 1);
@@ -109,7 +110,7 @@ static void backtrace_get_backtrace(bt_param_t *p)
         dp.user_data = p;
     }
     
-    diag_backtrace(&dp);
+    diag_backtrace(&dp, NULL);
 }
 
 #if DIAG_HAVE_ERRORLOG_HANDLER
@@ -158,6 +159,42 @@ static int backtrace_log(const ap_errorlog_info *info,
 }
 #endif /* DIAG_HAVE_ERRORLOG_HANDLER */
 
+static void fmt_rputs(void *userdata, const char *buffer)
+{
+    request_rec *r = userdata;
+
+    ap_rputs(buffer, r);
+    ap_rputs("\n", r);
+}
+
+static void backtrace(request_rec *r)
+{
+    diag_param_t p = {0};
+
+    ap_set_content_type(r, "text/plain");
+
+    ap_rputs("========== mod_backtrace report ===========================\n", r);
+
+    memset(&p, 0, sizeof p);
+    p.user_data = r;
+    p.calling_context = DIAG_MODE_NORMAL;
+    p.output_mode = DIAG_CALL_FN;
+    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
+    p.backtrace_count = 10;
+    p.output_fn = fmt_rputs;
+    diag_backtrace(&p, NULL);
+}
+
+static int backtrace_handler(request_rec *r)
+{
+    if (!strcmp(r->handler, "backtrace-handler")) {
+        backtrace(r);
+        return OK;
+    }
+
+    return DECLINED;
+}
+
 static void backtrace_child_init(apr_pool_t *p, server_rec *s)
 {
     main_server = s;
@@ -168,6 +205,7 @@ static void backtrace_register_hooks(apr_pool_t *p)
 #if DIAG_HAVE_ERRORLOG_HANDLER
     ap_register_errorlog_handler(p, "B", backtrace_log, 0);
 #endif
+    ap_hook_handler(backtrace_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(backtrace_child_init, NULL, NULL, APR_HOOK_MIDDLE);
     APR_REGISTER_OPTIONAL_FN(backtrace_describe_exception);
     APR_REGISTER_OPTIONAL_FN(backtrace_get_backtrace);

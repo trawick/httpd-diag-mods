@@ -1,0 +1,22 @@
+HTTPD = c:\apache22
+
+all: testdiag.exe mod_backtrace.so
+
+install: mod_backtrace.so
+	copy mod_backtrace.so $(HTTPD)\modules
+	copy mod_backtrace.pdb $(HTTPD)\modules
+
+testdiag.exe: testdiag.obj diag.obj
+	link kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib
+
+testdiag.obj: testdiag.c diag.h
+	cl /nologo /MD /W3 /Od /D WIN32 /D _WINDOWS   /c /Zi /Fdtestdiag.pdb /Fotestdiag.obj testdiag.c
+
+diag.obj: diag.c diag.h
+	cl /nologo /MD /W3 /Od /D WIN32 /D _WINDOWS   /c /Zi /Fddiag.pdb /Fodiag.obj diag.c
+
+mod_backtrace.so: mod_backtrace.obj diag.obj
+	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:"c:\Apache22\lib" /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
+
+mod_backtrace.obj: mod_backtrace.c diag.h
+	cl /nologo /MD /W3 /Od /D WIN32 /D _WINDOWS  -I"C:\Apache22\include"  /c /Zi /Fdmod_backtrace.pdb /Fomod_backtrace.obj mod_backtrace.c

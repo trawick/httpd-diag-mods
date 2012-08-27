@@ -102,7 +102,7 @@ static void fmt_context(FILE *log,
     stackframe.AddrStack.Offset = context.Esp;
 
     if (SymInitialize(process, 
-                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\symbols;"
+                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\\symbols;"
                       "c:\\windows\\symbols\\dll",
                       /* "SRV*C:\\MyLocalSymbols*http://msdl.microsoft.com/download/symbols" */
                       TRUE) != TRUE) {

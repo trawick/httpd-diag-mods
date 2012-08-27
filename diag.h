@@ -52,8 +52,16 @@ typedef struct {
     unsigned int backtrace_count;
 } diag_param_t;
 
+typedef struct diag_context_t {
+#ifdef WIN32
+    CONTEXT *context;
+#else
+    int foo;
+#endif
+} diag_context_t;
+
 extern int diag_describe(diag_param_t *);
-extern int diag_backtrace(diag_param_t *);
+extern int diag_backtrace(diag_param_t *, diag_context_t *);
 
 #ifdef __cplusplus
 }

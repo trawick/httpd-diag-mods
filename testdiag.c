@@ -44,7 +44,7 @@ int y(void)
 #ifdef __linux__
     p.outfile = STDOUT_FILENO;
     p.output_mode = DIAG_WRITE_FD;
-    diag_backtrace(&p);
+    diag_backtrace(&p, NULL);
 #endif
 
     printf("\n");
@@ -52,21 +52,21 @@ int y(void)
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_ADDRESS;
     p.output_fn = fmt;
-    diag_backtrace(&p);
+    diag_backtrace(&p, NULL);
 
     printf("\n");
 
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
     p.output_fn = fmt;
-    diag_backtrace(&p);
+    diag_backtrace(&p, NULL);
 
     printf("\n");
 
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.output_fn = fmt;
-    diag_backtrace(&p);
+    diag_backtrace(&p, NULL);
 
     printf("\n");
 
@@ -79,7 +79,7 @@ int y(void)
         p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
         p.backtrace_count = 3;
         p.output_fn = line_fmt;
-        diag_backtrace(&p);
+        diag_backtrace(&p, NULL);
         if (linebuf[strlen(linebuf) - 1] == '<') {
             linebuf[strlen(linebuf) - 1] = '\0';
         }

@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#if _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,10 +33,21 @@
 #include <execinfo.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+
+#if _MSC_VER
+#define snprintf _snprintf
+#endif
+
+#endif
+
 int diag_describe(diag_param_t *p)
 {
+#ifndef WIN32
     char buffer[256];
     size_t len;
+#endif
 
     assert(p->calling_context == DIAG_MODE_EXCEPTION);
 
@@ -170,7 +185,7 @@ static void format_frameinfo(const char *s,
 }
 
 #ifdef __linux__
-int diag_backtrace(diag_param_t *p)
+int diag_backtrace(diag_param_t *p, diag_context_t *c)
 {
     void *pointers[DIAG_BT_LIMIT];
     int count;
@@ -210,6 +225,77 @@ int diag_backtrace(diag_param_t *p)
         }
     }
     return size;
+}
+
+#elif defined(WIN32)
+
+int diag_backtrace(diag_param_t *p, diag_context_t *c)
+{
+    int cur = 0, limit = 25;
+    STACKFRAME64 stackframe;
+    CONTEXT context;
+    HANDLE process = GetCurrentProcess();
+    HANDLE thread = GetCurrentThread();
+    char symbol_buffer[512] = {0};
+    char buf[128];
+    IMAGEHLP_SYMBOL64 *symbol = (IMAGEHLP_SYMBOL64 *)&symbol_buffer;
+    DWORD64 ignored;
+
+    assert(p->output_mode == DIAG_CALL_FN);
+
+    if (c) {
+        context = *c->context;
+    }
+    else {
+        RtlCaptureContext(&context);
+    }
+
+    memset(&stackframe, 0, sizeof stackframe);
+    stackframe.AddrPC.Mode = 
+        stackframe.AddrFrame.Mode =
+            stackframe.AddrStack.Mode = AddrModeFlat;
+
+    stackframe.AddrPC.Offset    = context.Eip;
+    stackframe.AddrFrame.Offset = context.Ebp;
+    stackframe.AddrStack.Offset = context.Esp;
+
+    if (SymInitialize(process, 
+                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\\symbols;"
+                      "c:\\windows\\symbols\\dll",
+                      /* "SRV*C:\\MyLocalSymbols*http://msdl.microsoft.com/download/symbols" */
+                      TRUE) != TRUE) {
+        /*
+        fprintf(log, "SymInitialize() failed with error %d\n",
+                GetLastError());
+        */
+    }
+
+    while (StackWalk64(IMAGE_FILE_MACHINE_I386,
+                       process, thread,
+                       &stackframe,
+                       &context,
+                       NULL,                       /* ReadMemoryRoutine */
+                       SymFunctionTableAccess64,   /* FunctionTableAccessRoutine */
+                       SymGetModuleBase64,         /* GetModuleBaseRoutine */
+                       NULL)                       /* TranslateAddress */
+           == TRUE) {
+        cur++;
+        if (cur > limit) { /* avoid loop on corrupted chain */
+            break;
+        }
+        symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
+        symbol->MaxNameLength = sizeof(symbol_buffer) - sizeof(IMAGEHLP_SYMBOL64);
+        ignored = 0;
+        if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, &ignored, symbol) != TRUE) {
+            snprintf(symbol->Name, symbol->MaxNameLength, "no-symbol-%d", GetLastError());
+        }
+        snprintf(buf, sizeof buf, "  %s [0x%I64X]",
+                 symbol->Name,
+                 stackframe.AddrPC.Offset);
+        p->output_fn(p->user_data, buf);
+    }
+
+    return 0;
 }
 
 #else
