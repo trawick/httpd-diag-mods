@@ -81,6 +81,22 @@ int y(void)
 
     printf("\n");
 
+    p.output_mode = DIAG_CALL_FN;
+    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME;
+    p.output_fn = fmt;
+    printf("Format function name and module name via callback:\n");
+    diag_backtrace(&p, NULL);
+
+    printf("\n");
+
+    p.output_mode = DIAG_CALL_FN;
+    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH;
+    p.output_fn = fmt;
+    printf("Format function name and module path via callback:\n");
+    diag_backtrace(&p, NULL);
+
+    printf("\n");
+
     {
         char linebuf[1024];
 

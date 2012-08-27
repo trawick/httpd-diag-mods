@@ -272,6 +272,72 @@ static void format_frameinfo(const char *s,
 }
 #endif
 
+#if defined(__FreeBSD__) || defined(__DragonFly__) 
+
+static const char *end_of_field(const char *s)
+{
+    ++s;
+    while (*s && !isspace(*s) && *s != '+' && *s != '>') {
+        ++s;
+    }
+    return s - 1;
+}
+
+/* 0x400ba7 <_init+807> at /usr/home/trawick/myhg/apache/mod/diag/testdiag */
+static void format_frameinfo(const char *s,
+                             unsigned int fields,
+                             char *buf,
+                             size_t buf_size)
+{
+    char *outch = buf;
+    const char *lastoutch = buf + buf_size - 1;
+    const char *module, *address, *function, *offset;
+
+    address = s;
+
+    function = address;
+    function = strchr(function, '<');
+    if (function) {
+        function += 1;
+    }
+
+    offset = function;
+    if (offset) {
+        offset = strchr(offset, '+');
+        if (offset) {
+            offset += 1;
+        }
+    }
+
+    module = offset;
+    if (module) {
+        module = strstr(module, " at ");
+        if (module) {
+            module += 4;
+        }
+    }
+
+    if ((fields & DIAG_BTFIELDS_MODULE_NAME) && module) {
+        outch = safe_copy(outch, lastoutch, module, end_of_field(module));
+    }
+
+    if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
+        outch = safe_copy(outch, lastoutch, function, end_of_field(function));
+    }
+
+    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
+        static const char *plus = "+";
+
+        outch = safe_copy(outch, lastoutch, plus, plus);
+        outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
+    }
+
+    if ((fields & DIAG_BTFIELDS_ADDRESS) && address) {
+        outch = safe_copy(outch, lastoutch, address, end_of_field(address));
+    }
+}
+#endif
+
 #ifdef HAVE_EXECINFO_BACKTRACE
 int diag_backtrace(diag_param_t *p, diag_context_t *c)
 {
