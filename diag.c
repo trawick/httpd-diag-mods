@@ -103,7 +103,57 @@ static char *safe_copy(char *outch, const char *lastoutch,
     return outch;
 }
 
+#ifndef WIN32
+static const char *end_of_field(const char *s)
+{
+    ++s;
+    while (*s && !isspace(*s) && *s != '+' && *s != '>' && *s != ')'
+           && *s != ']' && *s != '(' && *s != '[') {
+        ++s;
+    }
+    return s - 1;
+}
+
+static void output_frame(char *outch, char *lastoutch, int fields,
+                         const char *module_path,
+                         const char *module, const char *function,
+                         const char *offset, const char *address)
+{
+    int fn_missing = 0;
+    static const char *colon = ":";
+
+    if ((fields & DIAG_BTFIELDS_MODULE_PATH) && module_path) {
+        outch = safe_copy(outch, lastoutch, module_path, end_of_field(module_path));
+        outch = safe_copy(outch, lastoutch, colon, colon);
+    }
+    else if ((fields & (DIAG_BTFIELDS_MODULE_NAME|DIAG_BTFIELDS_MODULE_PATH))
+             && module) {
+        outch = safe_copy(outch, lastoutch, module, end_of_field(module));
+        outch = safe_copy(outch, lastoutch, colon, colon);
+    }
+
+    if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
+        outch = safe_copy(outch, lastoutch, function, end_of_field(function));
+    }
+    else {
+        fn_missing = 1;
+    }
+
+    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
+        static const char *plus = "+";
+
+        outch = safe_copy(outch, lastoutch, plus, plus);
+        outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
+    }
+
+    if ((fn_missing || (fields & DIAG_BTFIELDS_ADDRESS)) && address) {
+        outch = safe_copy(outch, lastoutch, address, end_of_field(address));
+    }
+}
+#endif /* not WIN32 */
+
 #ifdef __linux__
+/* ./testdiag(diag_backtrace+0x75)[0x401824] */
 static void format_frameinfo(const char *s,
                              unsigned int fields,
                              char *buf,
@@ -111,9 +161,9 @@ static void format_frameinfo(const char *s,
 {
     size_t s_len = strlen(s);
     char *outch = buf;
-    const char *lastoutch = buf + buf_size - 1;
-    const char *lastslash, *firstparen, *firstbracket, *endmodule;
-    int fn_missing = 0;
+    char *lastoutch = buf + buf_size - 1;
+    const char *lastslash, *firstparen, *firstbracket;
+    const char *module_path, *module, *function, *offset, *address;
     
     lastslash = strrchr(s, '/');
     firstparen = strchr(s, '(');
@@ -128,86 +178,43 @@ static void format_frameinfo(const char *s,
             memcpy(buf, s, buf_size - 1);
             buf[buf_size - 1] = 0;
         }
-    }
-    if (firstparen) {
-        endmodule = firstparen - 1;
-    }
-    else if (firstbracket) {
-        endmodule = firstbracket - 1;
-    }
-    else {
-        endmodule = NULL;
+        return;
     }
 
-    if (fields & DIAG_BTFIELDS_MODULE_PATH) {
-        /* implies DIAG_BTFIELDS_MODULE_NAME */
-        if (s && endmodule) {
-            outch = safe_copy(outch, lastoutch, s, endmodule);
-        }
+    module_path = s;
+
+    module = lastslash;
+    if (module) {
+        module += 1;
     }
-    else {
-        if (s && endmodule) {
-            s = lastslash + 1;
-            if (fields & DIAG_BTFIELDS_MODULE_NAME) {
-                outch = safe_copy(outch, lastoutch, s, endmodule);
-            }
-            s = endmodule + 1;
+    
+    function = firstparen;
+    if (function) {
+        function += 1;
+        if (*function == ')') {
+            function = NULL;
         }
     }
 
-    if (fields & DIAG_BTFIELDS_FUNCTION) {
-        if (firstparen) {
-            const char *lastparen = strchr(firstparen, ')');
-            const char *plus = strchr(firstparen, '+');
-            const char *copyto;
-
-            if (fields & DIAG_BTFIELDS_FN_OFFSET) {
-                copyto = lastparen;
-            }
-            else if (plus) {
-                copyto = plus;
-            }
-            else {
-                copyto = NULL;
-            }
-        
-            if (copyto && lastparen && firstparen + 1 != copyto) {
-                outch = safe_copy(outch, lastoutch,
-                                  firstparen + 1, copyto - 1);
-                s = lastparen + 1;
-            }
-            else {
-                fn_missing = 1;
-            }
-        }
-        else {
-            fn_missing = 1;
+    offset = function;
+    if (offset) {
+        offset = strchr(function, '+');
+        if (offset) {
+            offset += 1;
         }
     }
-
-    if ((fields & DIAG_BTFIELDS_ADDRESS) || fn_missing) {
-        if (firstbracket) {
-            const char *lastbracket = strchr(firstbracket, ']');
-            if (lastbracket) {
-                outch = safe_copy(outch, lastoutch,
-                                  firstbracket + 1,
-                                  lastbracket - 1);
-            }
-        }
+    
+    address = firstbracket;
+    if (address) {
+        address += 1;
     }
+    
+    output_frame(outch, lastoutch, fields, module_path,
+                 module, function, offset, address);
 }
-#endif
+#endif /* __linux__ */
 
 #ifdef __MACH__
-
-static const char *end_of_field(const char *s)
-{
-    ++s;
-    while (*s && !isspace(*s)) {
-        ++s;
-    }
-    return s - 1;
-}
 
 static void format_frameinfo(const char *s,
                              unsigned int fields,
@@ -216,6 +223,7 @@ static void format_frameinfo(const char *s,
 {
     char *outch = buf;
     const char *lastoutch = buf + buf_size - 1;
+    const char *module_path = NULL; /* not implemented */
     const char *module, *address, *function, *offset;
 
     /* skip over frame number to find module */
@@ -251,37 +259,12 @@ static void format_frameinfo(const char *s,
         }
     }
 
-    if ((fields & DIAG_BTFIELDS_MODULE_NAME) && module) {
-        outch = safe_copy(outch, lastoutch, module, end_of_field(module));
-    }
-
-    if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
-        outch = safe_copy(outch, lastoutch, function, end_of_field(function));
-    }
-
-    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
-        static const char *plus = "+";
-
-        outch = safe_copy(outch, lastoutch, plus, plus);
-        outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
-    }
-
-    if ((fields & DIAG_BTFIELDS_ADDRESS) && address) {
-        outch = safe_copy(outch, lastoutch, address, end_of_field(address));
-    }
+    output_frame(outch, lastoutch, fields, module_path,
+                 module, function, offset, address);
 }
-#endif
+#endif /* __MACH__ */
 
 #if defined(__FreeBSD__) || defined(__DragonFly__) 
-
-static const char *end_of_field(const char *s)
-{
-    ++s;
-    while (*s && !isspace(*s) && *s != '+' && *s != '>') {
-        ++s;
-    }
-    return s - 1;
-}
 
 /* 0x400ba7 <_init+807> at /usr/home/trawick/myhg/apache/mod/diag/testdiag */
 static void format_frameinfo(const char *s,
@@ -291,6 +274,7 @@ static void format_frameinfo(const char *s,
 {
     char *outch = buf;
     const char *lastoutch = buf + buf_size - 1;
+    const char *module_path = NULL; /* not implemented */
     const char *module, *address, *function, *offset;
 
     address = s;
@@ -317,26 +301,10 @@ static void format_frameinfo(const char *s,
         }
     }
 
-    if ((fields & DIAG_BTFIELDS_MODULE_NAME) && module) {
-        outch = safe_copy(outch, lastoutch, module, end_of_field(module));
-    }
-
-    if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
-        outch = safe_copy(outch, lastoutch, function, end_of_field(function));
-    }
-
-    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
-        static const char *plus = "+";
-
-        outch = safe_copy(outch, lastoutch, plus, plus);
-        outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
-    }
-
-    if ((fields & DIAG_BTFIELDS_ADDRESS) && address) {
-        outch = safe_copy(outch, lastoutch, address, end_of_field(address));
-    }
+    output_frame(outch, lastoutch, fields, module_path,
+                 module, function, offset, address);
 }
-#endif
+#endif /* __FreeBSD__ || __DragonFly__ */
 
 #ifdef HAVE_EXECINFO_BACKTRACE
 int diag_backtrace(diag_param_t *p, diag_context_t *c)
