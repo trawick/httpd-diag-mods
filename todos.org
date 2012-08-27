@@ -1,0 +1,31 @@
+* Tasks
+** Build testing
+*** Windows
+**** TODO Create testbed with ASF 2.2, ApacheLounge 2.2, ASF 2.4, ApacheLounge 2.2, PHP with each
+**** TODO Create automated test script or checklist, with mechanism for saving results
+*** Linux
+**** TODO Create testbed with 2.2 and 2.4, PHP with each
+**** TODO Create automated test script with mechanism for saving results
+** diag.c/diag.h
+*** TODO Add better test coverage to testdiag, automate the tests
+*** TODO Remove DIAG_MODE_xxx; either you provide context info or you don't
+*** TODO Implement SA_SIGINFO/ucontext_t on Solaris
+*** TODO See if anything better than the Linux API is available on FreeBSD
+*** TODO Two forms of callback: formatted string and fields
+*** TODO Implement DIAG_BTFIELDS_LINENUM for Windows
+*** TODO Provide a way to bypass SymInitialize()
+*** TODO What to do about SymInitialize() when the caller doesn't handle it?
+*** TODO Implement missing features on Windows
+** mod_backtrace.c/mod_backtrace.h
+*** TODO Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
+*** TODO Add error log handler for 2.2
+*** TODO Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
+*** TODO Change backtrace-handler to generate backtrace in different flavors for automated regression testing
+** mod_whatkilledus.c
+*** TODO Implement the original mod_whatkilledus feature, with ways to filter out certain logging.
+*** TODO Don't compile in the crash handler by default.
+*** TODO Back out the exception filter as appropriate.
+** Web site
+*** TODO Create it!
+*** TODO Migrate old information from http://people.apache.org/~trawick/
+*** TODO Create release mechanism, document how to build
