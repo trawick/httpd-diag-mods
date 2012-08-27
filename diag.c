@@ -222,7 +222,7 @@ static void format_frameinfo(const char *s,
                              size_t buf_size)
 {
     char *outch = buf;
-    const char *lastoutch = buf + buf_size - 1;
+    char *lastoutch = buf + buf_size - 1;
     const char *module_path = NULL; /* not implemented */
     const char *module, *address, *function, *offset;
 
