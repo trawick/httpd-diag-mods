@@ -14,6 +14,7 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +25,11 @@
 #define DIAG_BT_LIMIT 25
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__MACH__)
+#define HAVE_EXECINFO_BACKTRACE
+#endif
+
+#ifdef HAVE_EXECINFO_BACKTRACE
 #include <unistd.h>
 #include <execinfo.h>
 #endif
@@ -84,6 +89,7 @@ static char *safe_copy(char *outch, const char *lastoutch,
     return outch;
 }
 
+#ifdef __linux__
 static void format_frameinfo(const char *s,
                              unsigned int fields,
                              char *buf,
@@ -112,20 +118,27 @@ static void format_frameinfo(const char *s,
     if (firstparen) {
         endmodule = firstparen - 1;
     }
-    else {
+    else if (firstbracket) {
         endmodule = firstbracket - 1;
+    }
+    else {
+        endmodule = NULL;
     }
 
     if (fields & DIAG_BTFIELDS_MODULE_PATH) {
         /* implies DIAG_BTFIELDS_MODULE_NAME */
-        outch = safe_copy(outch, lastoutch, s, endmodule);
-    }
-    else {
-        s = lastslash + 1;
-        if (fields & DIAG_BTFIELDS_MODULE_NAME) {
+        if (s && endmodule) {
             outch = safe_copy(outch, lastoutch, s, endmodule);
         }
-        s = endmodule + 1;
+    }
+    else {
+        if (s && endmodule) {
+            s = lastslash + 1;
+            if (fields & DIAG_BTFIELDS_MODULE_NAME) {
+                outch = safe_copy(outch, lastoutch, s, endmodule);
+            }
+            s = endmodule + 1;
+        }
     }
 
     if (fields & DIAG_BTFIELDS_FUNCTION) {
@@ -159,17 +172,93 @@ static void format_frameinfo(const char *s,
     }
 
     if ((fields & DIAG_BTFIELDS_ADDRESS) || fn_missing) {
-        const char *lastbracket = strchr(firstbracket, ']');
-        
-        if (lastbracket) {
-            outch = safe_copy(outch, lastoutch,
-                              firstbracket + 1,
-                              lastbracket - 1);
+        if (firstbracket) {
+            const char *lastbracket = strchr(firstbracket, ']');
+            if (lastbracket) {
+                outch = safe_copy(outch, lastoutch,
+                                  firstbracket + 1,
+                                  lastbracket - 1);
+            }
         }
     }
 }
+#endif
 
-#ifdef __linux__
+#ifdef __MACH__
+
+static const char *end_of_field(const char *s)
+{
+    ++s;
+    while (*s && !isspace(*s)) {
+        ++s;
+    }
+    return s - 1;
+}
+
+static void format_frameinfo(const char *s,
+                             unsigned int fields,
+                             char *buf,
+                             size_t buf_size)
+{
+    char *outch = buf;
+    const char *lastoutch = buf + buf_size - 1;
+    const char *module, *address, *function, *offset;
+
+    /* skip over frame number to find module */
+    module = s;
+    while (!isspace(*module)) {
+        ++module;
+    }
+    while (isspace(*module)) {
+        ++module;
+    }
+
+    /* find address */
+    address = strstr(module, "0x");
+
+    /* find function */
+    function = address;
+    if (function) {
+        while (!isspace(*function)) {
+            ++function;
+        }
+        while (isspace(*function)) {
+            ++function;
+        }
+    }
+
+    /* find offset */
+    offset = function;
+
+    if (offset) {
+        offset = strstr(function, " + ");
+        if (offset) {
+            offset += 3;
+        }
+    }
+
+    if ((fields & DIAG_BTFIELDS_MODULE_NAME) && module) {
+        outch = safe_copy(outch, lastoutch, module, end_of_field(module));
+    }
+
+    if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
+        outch = safe_copy(outch, lastoutch, function, end_of_field(function));
+    }
+
+    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
+        static const char *plus = "+";
+
+        outch = safe_copy(outch, lastoutch, plus, plus);
+        outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
+    }
+
+    if ((fields & DIAG_BTFIELDS_ADDRESS) && address) {
+        outch = safe_copy(outch, lastoutch, address, end_of_field(address));
+    }
+}
+#endif
+
+#ifdef HAVE_EXECINFO_BACKTRACE
 int diag_backtrace(diag_param_t *p)
 {
     void *pointers[DIAG_BT_LIMIT];

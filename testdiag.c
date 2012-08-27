@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef __linux__
+#ifndef WIN32
 #include <unistd.h>
 #endif
 
@@ -41,17 +41,17 @@ int y(void)
 
     p.calling_context = DIAG_MODE_NORMAL;
 
-#ifdef __linux__
     p.outfile = STDOUT_FILENO;
     p.output_mode = DIAG_WRITE_FD;
+    printf("Raw display to stdout:\n");
     diag_backtrace(&p);
-#endif
 
     printf("\n");
 
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_ADDRESS;
     p.output_fn = fmt;
+    printf("Format address via callback:\n");
     diag_backtrace(&p);
 
     printf("\n");
@@ -59,6 +59,7 @@ int y(void)
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
     p.output_fn = fmt;
+    printf("Format function name and offset via callback:\n");
     diag_backtrace(&p);
 
     printf("\n");
@@ -66,6 +67,7 @@ int y(void)
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.output_fn = fmt;
+    printf("Format function name via callback:\n");
     diag_backtrace(&p);
 
     printf("\n");
@@ -79,6 +81,7 @@ int y(void)
         p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
         p.backtrace_count = 3;
         p.output_fn = line_fmt;
+        printf("Format function name via one-liner callback:\n");
         diag_backtrace(&p);
         if (linebuf[strlen(linebuf) - 1] == '<') {
             linebuf[strlen(linebuf) - 1] = '\0';
