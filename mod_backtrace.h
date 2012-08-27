@@ -34,8 +34,9 @@ typedef enum {
 typedef enum {
     BT_OUTPUT_SHORT, /* just the function names */
     BT_OUTPUT_MEDIUM, /* function names and offsets */
-    BT_OUTPUT_LONG /* everything the native feature provides, which provides
-                    * simpler code
+    BT_OUTPUT_LONG /* everything the native feature provides, which sometimes
+                    * allows bypassing a lot of logic and deferring to the
+                    * platform function
                     */
 } bt_output_style_t;
 
