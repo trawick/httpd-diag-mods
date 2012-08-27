@@ -329,8 +329,6 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
     IMAGEHLP_SYMBOL64 *symbol = (IMAGEHLP_SYMBOL64 *)&symbol_buffer;
     DWORD64 ignored;
 
-    assert(p->output_mode == DIAG_CALL_FN);
-
     if (c) {
         context = *c->context;
     }
@@ -380,7 +378,12 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
         snprintf(buf, sizeof buf, "  %s [0x%I64X]",
                  symbol->Name,
                  stackframe.AddrPC.Offset);
-        p->output_fn(p->user_data, buf);
+        if (p->output_mode == DIAG_CALL_FN) {
+            p->output_fn(p->user_data, buf);
+        }
+        else {
+            WriteFile(p->outfile, buf, strlen(buf), NULL, NULL);
+        }
     }
 
     return 0;

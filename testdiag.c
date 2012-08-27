@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#if _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include <string.h>
 
@@ -41,7 +45,11 @@ int y(void)
 
     p.calling_context = DIAG_MODE_NORMAL;
 
+#ifdef WIN32
+    p.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
+#else
     p.outfile = STDOUT_FILENO;
+#endif
     p.output_mode = DIAG_WRITE_FD;
     printf("Raw display to stdout:\n");
     diag_backtrace(&p, NULL);
