@@ -325,7 +325,6 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
     HANDLE process = GetCurrentProcess();
     HANDLE thread = GetCurrentThread();
     char symbol_buffer[512] = {0};
-    char buf[128];
     IMAGEHLP_SYMBOL64 *symbol = (IMAGEHLP_SYMBOL64 *)&symbol_buffer;
     DWORD64 ignored;
 
@@ -375,14 +374,42 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
         if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, &ignored, symbol) != TRUE) {
             snprintf(symbol->Name, symbol->MaxNameLength, "no-symbol-%d", GetLastError());
         }
-        snprintf(buf, sizeof buf, "  %s [0x%I64X]",
-                 symbol->Name,
-                 stackframe.AddrPC.Offset);
-        if (p->output_mode == DIAG_CALL_FN) {
-            p->output_fn(p->user_data, buf);
-        }
-        else {
-            WriteFile(p->outfile, buf, strlen(buf), NULL, NULL);
+        {
+            char buf[128] = "no-data";
+            char *outch = buf;
+            const char *lastoutch = buf + sizeof buf - 1;
+            static const char *space = " ";
+
+            if (p->backtrace_fields & DIAG_BTFIELDS_FUNCTION) {
+                outch = safe_copy(outch, lastoutch,
+                                  symbol->Name,
+                                  symbol->Name + strlen(symbol->Name) - 1);
+            }
+
+            if (p->backtrace_fields & DIAG_BTFIELDS_ADDRESS) {
+                char addrbuf[30];
+
+                if (outch != buf) {
+                    outch = safe_copy(outch, lastoutch,
+                                      space,
+                                      space);
+                }
+
+                snprintf(addrbuf, sizeof addrbuf, "0x%I64X",
+                         stackframe.AddrPC.Offset);
+
+                outch = safe_copy(outch, lastoutch,
+                                  addrbuf,
+                                  addrbuf + strlen(addrbuf) - 1);
+            }
+
+            if (p->output_mode == DIAG_CALL_FN) {
+                p->output_fn(p->user_data, buf);
+            }
+            else {
+                WriteFile(p->outfile, buf, strlen(buf), NULL, NULL);
+                WriteFile(p->outfile, "\r\n", 2, NULL, NULL);
+            }
         }
     }
 

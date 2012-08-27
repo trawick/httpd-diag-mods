@@ -50,6 +50,7 @@ int y(void)
 #else
     p.outfile = STDOUT_FILENO;
 #endif
+    p.backtrace_fields = DIAG_BTFIELDS_ALL;
     p.output_mode = DIAG_WRITE_FD;
     printf("Raw display to stdout:\n");
     diag_backtrace(&p, NULL);
