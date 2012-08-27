@@ -29,3 +29,6 @@
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/
 *** TODO Create release mechanism, document how to build
+**** Need /usr/ports/devel/libexecinfo on FreeBSD
+*** TODO Document portability issues
+**** Garbage with DIAG_WRITE_FD on FreeBSD; see http://lists.freebsd.org/pipermail/freebsd-ports-bugs/2012-March/230175.html
