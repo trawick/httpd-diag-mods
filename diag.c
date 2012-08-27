@@ -142,17 +142,17 @@ static void format_frameinfo(const char *s,
     if (fields & DIAG_BTFIELDS_MODULE_PATH) {
         /* implies DIAG_BTFIELDS_MODULE_NAME */
         if (s && endmodule) {
-        outch = safe_copy(outch, lastoutch, s, endmodule);
-    }
+            outch = safe_copy(outch, lastoutch, s, endmodule);
+        }
     }
     else {
         if (s && endmodule) {
-        s = lastslash + 1;
-        if (fields & DIAG_BTFIELDS_MODULE_NAME) {
-            outch = safe_copy(outch, lastoutch, s, endmodule);
+            s = lastslash + 1;
+            if (fields & DIAG_BTFIELDS_MODULE_NAME) {
+                outch = safe_copy(outch, lastoutch, s, endmodule);
+            }
+            s = endmodule + 1;
         }
-        s = endmodule + 1;
-    }
     }
 
     if (fields & DIAG_BTFIELDS_FUNCTION) {
@@ -187,14 +187,14 @@ static void format_frameinfo(const char *s,
 
     if ((fields & DIAG_BTFIELDS_ADDRESS) || fn_missing) {
         if (firstbracket) {
-        const char *lastbracket = strchr(firstbracket, ']');
-        if (lastbracket) {
-            outch = safe_copy(outch, lastoutch,
-                              firstbracket + 1,
-                              lastbracket - 1);
+            const char *lastbracket = strchr(firstbracket, ']');
+            if (lastbracket) {
+                outch = safe_copy(outch, lastoutch,
+                                  firstbracket + 1,
+                                  lastbracket - 1);
+            }
         }
     }
-}
 }
 #endif
 
