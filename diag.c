@@ -273,9 +273,8 @@ static void format_frameinfo(const char *s,
                              size_t buf_size)
 {
     char *outch = buf;
-    const char *lastoutch = buf + buf_size - 1;
-    const char *module_path = NULL; /* not implemented */
-    const char *module, *address, *function, *offset;
+    char *lastoutch = buf + buf_size - 1;
+    const char *module_path, *module, *address, *function, *offset;
 
     address = s;
 
@@ -293,11 +292,19 @@ static void format_frameinfo(const char *s,
         }
     }
 
-    module = offset;
+    module_path = offset;
+    if (module_path) {
+        module_path = strstr(module_path, " at ");
+        if (module_path) {
+            module_path += 4;
+        }
+    }
+
+    module = module_path;
     if (module) {
-        module = strstr(module, " at ");
+        module = strrchr(module, '/');
         if (module) {
-            module += 4;
+            module += 1;
         }
     }
 
