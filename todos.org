@@ -16,6 +16,7 @@
 *** TODO Provide a way to bypass SymInitialize()
 *** TODO What to do about SymInitialize() when the caller doesn't handle it?
 *** TODO Implement missing features on Windows
+*** TODO Fix occasional wrong offset on Solaris
 ** mod_backtrace.c/mod_backtrace.h
 *** TODO Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
 *** TODO Add error log handler for 2.2
