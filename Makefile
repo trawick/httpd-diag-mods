@@ -2,17 +2,29 @@ PLATFORM := $(shell uname -s)
 
 $(info Building for platform $(PLATFORM))
 
+GCC_CFLAGS=-O0 -Wall -g
+
 ifeq ($(PLATFORM), FreeBSD)
 
-CFLAGS = -I/usr/local/include -rdynamic
-LDFLAGS=-L/usr/local/lib -rdynamic
+CFLAGS = $(GCC_CFLAGS) -I/usr/local/include -rdynamic
+LDFLAGS= $(GCC_CFLAGS) -L/usr/local/lib -rdynamic
 LIBS=-lexecinfo
+
+else
+
+ifeq ($(PLATFORM), Linux)
+
+CFLAGS=  $(GCC_CFLAGS) -rdynamic
+LDFLAGS= $(GCC_CFLAGS) -rdynamic
+LIBS=
 
 else
 
 CFLAGS=
 LDFLAGS=
 LIBS=
+
+endif
 
 endif
 
