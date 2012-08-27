@@ -360,7 +360,7 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
 
 int diag_backtrace(diag_param_t *p, diag_context_t *c)
 {
-    int cur = 0, limit = 25;
+    int cur = 0, count;
     STACKFRAME64 stackframe;
     CONTEXT context;
     HANDLE process = GetCurrentProcess();
@@ -374,6 +374,13 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
     }
     else {
         RtlCaptureContext(&context);
+    }
+
+    if (p->backtrace_count && p->backtrace_count < DIAG_BT_LIMIT) {
+        count = p->backtrace_count;
+    }
+    else {
+        count = DIAG_BT_LIMIT;
     }
 
     memset(&stackframe, 0, sizeof stackframe);
@@ -406,7 +413,7 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
                        NULL)                       /* TranslateAddress */
            == TRUE) {
         cur++;
-        if (cur > limit) { /* avoid loop on corrupted chain */
+        if (cur > count) { /* avoid loop on corrupted chain, respect caller's wishes */
             break;
         }
         symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
