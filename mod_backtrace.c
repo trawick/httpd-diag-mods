@@ -70,7 +70,7 @@ static void fmt2(void *user_data, const char *s)
     }
 }
 
-static void backtrace_get_backtrace(bt_param_t *p)
+static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
 {
     diag_param_t dp = {0};
 
@@ -110,7 +110,7 @@ static void backtrace_get_backtrace(bt_param_t *p)
         dp.user_data = p;
     }
     
-    diag_backtrace(&dp, NULL);
+    diag_backtrace(&dp, c);
 }
 
 #if DIAG_HAVE_ERRORLOG_HANDLER

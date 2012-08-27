@@ -15,6 +15,7 @@
 
 #include "httpd.h"
 #include "http_config.h"
+#include "http_log.h"
 #include "ap_mpm.h"
 
 #include "mod_backtrace.h"
@@ -22,7 +23,24 @@
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
-#ifndef WIN32
+#ifdef WIN32
+
+static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
+{
+    if (get_backtrace) {
+        bt_param_t p = {0};
+        diag_context_t c = {0};
+
+        p.output_mode = BT_OUTPUT_ERROR_LOG;
+        p.output_style = BT_OUTPUT_LONG;
+        c.context = ep->ContextRecord;
+        get_backtrace(&p, &c);
+    }
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+#else
+
 static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 {
     if (get_backtrace) {
@@ -30,10 +48,11 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 
         p.output_mode = BT_OUTPUT_ERROR_LOG;
         p.output_style = BT_OUTPUT_LONG;
-        get_backtrace(&p);
+        get_backtrace(&p, NULL);
     }
     return OK;
 }
+
 #endif
 
 static void whatkilledus_optional_fn_retrieve(void)
@@ -45,7 +64,29 @@ static void whatkilledus_optional_fn_retrieve(void)
 static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 {
 #ifdef WIN32
+    /* must back this out before this DLL is unloaded;
+     * but previous exception filter might have been unloaded too
+     */
+    SetUnhandledExceptionFilter(whatkilledus_crash_handler);
 #endif
+}
+
+static void crash(request_rec *r)
+{
+    ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
+                  "mod_whatkilledus: about to crash");
+
+    *(int *)0xdeadbeef = 0xcafebabe;
+}
+
+static int whatkilledus_handler(request_rec *r)
+{
+    if (!strcmp(r->handler, "whatkilledus-crash-handler")) {
+        crash(r);
+        /* unreached */
+    }
+
+    return DECLINED;
 }
 
 static void whatkilledus_register_hooks(apr_pool_t *p)
@@ -54,6 +95,7 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
     ap_hook_fatal_exception(whatkilledus_fatal_exception, NULL, NULL,
                             APR_HOOK_MIDDLE);
 #endif
+    ap_hook_handler(whatkilledus_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_optional_fn_retrieve(whatkilledus_optional_fn_retrieve, NULL, NULL,
                                  APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
