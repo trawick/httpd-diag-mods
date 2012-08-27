@@ -21,6 +21,10 @@
 #include <dbghelp.h>
 #endif
 
+#ifdef SOLARIS
+#include <ucontext.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,6 +59,8 @@ typedef struct {
 typedef struct diag_context_t {
 #ifdef WIN32
     CONTEXT *context;
+#elif defined(SOLARIS)
+    ucontext_t *context;
 #else
     int foo;
 #endif

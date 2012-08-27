@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,9 +34,17 @@
 #define HAVE_EXECINFO_BACKTRACE
 #endif
 
-#ifdef HAVE_EXECINFO_BACKTRACE
+#ifndef WIN32
 #include <unistd.h>
+#endif
+
+#ifdef HAVE_EXECINFO_BACKTRACE
 #include <execinfo.h>
+#endif
+
+#ifdef SOLARIS
+#include <ucontext.h>
+#include <dlfcn.h>
 #endif
 
 #ifdef WIN32
@@ -354,6 +363,88 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
         }
     }
     return size;
+}
+
+#elif defined(SOLARIS)
+
+typedef struct {
+    int cur;
+    int count;
+    diag_param_t *p;
+} fmt_userdata_t;
+
+static int fmt(uintptr_t pc, int sig, void *userdata)
+{
+    fmt_userdata_t *u = userdata;
+    diag_param_t *p = u->p;
+    int rc;
+    Dl_info dlip = {0};
+
+    rc = dladdr1((void *)pc, &dlip, NULL, 0);
+    if (rc != 0) {
+        char buf[128];
+        char addr_buf[20];
+        char offset_buf[20];
+        const char *module_path = dlip.dli_fname;
+        const char *module = NULL;
+        const char *function = dlip.dli_sname;
+
+        module = module_path;
+        if (module) {
+            module = strrchr(module_path, '/');
+            if (module) {
+                module += 1;
+            }
+        }
+        snprintf(addr_buf, sizeof addr_buf, "%p", (void *)pc);
+
+        snprintf(offset_buf, sizeof offset_buf, "0x%x",
+                 (char *)pc - (char *)dlip.dli_saddr);
+                 
+        output_frame(buf, buf + sizeof buf - 1,
+                     p->backtrace_fields,
+                     module_path, module, function,
+                     offset_buf, addr_buf);
+
+        p->output_fn(p->user_data, buf);
+    }
+    else {
+        /* printf("dladdr1 failed, errno %d\n", errno); */
+    }
+
+    ++u->cur;
+    return u->cur >= u->count;
+}
+
+int diag_backtrace(diag_param_t *p, diag_context_t *c)
+{
+    fmt_userdata_t u = {0};
+    ucontext_t context;
+
+    if (c) {
+        context = *c->context;
+    }
+    else {
+        getcontext(&context);
+    }
+
+    if (p->backtrace_count && p->backtrace_count < DIAG_BT_LIMIT) {
+        u.count = p->backtrace_count;
+    }
+    else {
+        u.count = DIAG_BT_LIMIT;
+    }
+
+    if (p->output_mode == DIAG_WRITE_FD) {
+        printstack(p->outfile);
+    }
+    else {
+        u.p = p;
+        walkcontext(&context, fmt, &u);
+    }
+
+
+    return 0;
 }
 
 #elif defined(WIN32)
