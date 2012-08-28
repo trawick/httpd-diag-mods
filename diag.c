@@ -583,11 +583,11 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     }
     else {
 #ifdef BROKEN_SIGNAL_UCONTEXT_T
-        u.skips = FRAMES_TO_SKIP;
         if (c && c->context) {
             /* must ignore user context, which probably came from
              * signal handler
              */
+            u.skips = FRAMES_TO_SKIP;
             getcontext(&context);
         }
 #endif
