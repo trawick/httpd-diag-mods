@@ -126,8 +126,7 @@ int diag_describe(diag_param_t *p)
     char buf[256];
     size_t len;
     char *outch = buf;
-    char *lastoutch = buf + buf_size - 1;
-    static const char *exited_with   = " exited with signal ";
+    char *lastoutch = buf + sizeof buf - 1;
 #endif
 
     assert(p->calling_context == DIAG_MODE_EXCEPTION);
@@ -141,10 +140,10 @@ int diag_describe(diag_param_t *p)
     outch = safe_copy(outch, lastoutch, ".\n", NULL);
     
     if (p->output_mode == DIAG_WRITE_FD) {
-        write(p->outfile, buffer, len);
+        write(p->outfile, buf, len);
     }
     else {
-        p->output_fn(p->user_data, buffer);
+        p->output_fn(p->user_data, buf);
     }
 #endif
 
