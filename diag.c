@@ -120,12 +120,12 @@ static char *add_int(char *outch, const char *lastoutch,
     return add_string(outch, lastoutch, ch + 1, lastch);
 }
 
+#ifdef WIN32
+
 struct exception_code_entry {
     DWORD symbol;
     const char *str;
 };
-
-#ifdef WIN32
 
 #define one_ec_entry(s) {s,#s}
 struct exception_code_entry ec_strs[] = {
@@ -487,6 +487,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
 typedef struct {
     int cur;
     int count;
+    diag_output_t *o;
     diag_backtrace_param_t *p;
 } fmt_userdata_t;
 
@@ -494,6 +495,7 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
 {
     fmt_userdata_t *u = userdata;
     diag_backtrace_param_t *p = u->p;
+    diag_output_t *o = u->o;
     int rc;
     Dl_info dlip = {0};
 
@@ -522,7 +524,13 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
                      module_path, module, function,
                      offset_buf, addr_buf);
 
-        o->output_fn(p->user_data, buf);
+        if (o->output_mode == DIAG_CALL_FN) {
+            o->output_fn(o->user_data, buf);
+        }
+        else {
+            write(o->outfile, buf, strlen(buf));
+            write(o->outfile, "\n", 1);
+        }
     }
     else {
         /* printf("dladdr1 failed, errno %d\n", errno); */
@@ -537,7 +545,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     fmt_userdata_t u = {0};
     ucontext_t context;
 
-    if (c) {
+    if (c && c->context) {
         context = *c->context;
     }
     else {
@@ -556,6 +564,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     }
     else {
         u.p = p;
+        u.o = o;
         walkcontext(&context, fmt, &u);
     }
 
