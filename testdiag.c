@@ -41,59 +41,58 @@ static void fmt(void *user_data, const char *s)
 
 int y(void)
 {
-    diag_param_t p = {0};
-
-    p.calling_context = DIAG_MODE_NORMAL;
+    diag_backtrace_param_t p = {0};
+    diag_output_t o = {0};
 
 #ifdef WIN32
-    p.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
+    o.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
 #else
-    p.outfile = STDOUT_FILENO;
+    o.outfile = STDOUT_FILENO;
 #endif
+    o.output_mode = DIAG_WRITE_FD;
     p.backtrace_fields = DIAG_BTFIELDS_ALL;
-    p.output_mode = DIAG_WRITE_FD;
     printf("Raw display to stdout:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
-    p.output_mode = DIAG_CALL_FN;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_ADDRESS;
-    p.output_fn = fmt;
     printf("Format address via callback:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
-    p.output_mode = DIAG_CALL_FN;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
-    p.output_fn = fmt;
     printf("Format function name and offset via callback:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
-    p.output_mode = DIAG_CALL_FN;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
-    p.output_fn = fmt;
     printf("Format function name via callback:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
-    p.output_mode = DIAG_CALL_FN;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME;
-    p.output_fn = fmt;
     printf("Format function name and module name via callback:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
-    p.output_mode = DIAG_CALL_FN;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH;
-    p.output_fn = fmt;
     printf("Format function name and module path via callback:\n");
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 
     printf("\n");
 
@@ -101,13 +100,13 @@ int y(void)
         char linebuf[1024];
 
         linebuf[0] = '\0';
-        p.user_data = linebuf;
-        p.output_mode = DIAG_CALL_FN;
+        o.user_data = linebuf;
+        o.output_mode = DIAG_CALL_FN;
+        o.output_fn = line_fmt;
         p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
         p.backtrace_count = 3;
-        p.output_fn = line_fmt;
         printf("Format function name via one-liner callback:\n");
-        diag_backtrace(&p, NULL);
+        diag_backtrace(&o, &p, NULL);
         if (linebuf[strlen(linebuf) - 1] == '<') {
             linebuf[strlen(linebuf) - 1] = '\0';
         }

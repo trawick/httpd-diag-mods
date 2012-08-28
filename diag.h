@@ -45,29 +45,33 @@ typedef struct {
     int outfile;
 #endif
     void (*output_fn)(void *user_data, const char *);
-    enum {DIAG_MODE_NORMAL, DIAG_MODE_EXCEPTION} calling_context;
-#ifdef WIN32
-    CONTEXT *context;
-    EXCEPTION_RECORD *exception_record;
-#else
-    int signal;
-#endif
+} diag_output_t;
+
+typedef struct {
     unsigned int backtrace_fields;
     unsigned int backtrace_count;
-} diag_param_t;
+} diag_backtrace_param_t;
+
+#ifdef WIN32
 
 typedef struct diag_context_t {
-#ifdef WIN32
     CONTEXT *context;
-#elif defined(SOLARIS)
-    ucontext_t *context;
+    EXCEPTION_RECORD *exception_record;
+} diag_context_t;
+
 #else
-    int foo;
+
+typedef struct diag_context_t {
+    int signal;
+#if defined(SOLARIS)
+    ucontext_t *context;
 #endif
 } diag_context_t;
 
-extern int diag_describe(diag_param_t *);
-extern int diag_backtrace(diag_param_t *, diag_context_t *);
+#endif
+
+extern int diag_describe(diag_output_t *, diag_context_t *);
+extern int diag_backtrace(diag_output_t *, diag_backtrace_param_t *, diag_context_t *);
 
 #ifdef __cplusplus
 }

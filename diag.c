@@ -120,7 +120,7 @@ static char *add_int(char *outch, const char *lastoutch,
     return safe_copy(outch, lastoutch, ch + 1, lastch);
 }
 
-int diag_describe(diag_param_t *p)
+int diag_describe(diag_output_t *o, diag_context_t *c)
 {
 #ifndef WIN32
     char buf[256];
@@ -128,21 +128,19 @@ int diag_describe(diag_param_t *p)
     char *lastoutch = buf + sizeof buf - 1;
 #endif
 
-    assert(p->calling_context == DIAG_MODE_EXCEPTION);
-
 #ifdef WIN32
 #else
     outch = safe_copy(outch, lastoutch, "Child process ", NULL);
     outch = add_int(outch, lastoutch, (long long)getpid(), 10);
     outch = safe_copy(outch, lastoutch, " exited with signal ", NULL);
-    outch = add_int(outch, lastoutch, (long long)p->signal, 10);
+    outch = add_int(outch, lastoutch, (long long)c->signal, 10);
     outch = safe_copy(outch, lastoutch, ".\n", NULL);
     
-    if (p->output_mode == DIAG_WRITE_FD) {
-        write(p->outfile, buf, strlen(buf));
+    if (o->output_mode == DIAG_WRITE_FD) {
+        write(o->outfile, buf, strlen(buf));
     }
     else {
-        p->output_fn(p->user_data, buf);
+        o->output_fn(o->user_data, buf);
     }
 #endif
 
@@ -357,7 +355,7 @@ static void format_frameinfo(const char *s,
 #endif /* __FreeBSD__ || __DragonFly__ */
 
 #ifdef HAVE_EXECINFO_BACKTRACE
-int diag_backtrace(diag_param_t *p, diag_context_t *c)
+int diag_backtrace(diag_backtrace_param_t *p, diag_context_t *c)
 {
     void *pointers[DIAG_BT_LIMIT];
     int count;
@@ -374,8 +372,8 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
 
     size = backtrace(pointers, DIAG_BT_LIMIT);
     if (size > 0) {
-        if (p->output_mode == DIAG_WRITE_FD) {
-            backtrace_symbols_fd(pointers, size, p->outfile);
+        if (o->output_mode == DIAG_WRITE_FD) {
+            backtrace_symbols_fd(pointers, size, o->outfile);
         }
         else {
             strings = backtrace_symbols(pointers, size);
@@ -390,7 +388,7 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
                                  p->backtrace_fields,
                                  buf,
                                  sizeof buf);
-                p->output_fn(p->user_data, buf);
+                o->output_fn(p->user_data, buf);
                 count--;
             }
             free(strings);
@@ -404,13 +402,13 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
 typedef struct {
     int cur;
     int count;
-    diag_param_t *p;
+    diag_backtrace_param_t *p;
 } fmt_userdata_t;
 
 static int fmt(uintptr_t pc, int sig, void *userdata)
 {
     fmt_userdata_t *u = userdata;
-    diag_param_t *p = u->p;
+    diag_backtrace_param_t *p = u->p;
     int rc;
     Dl_info dlip = {0};
 
@@ -439,7 +437,7 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
                      module_path, module, function,
                      offset_buf, addr_buf);
 
-        p->output_fn(p->user_data, buf);
+        o->output_fn(p->user_data, buf);
     }
     else {
         /* printf("dladdr1 failed, errno %d\n", errno); */
@@ -449,7 +447,7 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
     return u->cur >= u->count;
 }
 
-int diag_backtrace(diag_param_t *p, diag_context_t *c)
+int diag_backtrace(diag_backtrace_param_t *p, diag_context_t *c)
 {
     fmt_userdata_t u = {0};
     ucontext_t context;
@@ -468,8 +466,8 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
         u.count = DIAG_BT_LIMIT;
     }
 
-    if (p->output_mode == DIAG_WRITE_FD) {
-        printstack(p->outfile);
+    if (o->output_mode == DIAG_WRITE_FD) {
+        printstack(o->outfile);
     }
     else {
         u.p = p;
@@ -482,7 +480,7 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
 
 #elif defined(WIN32)
 
-int diag_backtrace(diag_param_t *p, diag_context_t *c)
+int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {
     int cur = 0, count;
     STACKFRAME64 stackframe;
@@ -568,12 +566,12 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
 
             }
 
-            if (p->output_mode == DIAG_CALL_FN) {
-                p->output_fn(p->user_data, buf);
+            if (o->output_mode == DIAG_CALL_FN) {
+                o->output_fn(o->user_data, buf);
             }
             else {
-                WriteFile(p->outfile, buf, strlen(buf), NULL, NULL);
-                WriteFile(p->outfile, "\r\n", 2, NULL, NULL);
+                WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+                WriteFile(o->outfile, "\r\n", 2, NULL, NULL);
             }
         }
     }

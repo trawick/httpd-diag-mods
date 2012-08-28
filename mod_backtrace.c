@@ -39,11 +39,6 @@ APLOG_USE_MODULE(backtrace);
 
 static server_rec *main_server;
 
-static void backtrace_describe_exception(diag_param_t *p)
-{
-    diag_describe(p);
-}
-
 static void fmt2(void *user_data, const char *s)
 {
     bt_param_t *p = user_data;
@@ -70,11 +65,43 @@ static void fmt2(void *user_data, const char *s)
     }
 }
 
+static void init_diag_output(bt_param_t *p, diag_output_t *o)
+{
+    /* simple case, handled by diag_backtrace() directly */
+    if (p->output_mode == BT_OUTPUT_FILE &&
+        p->output_style == BT_OUTPUT_LONG) {
+        o->output_mode = DIAG_WRITE_FD;
+        o->outfile = p->outfile;
+    }
+    else if (p->output_mode == BT_OUTPUT_FN) {
+        o->output_mode = DIAG_CALL_FN;
+        o->output_fn = p->output_fn;
+        o->user_data = p->user_data;
+    }
+    else {
+        if (p->output_mode == BT_OUTPUT_BUFFER) {
+            p->buffer[0] = '\0';
+        }
+
+        o->output_mode = DIAG_CALL_FN;
+        o->output_fn = fmt2;
+        o->user_data = p;
+    }
+}
+
+static void backtrace_describe_exception(bt_param_t *p, diag_context_t *c)
+{
+    diag_output_t o = {0};
+
+    init_diag_output(p, &o);
+    diag_describe(&o, c);
+}
+
 static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
 {
-    diag_param_t dp = {0};
+    diag_backtrace_param_t dp = {0};
+    diag_output_t o = {0};
 
-    dp.calling_context = DIAG_MODE_NORMAL;
     dp.backtrace_count = p->backtrace_count;
 
     switch (p->output_mode) {
@@ -89,28 +116,8 @@ static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
         dp.backtrace_fields = DIAG_BTFIELDS_ALL;
     }
     
-    /* simple case, handled by diag_backtrace() directly */
-    if (p->output_mode == BT_OUTPUT_FILE &&
-        p->output_style == BT_OUTPUT_LONG) {
-        dp.output_mode = DIAG_WRITE_FD;
-        dp.outfile = p->outfile;
-    }
-    else if (p->output_mode == BT_OUTPUT_FN) {
-        dp.output_mode = DIAG_CALL_FN;
-        dp.output_fn = p->output_fn;
-        dp.user_data = p->user_data;
-    }
-    else {
-        if (p->output_mode == BT_OUTPUT_BUFFER) {
-            p->buffer[0] = '\0';
-        }
-
-        dp.output_mode = DIAG_CALL_FN;
-        dp.output_fn = fmt2;
-        dp.user_data = p;
-    }
-    
-    diag_backtrace(&dp, c);
+    init_diag_output(p, &o);
+    diag_backtrace(&o, &dp, c);
 }
 
 #if DIAG_HAVE_ERRORLOG_HANDLER
@@ -132,20 +139,18 @@ static void fmt(void *user_data, const char *s)
 static int backtrace_log(const ap_errorlog_info *info,
                          const char *arg, char *buf, int buflen)
 {
-    diag_param_t p = {0};
+    diag_backtrace_param_t p = {0};
     loginfo_t li = {0};
 
     li.buffer = buf;
     li.len = buflen;
 
-    p.calling_context = DIAG_MODE_NORMAL;
     p.outfile = 2;
     p.output_mode = DIAG_WRITE_FD;
     diag_backtrace(&p);
 
     memset(&p, 0, sizeof p);
     p.user_data = &li;
-    p.calling_context = DIAG_MODE_NORMAL;
     p.output_mode = DIAG_CALL_FN;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.backtrace_count = 3;
@@ -169,20 +174,19 @@ static void fmt_rputs(void *userdata, const char *buffer)
 
 static void backtrace(request_rec *r)
 {
-    diag_param_t p = {0};
+    diag_backtrace_param_t p = {0};
+    diag_output_t o = {0};
 
     ap_set_content_type(r, "text/plain");
 
     ap_rputs("========== mod_backtrace report ===========================\n", r);
 
-    memset(&p, 0, sizeof p);
-    p.user_data = r;
-    p.calling_context = DIAG_MODE_NORMAL;
-    p.output_mode = DIAG_CALL_FN;
+    o.user_data = r;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt_rputs;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.backtrace_count = 10;
-    p.output_fn = fmt_rputs;
-    diag_backtrace(&p, NULL);
+    diag_backtrace(&o, &p, NULL);
 }
 
 static int backtrace_handler(request_rec *r)
