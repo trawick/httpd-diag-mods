@@ -514,15 +514,8 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     stackframe.AddrFrame.Offset = context.Ebp;
     stackframe.AddrStack.Offset = context.Esp;
 
-    if (SymInitialize(process, 
-                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\\symbols;"
-                      "c:\\windows\\symbols\\dll",
-                      /* "SRV*C:\\MyLocalSymbols*http://msdl.microsoft.com/download/symbols" */
-                      TRUE) != TRUE) {
-        /*
-        fprintf(log, "SymInitialize() failed with error %d\n",
-                GetLastError());
-        */
+    if (!p->symbols_initialized) {
+        SymInitialize(process, NULL, TRUE);
     }
 
     while (StackWalk64(IMAGE_FILE_MACHINE_I386,

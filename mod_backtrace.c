@@ -102,6 +102,7 @@ static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
     diag_backtrace_param_t dp = {0};
     diag_output_t o = {0};
 
+    dp.symbols_initialized = 1;
     dp.backtrace_count = p->backtrace_count;
 
     switch (p->output_mode) {
@@ -142,6 +143,8 @@ static int backtrace_log(const ap_errorlog_info *info,
     diag_backtrace_param_t p = {0};
     loginfo_t li = {0};
 
+    p.symbols_initialized = 1;
+
     li.buffer = buf;
     li.len = buflen;
 
@@ -177,6 +180,8 @@ static void backtrace(request_rec *r)
     diag_backtrace_param_t p = {0};
     diag_output_t o = {0};
 
+    p.symbols_initialized = 1;
+
     ap_set_content_type(r, "text/plain");
 
     ap_rputs("========== mod_backtrace report ===========================\n", r);
@@ -201,6 +206,19 @@ static int backtrace_handler(request_rec *r)
 
 static void backtrace_child_init(apr_pool_t *p, server_rec *s)
 {
+#ifdef WIN32
+    if (SymInitialize(GetCurrentProcess(),
+                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\\symbols;"
+                      "c:\\windows\\symbols\\dll",
+                      /* "SRV*C:\\MyLocalSymbols*http://msdl.microsoft.com/download/symbols" */
+                      TRUE) != TRUE) {
+        /*
+        fprintf(log, "SymInitialize() failed with error %d\n",
+                GetLastError());
+        */
+    }
+#endif
+
     main_server = s;
 }
 

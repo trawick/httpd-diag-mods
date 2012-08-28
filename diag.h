@@ -50,6 +50,7 @@ typedef struct {
 typedef struct {
     unsigned int backtrace_fields;
     unsigned int backtrace_count;
+    unsigned int symbols_initialized : 1;
 } diag_backtrace_param_t;
 
 #ifdef WIN32
