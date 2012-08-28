@@ -23,6 +23,32 @@
 
 #include "diag.h"
 
+#ifdef WIN32
+
+static LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS *ep)
+{
+    diag_context_t c = {0};
+    diag_output_t o = {0};
+    diag_backtrace_param_t p = {0};
+
+    c.context = ep->ContextRecord;
+    c.exception_record = ep->ExceptionRecord;
+
+    o.output_mode = DIAG_WRITE_FD;
+    o.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    diag_describe(&o, &c);
+
+    p.backtrace_fields =
+        DIAG_BTFIELDS_MODULE_NAME | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
+
+    diag_backtrace(&o, &p, &c);
+
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+
+#else
+
 static void signal_handler(int sig, siginfo_t *info, void *v)
 {
     diag_context_t c = {0};
@@ -42,6 +68,8 @@ static void signal_handler(int sig, siginfo_t *info, void *v)
 
     diag_backtrace(&o, &p, &c);
 }
+
+#endif
 
 int y(void)
 {
@@ -63,6 +91,7 @@ int w(void)
 int main(void)
 {
 #ifdef WIN32
+    SetUnhandledExceptionFilter(unhandled_exception_filter);
 #else
     struct sigaction sa, oldsa;
 
