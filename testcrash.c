@@ -54,9 +54,15 @@ static void signal_handler(int sig, siginfo_t *info, void *v)
     diag_context_t c = {0};
     diag_output_t o = {0};
     diag_backtrace_param_t p = {0};
+#ifdef SOLARIS
+    ucontext_t *uc = v;
+#endif
 
     c.signal = sig;
     c.info = info;
+#ifdef SOLARIS
+    c.context = uc;
+#endif
 
     o.output_mode = DIAG_WRITE_FD;
     o.outfile = STDOUT_FILENO;
