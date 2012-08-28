@@ -49,6 +49,12 @@ static LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS *ep)
 
 #else
 
+static void fmt(void *user_data, const char *s)
+{
+    write(STDOUT_FILENO, s, strlen(s));
+    write(STDOUT_FILENO, "\n", 1);
+}
+
 static void signal_handler(int sig, siginfo_t *info, void *v)
 {
     diag_context_t c = {0};
@@ -69,9 +75,18 @@ static void signal_handler(int sig, siginfo_t *info, void *v)
 
     diag_describe(&o, &c);
 
+    write(STDOUT_FILENO, "Backtrace to file descriptor:\n",
+          strlen("Backtrace to file descriptor:\n"));
     p.backtrace_fields =
         DIAG_BTFIELDS_MODULE_NAME | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
 
+    diag_backtrace(&o, &p, &c);
+
+    write(STDOUT_FILENO, "Backtrace to callback:\n",
+          strlen("Backtrace to callback:\n"));
+
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     diag_backtrace(&o, &p, &c);
 }
 
