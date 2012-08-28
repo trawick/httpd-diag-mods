@@ -447,7 +447,7 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
     return u->cur >= u->count;
 }
 
-int diag_backtrace(diag_backtrace_param_t *p, diag_context_t *c)
+int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {
     fmt_userdata_t u = {0};
     ucontext_t context;
