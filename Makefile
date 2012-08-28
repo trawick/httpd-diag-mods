@@ -42,9 +42,19 @@ endif
 
 endif
 
-TARGETS = testdiag testcrash
+TARGETS = testdiag testcrash mod_backtrace.la mod_whatkilledus.la
 
 all: $(TARGETS)
+
+install: $(TARGETS)
+	$(HTTPD)/bin/apxs -i mod_backtrace.la
+	$(HTTPD)/bin/apxs -i mod_whatkilledus.la
+
+mod_backtrace.la: mod_backtrace.c mod_backtrace.h diag.h diag.c
+	$(HTTPD)/bin/apxs -Wc,"$(CFLAGS)" -Wl,"$(LDFLAGS)" -c mod_backtrace.c diag.c $(LIBS)
+
+mod_whatkilledus.la: mod_whatkilledus.c mod_backtrace.h diag.h diag.c
+	$(HTTPD)/bin/apxs -Wc,"$(CFLAGS)" -Wl,"$(LDFLAGS)" -c mod_whatkilledus.c $(LIBS)
 
 testdiag: testdiag.o diag.o
 	$(CC) $(LDFLAGS) -o testdiag -g testdiag.o diag.o $(LIBS)
