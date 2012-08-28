@@ -355,7 +355,7 @@ static void format_frameinfo(const char *s,
 #endif /* __FreeBSD__ || __DragonFly__ */
 
 #ifdef HAVE_EXECINFO_BACKTRACE
-int diag_backtrace(diag_backtrace_param_t *p, diag_context_t *c)
+int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {
     void *pointers[DIAG_BT_LIMIT];
     int count;
@@ -388,7 +388,7 @@ int diag_backtrace(diag_backtrace_param_t *p, diag_context_t *c)
                                  p->backtrace_fields,
                                  buf,
                                  sizeof buf);
-                o->output_fn(p->user_data, buf);
+                o->output_fn(o->user_data, buf);
                 count--;
             }
             free(strings);
