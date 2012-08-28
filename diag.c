@@ -484,7 +484,19 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
 
 #elif defined(SOLARIS)
 
+/* seen on Solaris 10: the ucontext_t passed to signal handler
+ * is the caller of the function that crashed, rather than that
+ * function; we need to get the context ourselves and skip over
+ * a few stackframes
+ */
+
+#define BROKEN_SIGNAL_UCONTEXT_T
+#define FRAMES_TO_SKIP 3
+
 typedef struct {
+#ifdef BROKEN_SIGNAL_UCONTEXT_T
+    int skips;
+#endif
     int cur;
     int count;
     diag_output_t *o;
@@ -498,6 +510,13 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
     diag_output_t *o = u->o;
     int rc;
     Dl_info dlip = {0};
+
+#ifdef BROKEN_SIGNAL_UCONTEXT_T
+    if (u->skips) {
+        --u->skips;
+        return 0;
+    }
+#endif
 
     rc = dladdr1((void *)pc, &dlip, NULL, 0);
     if (rc != 0) {
@@ -563,6 +582,15 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         printstack(o->outfile);
     }
     else {
+#ifdef BROKEN_SIGNAL_UCONTEXT_T
+        u.skips = FRAMES_TO_SKIP;
+        if (c && c->context) {
+            /* must ignore user context, which probably came from
+             * signal handler
+             */
+            getcontext(&context);
+        }
+#endif
         u.p = p;
         u.o = o;
         walkcontext(&context, fmt, &u);
