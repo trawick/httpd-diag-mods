@@ -19,6 +19,8 @@
 #ifdef WIN32
 #include <windows.h>
 #include <dbghelp.h>
+#else
+#include <signal.h>
 #endif
 
 #ifdef SOLARIS
@@ -64,6 +66,7 @@ typedef struct diag_context_t {
 
 typedef struct diag_context_t {
     int signal;
+    siginfo_t *info;
 #if defined(SOLARIS)
     ucontext_t *context;
 #endif

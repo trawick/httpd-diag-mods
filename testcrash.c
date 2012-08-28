@@ -1,0 +1,75 @@
+/* Copyright 2012 Jeff Trawick, http://emptyhammock.com/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdio.h>
+#include <string.h>
+
+#ifndef WIN32
+#include <signal.h>
+#include <unistd.h>
+#endif
+
+#include "diag.h"
+
+static void signal_handler(int sig, siginfo_t *info, void *v)
+{
+    diag_context_t c = {0};
+    diag_output_t o = {0};
+    diag_backtrace_param_t p = {0};
+
+    c.signal = sig;
+    c.info = info;
+
+    o.output_mode = DIAG_WRITE_FD;
+    o.outfile = STDOUT_FILENO;
+
+    diag_describe(&o, &c);
+
+    p.backtrace_fields =
+        DIAG_BTFIELDS_MODULE_NAME | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
+
+    diag_backtrace(&o, &p, &c);
+}
+
+int y(void)
+{
+    *(int *)0xDEADBEEF = 0xC0FFEE;
+    /* unreached */
+    return 0;
+}
+
+int x(void)
+{
+    return y();
+}
+
+int w(void)
+{
+    return x();
+}
+
+int main(void)
+{
+#ifdef WIN32
+#else
+    struct sigaction sa, oldsa;
+
+    memset(&sa, 0, sizeof sa);
+    sa.sa_sigaction = signal_handler;
+    sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
+    sigaction(SIGSEGV, &sa, &oldsa);
+#endif
+    return w();
+}

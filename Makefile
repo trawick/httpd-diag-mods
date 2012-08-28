@@ -42,16 +42,21 @@ endif
 
 endif
 
-all: testdiag
+TARGETS = testdiag testcrash
+
+all: $(TARGETS)
 
 testdiag: testdiag.o diag.o
 	$(CC) $(LDFLAGS) -o testdiag -g testdiag.o diag.o $(LIBS)
 
-testdiag.o: testdiag.c diag.h
-	$(CC) -c $(CFLAGS) -g testdiag.c
+testcrash: testcrash.o diag.o
+	$(CC) $(LDFLAGS) -o testcrash -g testcrash.o diag.o $(LIBS)
+
+testcrash.o: testcrash.c diag.h
+	$(CC) -c $(CFLAGS) -g testcrash.c
 
 diag.o: diag.c diag.h
 	$(CC) -c $(CFLAGS) -g diag.c
 
 clean:
-	rm -f testdiag *.o
+	rm -f $(TARGETS) *.o

@@ -132,7 +132,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 #else
     outch = add_string(outch, lastoutch, "Child process ", NULL);
     outch = add_int(outch, lastoutch, (long long)getpid(), 10);
-    outch = add_string(outch, lastoutch, " exited with signal ", NULL);
+    outch = add_string(outch, lastoutch, " received signal ", NULL);
     outch = add_int(outch, lastoutch, (long long)c->signal, 10);
     outch = add_string(outch, lastoutch, ".\n", NULL);
     
@@ -141,6 +141,25 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
     }
     else {
         o->output_fn(o->user_data, buf);
+    }
+
+    if (c->info && c->info->si_addr) {
+        outch = buf;
+
+        if (c->signal == SIGSEGV) {
+            outch = add_string(outch, lastoutch, "Invalid memory address: ", NULL);
+        }
+        else {
+            outch = add_string(outch, lastoutch, "Faulting instruction: ", NULL);
+        }
+        outch = add_int(outch, lastoutch, (long long)c->info->si_addr, 16);
+        outch = add_string(outch, lastoutch, "\n", NULL);
+        if (o->output_mode == DIAG_WRITE_FD) {
+            write(o->outfile, buf, strlen(buf));
+        }
+        else {
+            o->output_fn(o->user_data, buf);
+        }
     }
 #endif
 
