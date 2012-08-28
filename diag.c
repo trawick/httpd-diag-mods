@@ -124,7 +124,6 @@ int diag_describe(diag_param_t *p)
 {
 #ifndef WIN32
     char buf[256];
-    size_t len;
     char *outch = buf;
     char *lastoutch = buf + sizeof buf - 1;
 #endif
@@ -140,7 +139,7 @@ int diag_describe(diag_param_t *p)
     outch = safe_copy(outch, lastoutch, ".\n", NULL);
     
     if (p->output_mode == DIAG_WRITE_FD) {
-        write(p->outfile, buf, len);
+        write(p->outfile, buf, strlen(buf));
     }
     else {
         p->output_fn(p->user_data, buf);
