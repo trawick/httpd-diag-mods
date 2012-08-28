@@ -120,16 +120,81 @@ static char *add_int(char *outch, const char *lastoutch,
     return add_string(outch, lastoutch, ch + 1, lastch);
 }
 
+struct exception_code_entry {
+    DWORD symbol;
+    const char *str;
+};
+
+#ifdef WIN32
+
+#define one_ec_entry(s) {s,#s}
+struct exception_code_entry ec_strs[] = {
+    one_ec_entry(EXCEPTION_ACCESS_VIOLATION),
+    one_ec_entry(EXCEPTION_ARRAY_BOUNDS_EXCEEDED),
+    one_ec_entry(EXCEPTION_DATATYPE_MISALIGNMENT),
+    one_ec_entry(EXCEPTION_ILLEGAL_INSTRUCTION),
+    one_ec_entry(EXCEPTION_IN_PAGE_ERROR),
+    one_ec_entry(EXCEPTION_INT_DIVIDE_BY_ZERO),
+    one_ec_entry(EXCEPTION_STACK_OVERFLOW),
+};
+
 int diag_describe(diag_output_t *o, diag_context_t *c)
 {
-#ifndef WIN32
     char buf[256];
     char *outch = buf;
     char *lastoutch = buf + sizeof buf - 1;
-#endif
+    const char *ch;
+    int i;
+    
+    if (c->exception_record) {
+        outch = add_string(outch, lastoutch, "Exception code:    ", NULL);
 
-#ifdef WIN32
+        ch = NULL;
+        for (i = 0; i < sizeof(ec_strs) / sizeof(ec_strs[0]); i++) {
+            if (ec_strs[i].symbol == c->exception_record->ExceptionCode) {
+                ch = ec_strs[i].str;
+                break;
+            }
+        }
+        if (ch == NULL) {
+            outch = add_int(outch, lastoutch, (long long)c->exception_record->ExceptionCode, 10);
+        }
+        else {
+            outch = add_string(outch, lastoutch, ch, NULL);
+        }
+
+        if (o->output_mode == DIAG_WRITE_FD) {
+            outch = add_string(outch, lastoutch, "\r\n", NULL);
+            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+        }
+        else {
+            o->output_fn(o->user_data, buf);
+        }
+
+        outch = buf;
+
+        outch = add_string(outch, lastoutch, "Exception address: ", NULL);
+        outch = add_int(outch, lastoutch, (long long)c->exception_record->ExceptionAddress, 16);
+
+        if (o->output_mode == DIAG_WRITE_FD) {
+            outch = add_string(outch, lastoutch, "\r\n", NULL);
+            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+        }
+        else {
+            o->output_fn(o->user_data, buf);
+        }
+    }
+    return 0;
+}
+
 #else
+
+int diag_describe(diag_output_t *o, diag_context_t *c)
+{
+    char buf[256];
+    char *outch = buf;
+    char *lastoutch = buf + sizeof buf - 1;
+
     outch = add_string(outch, lastoutch, "Child process ", NULL);
     outch = add_int(outch, lastoutch, (long long)getpid(), 10);
     outch = add_string(outch, lastoutch, " received signal ", NULL);
@@ -161,10 +226,11 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
             o->output_fn(o->user_data, buf);
         }
     }
-#endif
 
     return 0;
 }
+
+#endif /* WIN32 */
 
 #ifndef WIN32
 static const char *end_of_field(const char *s)
