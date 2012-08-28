@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -49,41 +48,12 @@
 
 #ifdef WIN32
 #include <windows.h>
-
-#if _MSC_VER
-#define snprintf _snprintf
 #endif
-#endif
-
-int diag_describe(diag_param_t *p)
-{
-#ifndef WIN32
-    char buffer[256];
-    size_t len;
-#endif
-
-    assert(p->calling_context == DIAG_MODE_EXCEPTION);
-
-#ifdef WIN32
-#else
-    len = snprintf(buffer, sizeof buffer,
-                   "Child process %ld exited with signal %d.\n",
-                   (long)getpid(), p->signal);
-    
-    if (p->output_mode == DIAG_WRITE_FD) {
-        write(p->outfile, buffer, len);
-    }
-    else {
-        p->output_fn(p->user_data, buffer);
-    }
-#endif
-
-    return 0;
-}
 
 static char *safe_copy(char *outch, const char *lastoutch,
-                       const char *in_first, const char *in_last)
+                       const char *in_first, const char *in_last_param)
 {
+    const char *in_last = in_last_param;
     const char *inch;
     
     if (!outch) {
@@ -92,6 +62,10 @@ static char *safe_copy(char *outch, const char *lastoutch,
     
     if (outch >= (lastoutch - 1)) {
         return NULL;
+    }
+
+    if (!in_last) {
+        in_last = in_first + strlen(in_first) - 1;
     }
     
     if (in_first > in_last) {
@@ -112,6 +86,71 @@ static char *safe_copy(char *outch, const char *lastoutch,
     return outch;
 }
 
+static char *add_int(char *outch, const char *lastoutch,
+                     long long val, int radix)
+{
+    char buf[28];
+    char *ch, *lastch;
+    static const char *digits = "0123456789ABCDEF";
+    int neg = 0;
+
+    if (val < 0) {
+        neg = 1;
+        val = -val;
+    }
+
+    assert(radix == 10 || radix == 16);
+
+    ch = lastch = buf + sizeof buf - 1;
+    while (ch >= buf && val > 0) {
+        int rem = val % radix;
+        val = val / radix;
+        *ch = digits[rem];
+        --ch;
+    }
+
+    if (neg) {
+        outch = safe_copy(outch, lastoutch, "-", NULL);
+    }
+
+    if (radix == 16) {
+        outch = safe_copy(outch, lastoutch, "0x", NULL);
+    }
+
+    return safe_copy(outch, lastoutch, ch + 1, lastch);
+}
+
+int diag_describe(diag_param_t *p)
+{
+#ifndef WIN32
+    char buf[256];
+    size_t len;
+    char *outch = buf;
+    char *lastoutch = buf + buf_size - 1;
+    static const char *exited_with   = " exited with signal ";
+#endif
+
+    assert(p->calling_context == DIAG_MODE_EXCEPTION);
+
+#ifdef WIN32
+#else
+    outch = safe_copy(outch, lastoutch, "Child process ", NULL);
+    outch = add_int(outch, lastoutch, (long long)getpid(), 10);
+    outch = safe_copy(outch, lastoutch, " exited with signal ", NULL);
+    outch = add_int(outch, lastoutch, (long long)p->signal, 10);
+    outch = safe_copy(outch, lastoutch, ".\n", NULL);
+    
+    if (p->output_mode == DIAG_WRITE_FD) {
+        write(p->outfile, buffer, len);
+    }
+    else {
+        p->output_fn(p->user_data, buffer);
+    }
+#endif
+
+    return 0;
+}
+
 #ifndef WIN32
 static const char *end_of_field(const char *s)
 {
@@ -129,16 +168,15 @@ static void output_frame(char *outch, char *lastoutch, int fields,
                          const char *offset, const char *address)
 {
     int fn_missing = 0;
-    static const char *colon = ":";
 
     if ((fields & DIAG_BTFIELDS_MODULE_PATH) && module_path) {
         outch = safe_copy(outch, lastoutch, module_path, end_of_field(module_path));
-        outch = safe_copy(outch, lastoutch, colon, colon);
+        outch = safe_copy(outch, lastoutch, ":", NULL);
     }
     else if ((fields & (DIAG_BTFIELDS_MODULE_NAME|DIAG_BTFIELDS_MODULE_PATH))
              && module) {
         outch = safe_copy(outch, lastoutch, module, end_of_field(module));
-        outch = safe_copy(outch, lastoutch, colon, colon);
+        outch = safe_copy(outch, lastoutch, ":", NULL);
     }
 
     if ((fields & DIAG_BTFIELDS_FUNCTION) && function) {
@@ -149,9 +187,7 @@ static void output_frame(char *outch, char *lastoutch, int fields,
     }
 
     if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
-        static const char *plus = "+";
-
-        outch = safe_copy(outch, lastoutch, plus, plus);
+        outch = safe_copy(outch, lastoutch, "+", NULL);
         outch = safe_copy(outch, lastoutch, offset, end_of_field(offset));
     }
 
@@ -396,11 +432,10 @@ static int fmt(uintptr_t pc, int sig, void *userdata)
                 module += 1;
             }
         }
-        snprintf(addr_buf, sizeof addr_buf, "%p", (void *)pc);
+        add_int(addr_buf, addr_buf + sizeof addr_buf - 1, (long long)pc, 16);
+        add_int(offset_buf, offset_buf + sizeof offset_buf - 1,
+                (long long)((char *)pc - (char *)dlip.dli_saddr), 16);
 
-        snprintf(offset_buf, sizeof offset_buf, "0x%x",
-                 (char *)pc - (char *)dlip.dli_saddr);
-                 
         output_frame(buf, buf + sizeof buf - 1,
                      p->backtrace_fields,
                      module_path, module, function,
@@ -511,35 +546,28 @@ int diag_backtrace(diag_param_t *p, diag_context_t *c)
         symbol->MaxNameLength = sizeof(symbol_buffer) - sizeof(IMAGEHLP_SYMBOL64);
         ignored = 0;
         if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, &ignored, symbol) != TRUE) {
-            snprintf(symbol->Name, symbol->MaxNameLength, "no-symbol-%d", GetLastError());
+            char *outch = symbol->Name;
+            const char *lastoutch = outch + symbol->MaxNameLength - 1;
+
+            outch = safe_copy(outch, lastoutch, "no-symbol-", NULL);
+            add_int(outch, lastoutch, (long long)GetLastError(), 10);
         }
         {
             char buf[128] = "no-data";
             char *outch = buf;
             const char *lastoutch = buf + sizeof buf - 1;
-            static const char *space = " ";
 
             if (p->backtrace_fields & DIAG_BTFIELDS_FUNCTION) {
-                outch = safe_copy(outch, lastoutch,
-                                  symbol->Name,
-                                  symbol->Name + strlen(symbol->Name) - 1);
+                outch = safe_copy(outch, lastoutch, symbol->Name, NULL);
             }
 
             if (p->backtrace_fields & DIAG_BTFIELDS_ADDRESS) {
-                char addrbuf[30];
-
                 if (outch != buf) {
-                    outch = safe_copy(outch, lastoutch,
-                                      space,
-                                      space);
+                    outch = safe_copy(outch, lastoutch, " ", NULL);
                 }
 
-                snprintf(addrbuf, sizeof addrbuf, "0x%I64X",
-                         stackframe.AddrPC.Offset);
+                outch = add_int(outch, lastoutch, stackframe.AddrPC.Offset, 16);
 
-                outch = safe_copy(outch, lastoutch,
-                                  addrbuf,
-                                  addrbuf + strlen(addrbuf) - 1);
             }
 
             if (p->output_mode == DIAG_CALL_FN) {
