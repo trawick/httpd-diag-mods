@@ -7,7 +7,7 @@ all: testdiag.exe testcrash.exe mod_backtrace.so mod_whatkilledus.so
 clean:
 	del *.obj *.exe *.so *.pdb *.ilk *.lib
 
-install: mod_backtrace.so mod_whatkilledus.so
+install: all
 	copy mod_backtrace.so $(HTTPD)\modules
 	copy mod_backtrace.pdb $(HTTPD)\modules
 	copy mod_whatkilledus.so $(HTTPD)\modules
