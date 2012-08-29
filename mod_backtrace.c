@@ -205,6 +205,8 @@ static void backtrace_error_log(const char *file, int line,
 
 #if DIAG_PLATFORM_WINDOWS
         skip = 5;
+#elif DIAG_PLATFORM_LINUX
+        skip = 5;
 #else /* tested on FreeBSD */
         skip = 3;
 #endif
