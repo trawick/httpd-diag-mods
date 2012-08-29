@@ -21,7 +21,7 @@
 *** TODO Make sure we respect platform defines added by httpd
 *** TODO Document that backtrace_symbols() is not async-signal safe.
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
-*** TODO Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.
+*** DONE Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.
 ** mod_backtrace.c/mod_backtrace.h
 *** DONE Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
 *** TODO Add error log handler for 2.2
@@ -61,6 +61,7 @@ info@emptyhammock.com.
 If testing of these modules with your product would help, yadayadayada.
 * 2nd release tasks
 ** diag.c/diag.h
+*** TODO Document API
 *** TODO ucontext_t on Linux and other non-Solaris Unix?
 *** TODO Two forms of callback: formatted string and fields
 *** TODO Implement DIAG_BTFIELDS_LINENUM for Windows
