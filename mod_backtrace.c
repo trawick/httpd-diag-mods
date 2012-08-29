@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "apr_strings.h"
+
 #include "httpd.h"
 #include "http_config.h"
 #include "http_core.h"
@@ -37,7 +39,17 @@ APLOG_USE_MODULE(backtrace);
 #define DIAG_HAVE_ERRORLOG_HANDLER 0
 #endif
 
+/* Use this LOG_PREFIX only on non-debug messages.  This provides a module
+ * identifer with httpd < 2.4.
+ */
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
+#define LOG_PREFIX ""
+#else
+#define LOG_PREFIX "mod_backtrace: "
+#endif
+
 static server_rec *main_server;
+static const char *configured_symbol_path;
 
 static void fmt2(void *user_data, const char *s)
 {
@@ -207,15 +219,37 @@ static int backtrace_handler(request_rec *r)
 static void backtrace_child_init(apr_pool_t *p, server_rec *s)
 {
 #ifdef WIN32
+    const char *bindir = ap_server_root_relative(p, "bin");
+    const char *modulesdir = ap_server_root_relative(p, "modules");
+    const char *symbolpath = getenv("_NT_ALT_SYMBOL_PATH");
+    apr_finfo_t finfo;
+
+    if (!symbolpath) {
+        symbolpath = getenv("_NT_SYMBOL_PATH");
+    }
+
+    symbolpath = apr_pstrcat(p,
+                             configured_symbol_path ? configured_symbol_path : "",
+                             configured_symbol_path ? ";" : "",
+                             bindir, ";", modulesdir, ";", symbolpath /* may be NULL */,
+                             ";", NULL);
+
     if (SymInitialize(GetCurrentProcess(),
-                      "C:\\Apache22\\bin;C:\\Apache22\\modules;c:\\Symbols;c:\\windows\\symbols;"
-                      "c:\\windows\\symbols\\dll",
-                      /* "SRV*C:\\MyLocalSymbols*http://msdl.microsoft.com/download/symbols" */
+                      symbolpath,
                       TRUE) != TRUE) {
-        /*
-        fprintf(log, "SymInitialize() failed with error %d\n",
-                GetLastError());
-        */
+        ap_log_error(APLOG_MARK, APLOG_WARNING, APR_FROM_OS_ERROR(GetLastError()), s,
+                     LOG_PREFIX "SymInitialize() failed");
+    }
+    else {
+        ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s,
+                     "Symbol path set to %s", symbolpath);
+    }
+
+    if (apr_stat(&finfo, ap_server_root_relative(p, "bin/httpd.pdb"), APR_FINFO_MIN, p)
+        != APR_SUCCESS) {
+        ap_log_error(APLOG_MARK, APLOG_WARNING, 0, s,
+                     LOG_PREFIX "Symbol files are not present in the server bin directory; "
+                     "backtraces may not have symbols");
     }
 #endif
 
@@ -233,6 +267,21 @@ static void backtrace_register_hooks(apr_pool_t *p)
     APR_REGISTER_OPTIONAL_FN(backtrace_get_backtrace);
 }
 
+static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    configured_symbol_path = arg;
+    return NULL;
+}
+
+static const command_rec backtrace_cmds[] =
+{
+#ifdef WIN32
+    AP_INIT_TAKE1("BacktraceSymbolPath", set_symbol_path, NULL, RSRC_CONF,
+                  "Specify additional directoriess for symbols (e.g., BacktraceSymbolPath c:/dir1;c:/dir2;c:/dir3)"),
+#endif
+    {NULL}
+};
+
 module AP_MODULE_DECLARE_DATA backtrace_module =
 {
     STANDARD20_MODULE_STUFF,
@@ -240,6 +289,6 @@ module AP_MODULE_DECLARE_DATA backtrace_module =
     NULL,
     NULL,
     NULL,
-    NULL,
+    backtrace_cmds,
     backtrace_register_hooks,
 };
