@@ -76,6 +76,7 @@ typedef struct diag_context_t {
 
 extern int diag_describe(diag_output_t *, diag_context_t *);
 extern int diag_backtrace(diag_output_t *, diag_backtrace_param_t *, diag_context_t *);
+extern int diag_backtrace_init(int symbols_initialized);
 
 #ifdef __cplusplus
 }

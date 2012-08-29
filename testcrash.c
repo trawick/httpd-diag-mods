@@ -121,5 +121,8 @@ int main(void)
     sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
     sigaction(SIGSEGV, &sa, &oldsa);
 #endif
+
+    diag_backtrace_init(0);
+
     return w();
 }

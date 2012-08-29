@@ -699,3 +699,26 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
 #error not implemented on your platform
 
 #endif
+
+static void fmt_dummy(void *userdata, const char *buffer)
+{
+}
+
+static void dummy_backtrace(int symbols_initialized)
+{
+    diag_backtrace_param_t p = {0};
+    diag_output_t o = {0};
+
+    p.symbols_initialized = symbols_initialized;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt_dummy;
+    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
+    p.backtrace_count = 10;
+    diag_backtrace(&o, &p, NULL);
+}
+
+int diag_backtrace_init(int symbols_initialized)
+{
+    dummy_backtrace(symbols_initialized);
+    return 0;
+}

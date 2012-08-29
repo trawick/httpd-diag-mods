@@ -220,9 +220,10 @@ static int backtrace_handler(request_rec *r)
     return DECLINED;
 }
 
-static void backtrace_child_init(apr_pool_t *p, server_rec *s)
-{
 #ifdef WIN32
+
+static void load_symbols(apr_pool_t *p, server_rec *s)
+{
     const char *bindir = ap_server_root_relative(p, "bin");
     const char *modulesdir = ap_server_root_relative(p, "modules");
     const char *symbolpath = getenv("_NT_ALT_SYMBOL_PATH");
@@ -245,7 +246,7 @@ static void backtrace_child_init(apr_pool_t *p, server_rec *s)
                      LOG_PREFIX "SymInitialize() failed");
     }
     else {
-        ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s,
+        ap_log_error(APLOG_MARK, APLOG_INFO, 0, s,
                      "Symbol path set to %s", symbolpath);
     }
 
@@ -255,9 +256,22 @@ static void backtrace_child_init(apr_pool_t *p, server_rec *s)
                      LOG_PREFIX "Symbol files are not present in the server bin directory; "
                      "backtraces may not have symbols");
     }
-#endif
+}
 
+#else /* WIN32 */
+
+static void load_symbols(apr_pool_t *p, server_rec *s)
+{
+}
+
+#endif /* WIN32 */
+
+static void backtrace_child_init(apr_pool_t *p, server_rec *s)
+{
     main_server = s;
+
+    load_symbols(p, s);
+    diag_backtrace_init(1);
 }
 
 static void backtrace_register_hooks(apr_pool_t *p)
