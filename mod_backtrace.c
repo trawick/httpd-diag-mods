@@ -288,6 +288,11 @@ static void backtrace_register_hooks(apr_pool_t *p)
 #ifdef WIN32
 static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
 {
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
     configured_symbol_path = arg;
     return NULL;
 }
