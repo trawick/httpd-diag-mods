@@ -25,7 +25,7 @@
 
 #include "mod_backtrace.h"
 
-#ifndef WIN32
+#if DIAG_PLATFORM_UNIX
 #include <unistd.h>
 #endif
 
@@ -49,7 +49,7 @@ APLOG_USE_MODULE(backtrace);
 #endif
 
 static server_rec *main_server;
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 static const char *configured_symbol_path;
 #endif
 
@@ -65,7 +65,7 @@ static void fmt2(void *user_data, const char *s)
         }
         break;
     case BT_OUTPUT_FILE:
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
         WriteFile(p->outfile, s, strlen(s), NULL, NULL);
 #else
         write(p->outfile, s, strlen(s));
@@ -220,7 +220,7 @@ static int backtrace_handler(request_rec *r)
     return DECLINED;
 }
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 
 static void load_symbols(apr_pool_t *p, server_rec *s)
 {
@@ -285,7 +285,7 @@ static void backtrace_register_hooks(apr_pool_t *p)
     APR_REGISTER_OPTIONAL_FN(backtrace_get_backtrace);
 }
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
 {
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
@@ -300,7 +300,7 @@ static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
 
 static const command_rec backtrace_cmds[] =
 {
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     AP_INIT_TAKE1("BacktraceSymbolPath", set_symbol_path, NULL, RSRC_CONF,
                   "Specify additional directoriess for symbols (e.g., BacktraceSymbolPath c:/dir1;c:/dir2;c:/dir3)"),
 #endif

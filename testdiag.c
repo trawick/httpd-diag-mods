@@ -20,11 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef WIN32
+#include "diag.h"
+
+#if DIAG_PLATFORM_UNIX
 #include <unistd.h>
 #endif
-
-#include "diag.h"
 
 static void line_fmt(void *user_data, const char *s)
 {
@@ -44,7 +44,7 @@ int y(void)
     diag_backtrace_param_t p = {0};
     diag_output_t o = {0};
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     o.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
 #else
     o.outfile = STDOUT_FILENO;

@@ -43,7 +43,7 @@ typedef enum {
 typedef struct {
     bt_output_mode_t output_mode;
     bt_output_style_t output_style;
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     HANDLE outfile;
 #else
     int outfile;

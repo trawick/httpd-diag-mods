@@ -16,14 +16,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef WIN32
+#include "diag.h"
+
+#if DIAG_PLATFORM_UNIX
 #include <signal.h>
 #include <unistd.h>
 #endif
 
-#include "diag.h"
-
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS *ep)
 {
@@ -60,13 +60,13 @@ static void signal_handler(int sig, siginfo_t *info, void *v)
     diag_context_t c = {0};
     diag_output_t o = {0};
     diag_backtrace_param_t p = {0};
-#ifdef SOLARIS
+#if DIAG_PLATFORM_SOLARIS
     ucontext_t *uc = v;
 #endif
 
     c.signal = sig;
     c.info = info;
-#ifdef SOLARIS
+#if DIAG_PLATFORM_SOLARIS
     c.context = uc;
 #endif
 
@@ -111,7 +111,7 @@ int w(void)
 
 int main(void)
 {
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     SetUnhandledExceptionFilter(unhandled_exception_filter);
 #else
     struct sigaction sa, oldsa;

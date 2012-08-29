@@ -23,7 +23,7 @@
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 {
@@ -63,7 +63,7 @@ static void whatkilledus_optional_fn_retrieve(void)
 
 static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 {
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     /* must back this out before this DLL is unloaded;
      * but previous exception filter might have been unloaded too
      */
@@ -91,7 +91,7 @@ static int whatkilledus_handler(request_rec *r)
 
 static void whatkilledus_register_hooks(apr_pool_t *p)
 {
-#ifndef WIN32
+#if DIAG_PLATFORM_UNIX
     ap_hook_fatal_exception(whatkilledus_fatal_exception, NULL, NULL,
                             APR_HOOK_MIDDLE);
 #endif

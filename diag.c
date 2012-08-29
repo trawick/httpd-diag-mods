@@ -29,24 +29,20 @@
 #define DIAG_BT_LIMIT 25
 #endif
 
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__MACH__)
-#define HAVE_EXECINFO_BACKTRACE
-#endif
-
-#ifndef WIN32
+#if DIAG_PLATFORM_UNIX
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_EXECINFO_BACKTRACE
+#if DIAG_HAVE_EXECINFO_BACKTRACE
 #include <execinfo.h>
 #endif
 
-#ifdef SOLARIS
+#if DIAG_PLATFORM_SOLARIS
 #include <ucontext.h>
 #include <dlfcn.h>
 #endif
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 #include <windows.h>
 #endif
 
@@ -151,7 +147,7 @@ static char *add_pointer(char *outch, const char *lastoutch,
     return add_string(outch, lastoutch, ch + 1, lastch);
 }
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 
 struct exception_code_entry {
     DWORD symbol;
@@ -263,7 +259,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 
 #endif /* WIN32 */
 
-#ifndef WIN32
+#if DIAG_PLATFORM_UNIX
 static const char *end_of_field(const char *s)
 {
     ++s;
@@ -307,9 +303,9 @@ static void output_frame(char *outch, char *lastoutch, int fields,
         outch = add_string(outch, lastoutch, address, end_of_field(address));
     }
 }
-#endif /* not WIN32 */
+#endif /* UNIX */
 
-#ifdef __linux__
+#if DIAG_PLATFORM_LINUX
 /* ./testdiag(diag_backtrace+0x75)[0x401824] */
 static void format_frameinfo(const char *s,
                              unsigned int fields,
@@ -369,9 +365,9 @@ static void format_frameinfo(const char *s,
     output_frame(outch, lastoutch, fields, module_path,
                  module, function, offset, address);
 }
-#endif /* __linux__ */
+#endif /* Linux */
 
-#ifdef __MACH__
+#if DIAG_PLATFORM_MACOSX
 
 static void format_frameinfo(const char *s,
                              unsigned int fields,
@@ -419,9 +415,9 @@ static void format_frameinfo(const char *s,
     output_frame(outch, lastoutch, fields, module_path,
                  module, function, offset, address);
 }
-#endif /* __MACH__ */
+#endif /* OS X */
 
-#if defined(__FreeBSD__) || defined(__DragonFly__) 
+#if DIAG_PLATFORM_FREEBSD
 
 /* 0x400ba7 <_init+807> at /usr/home/trawick/myhg/apache/mod/diag/testdiag */
 static void format_frameinfo(const char *s,
@@ -468,9 +464,9 @@ static void format_frameinfo(const char *s,
     output_frame(outch, lastoutch, fields, module_path,
                  module, function, offset, address);
 }
-#endif /* __FreeBSD__ || __DragonFly__ */
+#endif /* FreeBSD */
 
-#ifdef HAVE_EXECINFO_BACKTRACE
+#if DIAG_HAVE_EXECINFO_BACKTRACE
 int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {
     void *pointers[DIAG_BT_LIMIT];
@@ -513,7 +509,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     return size;
 }
 
-#elif defined(SOLARIS)
+#elif DIAG_PLATFORM_SOLARIS
 
 /* seen on Solaris 10: the ucontext_t passed to signal handler
  * is the caller of the function that crashed, rather than that
@@ -631,7 +627,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     return 0;
 }
 
-#elif defined(WIN32)
+#elif DIAG_PLATFORM_WINDOWS
 
 int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {

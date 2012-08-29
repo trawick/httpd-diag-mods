@@ -16,14 +16,16 @@
 #ifndef DIAG_H
 #define DIAG_H
 
-#ifdef WIN32
+#include "diagplat.h"
+
+#if DIAG_PLATFORM_WINDOWS
 #include <windows.h>
 #include <dbghelp.h>
 #else
 #include <signal.h>
 #endif
 
-#ifdef SOLARIS
+#if DIAG_PLATFORM_SOLARIS
 #include <ucontext.h>
 #endif
 
@@ -41,7 +43,7 @@ extern "C" {
 typedef struct {
     void *user_data;
     enum {DIAG_WRITE_FD, DIAG_CALL_FN} output_mode;
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
     HANDLE outfile;
 #else
     int outfile;
@@ -55,7 +57,7 @@ typedef struct {
     unsigned int symbols_initialized : 1;
 } diag_backtrace_param_t;
 
-#ifdef WIN32
+#if DIAG_PLATFORM_WINDOWS
 
 typedef struct diag_context_t {
     CONTEXT *context;
@@ -67,7 +69,7 @@ typedef struct diag_context_t {
 typedef struct diag_context_t {
     int signal;
     siginfo_t *info;
-#if defined(SOLARIS)
+#if DIAG_PLATFORM_SOLARIS
     ucontext_t *context;
 #endif
 } diag_context_t;
