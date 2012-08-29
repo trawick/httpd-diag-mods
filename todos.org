@@ -18,7 +18,7 @@
 *** DONE Provide a way to bypass SymInitialize()
 *** DONE What to do about SymInitialize() when the caller doesn't handle it?
 *** DONE Implement missing features on Windows
-*** TODO Make sure we respect platform defines added by httpd
+*** DONE (handled differently) Make sure we respect platform defines added by httpd
 *** TODO Document that backtrace_symbols() is not async-signal safe.
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 *** DONE Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.

@@ -34,9 +34,11 @@ APLOG_USE_MODULE(backtrace);
 #endif
 
 #if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
-#define DIAG_HAVE_ERRORLOG_HANDLER 1
+#define MODBT_HAVE_ERRORLOG_HANDLER 1
+#define MODBT_HAVE_ERRORLOG_HOOK    0
 #else
-#define DIAG_HAVE_ERRORLOG_HANDLER 0
+#define MODBT_HAVE_ERRORLOG_HANDLER 0
+#define MODBT_HAVE_ERRORLOG_HOOK    1
 #endif
 
 /* Use this LOG_PREFIX only on non-debug messages.  This provides a module
@@ -135,8 +137,8 @@ static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
     diag_backtrace(&o, &dp, c);
 }
 
-#if DIAG_HAVE_ERRORLOG_HANDLER
 typedef struct {
+    int skip;
     char *buffer;
     size_t len;
 } loginfo_t;
@@ -145,43 +147,74 @@ static void fmt(void *user_data, const char *s)
 {
     loginfo_t *li = user_data;
 
+    if (li->skip > 0) {
+        --li->skip;
+        return;
+    }
+
     if (strlen(li->buffer) + strlen(s) < li->len) {
         strcat(li->buffer, s);
         strcat(li->buffer, "<");
     }
 }
 
-static int backtrace_log(const ap_errorlog_info *info,
-                         const char *arg, char *buf, int buflen)
+static void mini_backtrace(char *buf, int buflen, int skip)
 {
     diag_output_t o = {0};
     diag_backtrace_param_t p = {0};
     loginfo_t li = {0};
 
-    p.symbols_initialized = 1;
-
+    li.skip = skip;
     li.buffer = buf;
     li.len = buflen;
 
-    o.outfile = 2;
-    o.output_mode = DIAG_WRITE_FD;
-    diag_backtrace(&o, &p, NULL);
-
-    memset(&p, 0, sizeof p);
-    memset(&o, 0, sizeof o);
     o.user_data = &li;
     o.output_mode = DIAG_CALL_FN;
     o.output_fn = fmt;
+
+    p.symbols_initialized = 1;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
-    p.backtrace_count = 3;
+    p.backtrace_count = skip + 4;
+
     diag_backtrace(&o, &p, NULL);
     if (buf[strlen(buf) - 1] == '<') {
         buf[strlen(buf) - 1] = '\0';
     }
+}
 
+#if MODBT_HAVE_ERRORLOG_HANDLER
+static int backtrace_log(const ap_errorlog_info *info,
+                         const char *arg, char *buf, int buflen)
+{
+    mini_backtrace(buf, buflen, 1);
     return strlen(buf);
 }
-#endif /* DIAG_HAVE_ERRORLOG_HANDLER */
+#endif /* MODBT_HAVE_ERRORLOG_HANDLER */
+
+#if MODBT_HAVE_ERRORLOG_HOOK
+static void backtrace_error_log(const char *file, int line,
+                                int level, apr_status_t status, 
+                                const server_rec *s, const request_rec *r,
+                                apr_pool_t *pool, const char *errstr)
+{
+    static const char *label = "Backtrace:";
+
+    if (errstr && (r || s) && !strstr(errstr, label)) {
+        char buf[128];
+
+        buf[0] = '\0';
+        mini_backtrace(buf, sizeof buf, 5);
+        if (r) {
+            ap_log_rerror(APLOG_MARK, level, 0, r,
+                          "%s %s", label, buf);
+        }
+        else if (s) {
+            ap_log_error(APLOG_MARK, level, 0, s,
+                         "%s %s", label, buf);
+        }
+    }
+}
+#endif /* MODBT_HAVE_ERRORLOG_HOOK */
 
 static void fmt_rputs(void *userdata, const char *buffer)
 {
@@ -276,8 +309,11 @@ static void backtrace_child_init(apr_pool_t *p, server_rec *s)
 
 static void backtrace_register_hooks(apr_pool_t *p)
 {
-#if DIAG_HAVE_ERRORLOG_HANDLER
+#if MODBT_HAVE_ERRORLOG_HANDLER
     ap_register_errorlog_handler(p, "B", backtrace_log, 0);
+#endif
+#if MODBT_HAVE_ERRORLOG_HOOK
+    ap_hook_error_log(backtrace_error_log, NULL, NULL, APR_HOOK_MIDDLE);
 #endif
     ap_hook_handler(backtrace_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(backtrace_child_init, NULL, NULL, APR_HOOK_MIDDLE);
