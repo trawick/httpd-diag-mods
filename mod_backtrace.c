@@ -203,9 +203,7 @@ static void backtrace_error_log(const char *file, int line,
         char buf[128];
         int skip;
 
-#if DIAG_PLATFORM_WINDOWS
-        skip = 5;
-#elif DIAG_PLATFORM_LINUX
+#if DIAG_PLATFORM_WINDOWS || DIAG_PLATFORM_LINUX || DIAG_PLATFORM_SOLARIS
         skip = 5;
 #else /* tested on FreeBSD */
         skip = 3;
