@@ -199,11 +199,18 @@ static void backtrace_error_log(const char *file, int line,
 {
     static const char *label = "Backtrace:";
 
-    if (errstr && (r || s) && !strstr(errstr, label)) {
+    if (errstr && (r || s) && !ap_strstr_c(errstr, label)) {
         char buf[128];
+        int skip;
+
+#if DIAG_PLATFORM_WINDOWS
+        skip = 5;
+#else /* tested on FreeBSD */
+        skip = 3;
+#endif
 
         buf[0] = '\0';
-        mini_backtrace(buf, sizeof buf, 5);
+        mini_backtrace(buf, sizeof buf, skip);
         if (r) {
             ap_log_rerror(APLOG_MARK, level, 0, r,
                           "%s %s", label, buf);
