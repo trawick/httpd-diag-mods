@@ -24,7 +24,7 @@
 *** DONE Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.
 ** mod_backtrace.c/mod_backtrace.h
 *** DONE Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
-*** TODO Add error log handler for 2.2
+*** DONE Add error log handler for 2.2
 *** TODO Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
 *** TODO Change backtrace-handler to generate backtrace in different flavors for automated regression testing
 ** mod_whatkilledus.c
