@@ -154,6 +154,7 @@ static void fmt(void *user_data, const char *s)
 static int backtrace_log(const ap_errorlog_info *info,
                          const char *arg, char *buf, int buflen)
 {
+    diag_output_t o = {0};
     diag_backtrace_param_t p = {0};
     loginfo_t li = {0};
 
@@ -162,17 +163,18 @@ static int backtrace_log(const ap_errorlog_info *info,
     li.buffer = buf;
     li.len = buflen;
 
-    p.outfile = 2;
-    p.output_mode = DIAG_WRITE_FD;
-    diag_backtrace(&p);
+    o.outfile = 2;
+    o.output_mode = DIAG_WRITE_FD;
+    diag_backtrace(&o, &p, NULL);
 
     memset(&p, 0, sizeof p);
-    p.user_data = &li;
-    p.output_mode = DIAG_CALL_FN;
+    memset(&o, 0, sizeof o);
+    o.user_data = &li;
+    o.output_mode = DIAG_CALL_FN;
+    o.output_fn = fmt;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.backtrace_count = 3;
-    p.output_fn = fmt;
-    diag_backtrace(&p);
+    diag_backtrace(&o, &p, NULL);
     if (buf[strlen(buf) - 1] == '<') {
         buf[strlen(buf) - 1] = '\0';
     }
