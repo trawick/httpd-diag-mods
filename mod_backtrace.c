@@ -49,7 +49,9 @@ APLOG_USE_MODULE(backtrace);
 #endif
 
 static server_rec *main_server;
+#ifdef WIN32
 static const char *configured_symbol_path;
+#endif
 
 static void fmt2(void *user_data, const char *s)
 {
@@ -267,11 +269,13 @@ static void backtrace_register_hooks(apr_pool_t *p)
     APR_REGISTER_OPTIONAL_FN(backtrace_get_backtrace);
 }
 
+#ifdef WIN32
 static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
 {
     configured_symbol_path = arg;
     return NULL;
 }
+#endif
 
 static const command_rec backtrace_cmds[] =
 {
