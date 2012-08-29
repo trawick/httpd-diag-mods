@@ -1,3 +1,9 @@
+BITS := $(shell $(HTTPD)/bin/httpd -V | grep Architecture | sed -e 's/^Architecture: \+//' -e 's/-bit.*//')
+
+DEFBITS := -DDIAG_BITS_$(BITS)
+
+BASE_CFLAGS=$(DEFBITS)
+
 PLATFORM := $(shell uname -s)
 
 $(info Building for platform $(PLATFORM))
@@ -7,7 +13,7 @@ GCC_CFLAGS=-O0 -Wall
 ifeq ($(PLATFORM), FreeBSD)
 
 CC=gcc
-CFLAGS = $(GCC_CFLAGS) -I/usr/local/include -rdynamic
+CFLAGS = $(BASE_CFLAGS) $(GCC_CFLAGS) -I/usr/local/include -rdynamic
 LDFLAGS= $(GCC_CFLAGS) -L/usr/local/lib -rdynamic
 LIBS=-lexecinfo
 
@@ -16,7 +22,7 @@ else
 ifeq ($(PLATFORM), Linux)
 
 CC=gcc
-CFLAGS=  $(GCC_CFLAGS) -rdynamic
+CFLAGS=  $(BASE_CFLAGS) $(GCC_CFLAGS) -rdynamic
 LDFLAGS= $(GCC_CFLAGS) -rdynamic
 LIBS=
 
@@ -25,14 +31,14 @@ else
 ifeq ($(PLATFORM), SunOS)
 
 CC=cc
-CFLAGS=-DSOLARIS
+CFLAGS=$(BASE_CFLAGS) -DSOLARIS
 LDFLAGS=
 LIBS=
 
 else
 
 CC=gcc
-CFLAGS=
+CFLAGS=$(BASE_CFLAGS) $(GCC_CFLAGS)
 LDFLAGS=
 LIBS=
 

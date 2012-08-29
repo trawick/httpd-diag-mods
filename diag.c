@@ -120,6 +120,37 @@ static char *add_int(char *outch, const char *lastoutch,
     return add_string(outch, lastoutch, ch + 1, lastch);
 }
 
+static char *add_pointer(char *outch, const char *lastoutch,
+                         void *vpointer)
+{
+#ifdef DIAG_BITS_64
+    unsigned long long val = (unsigned long long)vpointer;
+#else
+    unsigned val = (unsigned)vpointer;
+#endif
+    int radix = 16;
+
+    char buf[28];
+    char *ch, *lastch;
+    static const char *digits = "0123456789ABCDEF";
+
+    assert(radix == 10 || radix == 16);
+
+    ch = lastch = buf + sizeof buf - 1;
+    while (ch >= buf && val > 0) {
+        int rem = val % radix;
+        val = val / radix;
+        *ch = digits[rem];
+        --ch;
+    }
+
+    if (radix == 16) {
+        outch = add_string(outch, lastoutch, "0x", NULL);
+    }
+
+    return add_string(outch, lastoutch, ch + 1, lastch);
+}
+
 #ifdef WIN32
 
 struct exception_code_entry {
@@ -217,7 +248,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
         else {
             outch = add_string(outch, lastoutch, "Faulting instruction: ", NULL);
         }
-        outch = add_int(outch, lastoutch, (long long)c->info->si_addr, 16);
+        outch = add_pointer(outch, lastoutch, c->info->si_addr);
         outch = add_string(outch, lastoutch, "\n", NULL);
         if (o->output_mode == DIAG_WRITE_FD) {
             write(o->outfile, buf, strlen(buf));
