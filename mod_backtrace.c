@@ -205,6 +205,14 @@ static void fmt(void *user_data, const char *s)
         else if (!strcmp(s + 3, "run_error_log")) {
             return;
         }
+#if DIAG_PLATFORM_FREEBSD
+        else if (!strcmp(s + 3, "error_log2stderr")) {
+            /* with httpd 2.2.x, this function right before
+             * log_error_core() may be the symbol retrieved
+             */
+            return;
+        }
+#endif
     }
 
     if (!memcmp(s, "SKIP_", 5)) {
@@ -214,6 +222,12 @@ static void fmt(void *user_data, const char *s)
     if (!strcmp(s, "log_error_core")) {
         return;
     }
+
+#if DIAG_PLATFORM_FREEBSD
+    if (!strcmp(s, "_init")) {
+        return;
+    }
+#endif
 
     if (!strcmp(s, "main")
 #if DIAG_PLATFORM_WINDOWS
