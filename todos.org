@@ -19,14 +19,14 @@
 *** DONE What to do about SymInitialize() when the caller doesn't handle it?
 *** DONE Implement missing features on Windows
 *** DONE (handled differently) Make sure we respect platform defines added by httpd
-*** TODO Document that backtrace_symbols() is not async-signal safe.
-*** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 *** DONE Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.
+*** TODO Tiny automated regression test for 32-bit and 64-bit.
 ** mod_backtrace.c/mod_backtrace.h
 *** DONE Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
 *** DONE Add error log handler for 2.2
 *** TODO Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
-*** TODO Change backtrace-handler to generate backtrace in different flavors for automated regression testing
+*** DONE Change backtrace-handler to generate backtrace in different flavors for automated regression testing
+*** TODO Tiny automated regression test for 32-bit and 64-bit.
 ** mod_whatkilledus.c
 *** TODO Ensure that only the first crashing thread in the process gets to do any work
 *** TODO Create a log file to contain crash reports
@@ -69,6 +69,8 @@ If testing of these modules with your product would help, yadayadayada.
 *** TODO Rationalize when to write to FD using native feature
 *** TODO Work around FreeBSD issue writing to FD using native feature
 *** TODO Create feature defines to avoid #if-PLATFORM in client code
+*** TODO Document that backtrace_symbols() is not async-signal safe.
+*** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 * httpd enhancements
 ** Unix: use SA_SIGINFO, add siginfo_t to exception info
 ** Windows: implement exception hook

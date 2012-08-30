@@ -237,17 +237,27 @@ static void backtrace(request_rec *r)
     diag_output_t o = {0};
 
     p.symbols_initialized = 1;
-
-    ap_set_content_type(r, "text/plain");
-
-    ap_rputs("========== mod_backtrace report ===========================\n", r);
-
+    p.backtrace_count = 10;
     o.user_data = r;
     o.output_mode = DIAG_CALL_FN;
     o.output_fn = fmt_rputs;
-    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
-    p.backtrace_count = 10;
-    diag_backtrace(&o, &p, NULL);
+
+    ap_set_content_type(r, "text/plain");
+
+#define TESTCASE(btfields)                         \
+    ap_rputs("----------------------------------------------------\n", r); \
+    ap_rputs("mod_backtrace: " #btfields "\n", r); \
+    p.backtrace_fields = (btfields);               \
+    diag_backtrace(&o, &p, NULL)
+
+    TESTCASE(DIAG_BTFIELDS_MODULE_PATH);
+    TESTCASE(DIAG_BTFIELDS_MODULE_NAME);
+    TESTCASE(DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME);
+    TESTCASE(DIAG_BTFIELDS_FUNCTION);
+    TESTCASE(DIAG_BTFIELDS_FN_OFFSET);
+    TESTCASE(DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET);
+    TESTCASE(DIAG_BTFIELDS_ADDRESS);
+    TESTCASE(DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET);
 }
 
 static int backtrace_handler(request_rec *r)
