@@ -50,10 +50,51 @@ APLOG_USE_MODULE(backtrace);
 #define LOG_PREFIX "mod_backtrace: "
 #endif
 
+module AP_MODULE_DECLARE_DATA backtrace_module;
 static server_rec *main_server;
 #if DIAG_PLATFORM_WINDOWS
 static const char *configured_symbol_path;
 #endif
+
+typedef struct backtrace_server_t {
+#if MODBT_HAVE_ERRORLOG_HOOK
+    int enabled;
+    const char *str;
+    int oserror;
+    apr_status_t error;
+#else
+    int dummy;
+#endif
+} backtrace_server_t;
+
+static void *create_backtrace_server_conf(apr_pool_t *p, server_rec *s)
+{
+    backtrace_server_t *conf;
+
+    conf = (backtrace_server_t *)apr_pcalloc(p, sizeof(backtrace_server_t));
+#if MODBT_HAVE_ERRORLOG_HOOK
+    conf->enabled = -1;
+#endif
+    return conf;
+}
+
+static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overridesv)
+{
+    backtrace_server_t *base = (backtrace_server_t *)basev;
+    backtrace_server_t *overrides = (backtrace_server_t *)overridesv;
+    backtrace_server_t *conf = (backtrace_server_t *)apr_pmemdup(p, base, sizeof(*conf));
+
+#if MODBT_HAVE_ERRORLOG_HOOK
+    if (overrides->enabled != -1) {
+        conf->enabled = overrides->enabled;
+        conf->str = overrides->str;
+        conf->oserror = overrides->oserror;
+        conf->error = overrides->error;
+    }
+#endif
+
+    return overrides;
+}
 
 static void fmt2(void *user_data, const char *s)
 {
@@ -138,7 +179,8 @@ static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
 }
 
 typedef struct {
-    int skip;
+    int kept;
+    int to_keep;
     char *buffer;
     size_t len;
 } loginfo_t;
@@ -147,9 +189,42 @@ static void fmt(void *user_data, const char *s)
 {
     loginfo_t *li = user_data;
 
-    if (li->skip > 0) {
-        --li->skip;
+    if (li->kept >= li->to_keep) {
         return;
+    }
+
+    if (s[0] == 'a'
+        && s[1] == 'p'
+        && s[2] == '_') {
+        if (s[3] == 'l'
+            && s[4] == 'o'
+            && s[5] == 'g'
+            && s[6] == '_') {
+            return;
+        }
+        else if (!strcmp(s + 3, "run_error_log")) {
+            return;
+        }
+    }
+
+    if (!memcmp(s, "SKIP_", 5)) {
+        return;
+    }
+
+    if (!strcmp(s, "log_error_core")) {
+        return;
+    }
+
+    if (!strcmp(s, "main")
+#if DIAG_PLATFORM_WINDOWS
+        || !strcmp(s, "BaseThreadInitThunk")
+#endif
+        ) {
+        /* keep this, but we're done */
+        li->kept = li->to_keep;
+    }
+    else {
+        li->kept++;
     }
 
     if (strlen(li->buffer) + strlen(s) < li->len) {
@@ -158,13 +233,13 @@ static void fmt(void *user_data, const char *s)
     }
 }
 
-static void mini_backtrace(char *buf, int buflen, int skip)
+static void SKIP_mini_backtrace(char *buf, int buflen, int to_keep)
 {
     diag_output_t o = {0};
     diag_backtrace_param_t p = {0};
     loginfo_t li = {0};
 
-    li.skip = skip;
+    li.to_keep = to_keep;
     li.buffer = buf;
     li.len = buflen;
 
@@ -174,7 +249,7 @@ static void mini_backtrace(char *buf, int buflen, int skip)
 
     p.symbols_initialized = 1;
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
-    p.backtrace_count = skip + 4;
+    p.backtrace_count = to_keep + 7;
 
     diag_backtrace(&o, &p, NULL);
     if (buf[strlen(buf) - 1] == '<') {
@@ -183,42 +258,70 @@ static void mini_backtrace(char *buf, int buflen, int skip)
 }
 
 #if MODBT_HAVE_ERRORLOG_HANDLER
-static int backtrace_log(const ap_errorlog_info *info,
-                         const char *arg, char *buf, int buflen)
+static int SKIP_backtrace_log(const ap_errorlog_info *info,
+                              const char *arg, char *buf, int buflen)
 {
-    mini_backtrace(buf, buflen, 1);
+    SKIP_mini_backtrace(buf, buflen, 5);
     return strlen(buf);
 }
 #endif /* MODBT_HAVE_ERRORLOG_HANDLER */
 
 #if MODBT_HAVE_ERRORLOG_HOOK
-static void backtrace_error_log(const char *file, int line,
-                                int level, apr_status_t status, 
-                                const server_rec *s, const request_rec *r,
-                                apr_pool_t *pool, const char *errstr)
+static void SKIP_backtrace_error_log(const char *file, int line,
+                                     int level, apr_status_t status, 
+                                     const server_rec *s, const request_rec *r,
+                                     apr_pool_t *pool, const char *errstr)
 {
     static const char *label = "Backtrace:";
+    backtrace_server_t *conf;
+    char buf[256];
 
-    if (errstr && (r || s) && !ap_strstr_c(errstr, label)) {
-        char buf[128];
-        int skip;
+    if (!s) {
+        s = main_server;
+    }
 
-#if DIAG_PLATFORM_WINDOWS || DIAG_PLATFORM_LINUX || DIAG_PLATFORM_SOLARIS
-        skip = 5;
-#else /* tested on FreeBSD */
-        skip = 3;
-#endif
+    if (!s) {
+        return;
+    }
 
-        buf[0] = '\0';
-        mini_backtrace(buf, sizeof buf, skip);
-        if (r) {
-            ap_log_rerror(APLOG_MARK, level, 0, r,
-                          "%s %s", label, buf);
-        }
-        else if (s) {
-            ap_log_error(APLOG_MARK, level, 0, s,
-                         "%s %s", label, buf);
-        }
+    conf = ap_get_module_config(s->module_config,
+                                &backtrace_module);
+
+    if (!conf || !conf->enabled) {
+        return;
+    }
+
+    if (!errstr) {
+        /* ??? */
+        return;
+    }
+
+    if (ap_strstr_c(errstr, label)) {
+        /* recursive call */
+        return;
+    }
+
+    if (conf->error != 0 && conf->error != status) {
+        return;
+    }
+
+    if (conf->oserror != 0 && status - APR_OS_START_SYSERR != conf->oserror) {
+        return;
+    }
+
+    if (conf->str && !ap_strstr_c(errstr, conf->str)) {
+        return;
+    }
+
+    buf[0] = '\0';
+    SKIP_mini_backtrace(buf, sizeof buf, 5);
+    if (r) {
+        ap_log_rerror(APLOG_MARK, level, 0, r,
+                      "%s %s", label, buf);
+    }
+    else if (s) {
+        ap_log_error(APLOG_MARK, level, 0, s,
+                     "%s %s", label, buf);
     }
 }
 #endif /* MODBT_HAVE_ERRORLOG_HOOK */
@@ -327,10 +430,10 @@ static void backtrace_child_init(apr_pool_t *p, server_rec *s)
 static void backtrace_register_hooks(apr_pool_t *p)
 {
 #if MODBT_HAVE_ERRORLOG_HANDLER
-    ap_register_errorlog_handler(p, "B", backtrace_log, 0);
+    ap_register_errorlog_handler(p, "B", SKIP_backtrace_log, 0);
 #endif
 #if MODBT_HAVE_ERRORLOG_HOOK
-    ap_hook_error_log(backtrace_error_log, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_error_log(SKIP_backtrace_error_log, NULL, NULL, APR_HOOK_MIDDLE);
 #endif
     ap_hook_handler(backtrace_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(backtrace_child_init, NULL, NULL, APR_HOOK_MIDDLE);
@@ -351,11 +454,47 @@ static const char *set_symbol_path(cmd_parms *cmd, void *dummy, const char *arg)
 }
 #endif
 
+#if MODBT_HAVE_ERRORLOG_HOOK
+static const char *set_error_logging(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    backtrace_server_t *conf = ap_get_module_config(cmd->server->module_config,
+                                                    &backtrace_module);
+
+    if (!strcasecmp(arg, "off")) {
+        conf->enabled = 0;
+    }
+    else if (!strcasecmp(arg, "on")) {
+        conf->enabled = 1;
+    }
+    else {
+        conf->enabled = 1;
+        if (arg[0] == '/' && arg[strlen(arg) - 1] == '/') {
+            conf->str = apr_pstrndup(cmd->pool, arg + 1, strlen(arg) - 2);
+        }
+        else if (!memcmp(arg, "error==", 7)) {
+            conf->error = atoi(arg + 7);
+        }
+        else if (!memcmp(arg, "oserror==", 9)) {
+            conf->oserror = atoi(arg + 9);
+        }
+        else {
+            return apr_pstrcat(cmd->pool, "Invalid value for BacktraceErrorLogging: ",
+                               arg, NULL);
+        }
+    }
+    return NULL;
+}
+#endif
+
 static const command_rec backtrace_cmds[] =
 {
 #if DIAG_PLATFORM_WINDOWS
     AP_INIT_TAKE1("BacktraceSymbolPath", set_symbol_path, NULL, RSRC_CONF,
                   "Specify additional directoriess for symbols (e.g., BacktraceSymbolPath c:/dir1;c:/dir2;c:/dir3)"),
+#endif
+#if MODBT_HAVE_ERRORLOG_HOOK
+    AP_INIT_TAKE1("BacktraceErrorLogging", set_error_logging, NULL, RSRC_CONF,
+                  "Specify conditions for adding a backtrace to the error log"),
 #endif
     {NULL}
 };
@@ -365,8 +504,8 @@ module AP_MODULE_DECLARE_DATA backtrace_module =
     STANDARD20_MODULE_STUFF,
     NULL,
     NULL,
-    NULL,
-    NULL,
+    create_backtrace_server_conf,
+    merge_backtrace_server_conf,
     backtrace_cmds,
     backtrace_register_hooks,
 };
