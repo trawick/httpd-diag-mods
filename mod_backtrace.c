@@ -110,6 +110,7 @@ static void fmt2(void *user_data, const char *s)
     case BT_OUTPUT_FILE:
 #if DIAG_PLATFORM_WINDOWS
         WriteFile(p->outfile, s, strlen(s), NULL, NULL);
+        WriteFile(p->outfile, "\r\n", 2, NULL, NULL);
 #else
         write(p->outfile, s, strlen(s));
         write(p->outfile, "\n", 1);
