@@ -24,6 +24,15 @@
 APLOG_USE_MODULE(whatkilledus);
 #endif
 
+/* Use this LOG_PREFIX only on non-debug messages.  This provides a module
+ * identifer with httpd < 2.4.
+ */
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
+#define LOG_PREFIX ""
+#else
+#define LOG_PREFIX "mod_whatkilledus: "
+#endif
+
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
@@ -82,7 +91,7 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 static void crash(request_rec *r)
 {
     ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
-                  "mod_whatkilledus: about to crash");
+                  LOG_PREFIX "about to crash");
 
     *(int *)0xdeadbeef = 0xcafebabe;
 }
@@ -102,7 +111,7 @@ static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_poo
 #if DIAG_PLATFORM_UNIX
     if (!exception_hook_enabled) {
         ap_log_error(APLOG_MARK, APLOG_ERR, 0, s,
-                     "mod_whatkilledus: EnableExceptionHook must be set to On");
+                     LOG_PREFIX "EnableExceptionHook must be set to On");
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 #endif
