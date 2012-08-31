@@ -683,7 +683,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         char address_buf[20], offset_buf[20];
         char buf[128];
         char *outch = buf;
-        const char *lastoutch = buf + sizeof buf - 1;
+        char *lastoutch = buf + sizeof buf - 1;
 
         cur++;
         if (cur > count) { /* avoid loop on corrupted chain, respect caller's wishes */
