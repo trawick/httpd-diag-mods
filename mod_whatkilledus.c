@@ -13,12 +13,20 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+
 #include "httpd.h"
 #include "http_config.h"
 #include "http_log.h"
 #include "ap_mpm.h"
 
 #include "mod_backtrace.h"
+
+#if DIAG_PLATFORM_UNIX
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#endif
 
 #if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
 APLOG_USE_MODULE(whatkilledus);
@@ -51,6 +59,110 @@ static volatile /* imperfect but probably good enough */ int already_crashed = 0
 static server_rec *main_server;
 static const char *logfilename;
 
+static char *add_string(char *outch, const char *lastoutch,
+                        const char *in_first, const char *in_last_param)
+{
+    const char *in_last = in_last_param;
+    const char *inch;
+    
+    if (!outch) {
+        return NULL;
+    }
+    
+    if (outch >= (lastoutch - 1)) {
+        return NULL;
+    }
+
+    if (!in_last) {
+        in_last = in_first + strlen(in_first) - 1;
+    }
+    
+    if (in_first > in_last) {
+        return NULL;
+    }
+    
+    inch = in_first;
+    while (inch <= in_last) {
+        *outch = *inch;
+        ++outch;
+        if (outch == lastoutch) {
+            break;
+        }
+        ++inch;
+    }
+    *outch = '\0';
+
+    return outch;
+}
+
+static char *add_int(char *outch, const char *lastoutch,
+                     long long val, int radix)
+{
+    char buf[28];
+    char *ch, *lastch;
+    static const char *digits = "0123456789ABCDEF";
+    int neg = 0;
+
+    if (val < 0) {
+        neg = 1;
+        val = -val;
+    }
+
+    assert(radix == 10 || radix == 16);
+
+    ch = lastch = buf + sizeof buf - 1;
+    while (ch >= buf && val > 0) {
+        int rem = val % radix;
+        val = val / radix;
+        *ch = digits[rem];
+        --ch;
+    }
+
+    if (neg) {
+        outch = add_string(outch, lastoutch, "-", NULL);
+    }
+
+    if (radix == 16) {
+        outch = add_string(outch, lastoutch, "0x", NULL);
+    }
+
+    return add_string(outch, lastoutch, ch + 1, lastch);
+}
+
+static void build_header(char *buf, size_t buflen,
+                         int year, int month, int day, int hour, int minute, int second)
+{
+    char *outch = buf, *lastoutch = buf + buflen - 1;
+
+    outch = add_string(outch, lastoutch, "**** Crash at ", NULL);
+    outch = add_int(outch, lastoutch, (long long)year, 10);
+    outch = add_string(outch, lastoutch, "-", NULL);
+    if (month < 10) {
+        outch = add_string(outch, lastoutch, "0", NULL);
+    }
+    outch = add_int(outch, lastoutch, (long long)month, 10);
+    outch = add_string(outch, lastoutch, "-", NULL);
+    if (day < 10) {
+        outch = add_string(outch, lastoutch, "0", NULL);
+    }
+    outch = add_int(outch, lastoutch, (long long)day, 10);
+    outch = add_string(outch, lastoutch, " ", NULL);
+    if (hour < 10) {
+        outch = add_string(outch, lastoutch, "0", NULL);
+    }
+    outch = add_int(outch, lastoutch, (long long)hour, 10);
+    outch = add_string(outch, lastoutch, ":", NULL);
+    if (minute < 10) {
+        outch = add_string(outch, lastoutch, "0", NULL);
+    }
+    outch = add_int(outch, lastoutch, (long long)minute, 10);
+    outch = add_string(outch, lastoutch, ":", NULL);
+    if (second < 10) {
+        outch = add_string(outch, lastoutch, "0", NULL);
+    }
+    outch = add_int(outch, lastoutch, (long long)second, 10);
+}
+
 #if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
@@ -58,6 +170,8 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     bt_param_t p = {0};
     diag_context_t c = {0};
     HANDLE logfile;
+    SYSTEMTIME now;
+    char buf[128];
 
     if (already_crashed) {
         return EXCEPTION_CONTINUE_SEARCH;
@@ -74,8 +188,16 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 
     SetFilePointer(logfile, 0, NULL, FILE_END);
 
+    GetLocalTime(&now);
+
+    build_header(buf, sizeof buf, now.wYear, now.wMonth, now.wDay,
+                 now.wHour, now.wMinute, now.wSecond);
+
+    WriteFile(logfile, buf, strlen(buf), NULL, NULL);
+    WriteFile(logfile, "\r\n", 2, NULL, NULL);
+
     p.output_mode = BT_OUTPUT_FILE;
-    p.output_style = BT_OUTPUT_LONG;
+    p.output_style = BT_OUTPUT_MEDIUM;
     p.outfile = logfile;
 
     c.context = ep->ContextRecord;
@@ -83,10 +205,12 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 
     if (describe_exception) {
         describe_exception(&p, &c);
+        WriteFile(logfile, "\r\n", 2, NULL, NULL);
     }
 
     if (get_backtrace) {
         get_backtrace(&p, &c);
+        WriteFile(logfile, "\r\n", 2, NULL, NULL);
     }
 
     CloseHandle(logfile);
@@ -101,6 +225,9 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
     bt_param_t p = {0};
     diag_context_t c = {0};
     int logfile;
+    time_t now;
+    struct tm tm;
+    char buf[128];
 
     if (already_crashed) {
         return OK;
@@ -114,22 +241,29 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
         return OK;
     }
 
+    time(&now);
+    /* whoops, not necessarily async-signal safe */
+    localtime_r(&now, &tm);
+
+    build_header(buf, sizeof buf, 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday,
+                 tm.tm_hour, tm.tm_min, tm.tm_sec);
+    write(logfile, buf, strlen(buf));
+    write(logfile, "\n", 1);
+
     p.output_mode = BT_OUTPUT_FILE;
-    p.output_style = BT_OUTPUT_LONG;
+    p.output_style = BT_OUTPUT_MEDIUM;
     p.outfile = logfile;
 
     c.signal = ei->sig;
 
     if (describe_exception) {
         describe_exception(&p, &c);
+        write(logfile, "\n", 1);
     }
 
     if (get_backtrace) {
-        bt_param_t p = {0};
-
-        p.output_mode = BT_OUTPUT_ERROR_LOG;
-        p.output_style = BT_OUTPUT_LONG;
         get_backtrace(&p, NULL);
+        write(logfile, "\n", 1);
     }
 
     close(logfile);
