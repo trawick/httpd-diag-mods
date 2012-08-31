@@ -319,7 +319,7 @@ static void SKIP_backtrace_error_log(const char *file, int line,
                                      const server_rec *s, const request_rec *r,
                                      apr_pool_t *pool, const char *errstr)
 {
-    static const char *label = "Backtrace:";
+    static const char *label = LOG_PREFIX;
     backtrace_server_t *conf;
     char buf[256];
 
@@ -364,11 +364,11 @@ static void SKIP_backtrace_error_log(const char *file, int line,
     SKIP_mini_backtrace(buf, sizeof buf, 5);
     if (r) {
         ap_log_rerror(APLOG_MARK, level, 0, r,
-                      "%s %s", label, buf);
+                      "%s%s", label, buf);
     }
     else if (s) {
         ap_log_error(APLOG_MARK, level, 0, s,
-                     "%s %s", label, buf);
+                     "%s%s", label, buf);
     }
 }
 #endif /* MODBT_HAVE_ERRORLOG_HOOK */
