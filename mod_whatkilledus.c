@@ -54,6 +54,10 @@ static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 static int exception_hook_enabled;
 #endif
 
+#if DIAG_PLATFORM_WINDOWS
+static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI old_exception_filter;
+#endif
+
 static volatile /* imperfect but probably good enough */ int already_crashed = 0;
 
 static server_rec *main_server;
@@ -288,7 +292,7 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
     /* must back this out before this DLL is unloaded;
      * but previous exception filter might have been unloaded too
      */
-    SetUnhandledExceptionFilter(whatkilledus_crash_handler);
+    old_exception_filter = SetUnhandledExceptionFilter(whatkilledus_crash_handler);
 #endif
 }
 
