@@ -24,7 +24,7 @@
 ** mod_backtrace.c/mod_backtrace.h
 *** DONE Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
 *** DONE Add error log handler for 2.2
-*** TODO Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
+*** DONE Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
 *** DONE Change backtrace-handler to generate backtrace in different flavors for automated regression testing
 *** TODO Tiny automated regression test for 32-bit and 64-bit.
 ** mod_whatkilledus.c
@@ -71,6 +71,7 @@ If testing of these modules with your product would help, yadayadayada.
 *** TODO Create feature defines to avoid #if-PLATFORM in client code
 *** TODO Document that backtrace_symbols() is not async-signal safe.
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
+*** TODO Windows, SymGetModuleInfo64
 * httpd enhancements
 ** Unix: use SA_SIGINFO, add siginfo_t to exception info
 ** Windows: implement exception hook
