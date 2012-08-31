@@ -33,7 +33,7 @@
 *** DONE Exit with error if EnableExceptionHook is not on (Unix only)
 *** TODO Implement the original mod_whatkilledus feature, with ways to filter out certain logging.
 *** TODO Don't compile in the crash handler by default.
-*** TODO Back out the exception filter as appropriate.
+*** DONE Back out the exception filter as appropriate.
 ** Web site
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/

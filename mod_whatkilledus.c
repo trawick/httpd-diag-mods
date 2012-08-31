@@ -55,7 +55,7 @@ static int exception_hook_enabled;
 #endif
 
 #if DIAG_PLATFORM_WINDOWS
-static LPTOP_LEVEL_EXCEPTION_FILTER WINAPI old_exception_filter;
+static LPTOP_LEVEL_EXCEPTION_FILTER old_exception_filter;
 #endif
 
 static volatile /* imperfect but probably good enough */ int already_crashed = 0;
@@ -183,6 +183,11 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     }
     ++already_crashed;
 
+    if (old_exception_filter) {
+        SetUnhandledExceptionFilter(old_exception_filter);
+        old_exception_filter = NULL;
+    }
+
     logfile = CreateFile(logfilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
                          OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
@@ -284,6 +289,17 @@ static void whatkilledus_optional_fn_retrieve(void)
     get_backtrace = APR_RETRIEVE_OPTIONAL_FN(backtrace_get_backtrace);
 }
 
+static apr_status_t whatkilledus_child_term(void *unused)
+{
+#if DIAG_PLATFORM_WINDOWS
+    if (old_exception_filter) {
+        SetUnhandledExceptionFilter(old_exception_filter);
+        old_exception_filter = NULL;
+    }
+#endif
+    return APR_SUCCESS;
+}
+
 static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 {
     main_server = s;
@@ -294,6 +310,9 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
      */
     old_exception_filter = SetUnhandledExceptionFilter(whatkilledus_crash_handler);
 #endif
+
+    apr_pool_cleanup_register(p, NULL,
+                              whatkilledus_child_term, apr_pool_cleanup_null);
 }
 
 static void crash(request_rec *r)
