@@ -104,7 +104,6 @@ static void fmt2(void *user_data, const char *s)
     case BT_OUTPUT_BUFFER:
         if (strlen(s) + strlen(p->buffer) + 1 < p->buffer_size) {
             strcat(p->buffer, s);
-            strcat(p->buffer, "\n");
         }
         break;
     case BT_OUTPUT_FILE:
