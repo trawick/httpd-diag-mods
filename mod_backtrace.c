@@ -25,6 +25,8 @@
 
 #include "mod_backtrace.h"
 
+#include "diag_mod_version.h"
+
 #if DIAG_PLATFORM_UNIX
 #include <unistd.h>
 #endif
@@ -477,6 +479,36 @@ static void backtrace_child_init(apr_pool_t *p, server_rec *s)
     diag_backtrace_init(1);
 }
 
+static void banner(server_rec *s)
+{
+    const char *userdata_key = "backtrace_banner";
+    void *data;
+
+    apr_pool_userdata_get(&data, userdata_key, s->process->pool);
+    if (data) {
+        return;
+    }
+
+    apr_pool_userdata_set((const void *)1, userdata_key,
+                          apr_pool_cleanup_null, s->process->pool);
+
+#if DIAG_PLATFORM_WINDOWS
+    if (getenv("AP_PARENT_PID")) {
+        /* don't repeat the message in child processes */
+        return;
+    }
+#endif
+    ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
+                 "mod_backtrace v%s from http://emptyhammock.com/",
+                 DIAG_MOD_VERSION);
+}
+
+static int backtrace_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+{
+    banner(s);
+    return OK;
+}
+
 static void backtrace_register_hooks(apr_pool_t *p)
 {
 #if MODBT_HAVE_ERRORLOG_HANDLER
@@ -487,6 +519,7 @@ static void backtrace_register_hooks(apr_pool_t *p)
 #endif
     ap_hook_handler(backtrace_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(backtrace_child_init, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_post_config(backtrace_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     APR_REGISTER_OPTIONAL_FN(backtrace_describe_exception);
     APR_REGISTER_OPTIONAL_FN(backtrace_get_backtrace);
 }

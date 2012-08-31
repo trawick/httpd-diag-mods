@@ -22,6 +22,8 @@
 
 #include "mod_backtrace.h"
 
+#include "diag_mod_version.h"
+
 #if DIAG_PLATFORM_UNIX
 #include <fcntl.h>
 #include <unistd.h>
@@ -333,6 +335,30 @@ static int whatkilledus_handler(request_rec *r)
     return DECLINED;
 }
 
+static void banner(server_rec *s)
+{
+    const char *userdata_key = "whatkilledus_banner";
+    void *data;
+
+    apr_pool_userdata_get(&data, userdata_key, s->process->pool);
+    if (data) {
+        return;
+    }
+
+    apr_pool_userdata_set((const void *)1, userdata_key,
+                          apr_pool_cleanup_null, s->process->pool);
+
+#if DIAG_PLATFORM_WINDOWS
+    if (getenv("AP_PARENT_PID")) {
+        /* don't repeat the message in child processes */
+        return;
+    }
+#endif
+    ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
+                 "mod_whatkilledus v%s from http://emptyhammock.com/",
+                 DIAG_MOD_VERSION);
+}
+
 static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
 #if DIAG_PLATFORM_UNIX
@@ -343,6 +369,7 @@ static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_poo
     }
 #endif
 
+    banner(s);
     logfilename = ap_server_root_relative(pconf, DEFAULT_REL_LOGFILENAME);
 
     return OK;
