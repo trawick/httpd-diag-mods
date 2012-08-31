@@ -29,7 +29,7 @@
 *** TODO Tiny automated regression test for 32-bit and 64-bit.
 ** mod_whatkilledus.c
 *** DONE Ensure that only the first crashing thread in the process gets to do any work
-*** TODO Create a log file to contain crash reports
+*** DONE Create a log file to contain crash reports
 *** DONE Exit with error if EnableExceptionHook is not on (Unix only)
 *** TODO Implement the original mod_whatkilledus feature, with ways to filter out certain logging.
 *** TODO Don't compile in the crash handler by default.
@@ -72,6 +72,8 @@ If testing of these modules with your product would help, yadayadayada.
 *** TODO Document that backtrace_symbols() is not async-signal safe.
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 *** TODO Windows, SymGetModuleInfo64
+** mod_whatkilledus.c
+*** Allow log file to be customized.
 * httpd enhancements
 ** Unix: use SA_SIGINFO, add siginfo_t to exception info
 ** Windows: implement exception hook
