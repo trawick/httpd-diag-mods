@@ -44,7 +44,11 @@ static LONG WINAPI unhandled_exception_filter(EXCEPTION_POINTERS *ep)
 
     diag_backtrace(&o, &p, &c);
 
-    return EXCEPTION_CONTINUE_SEARCH;
+    /* Don't execute other handlers, as we want this test program to fail
+     * immediately.
+     */
+    /* return EXCEPTION_CONTINUE_SEARCH; */
+    return EXCEPTION_EXECUTE_HANDLER;
 }
 
 #else
