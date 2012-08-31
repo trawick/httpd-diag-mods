@@ -20,6 +20,10 @@
 
 #include "mod_backtrace.h"
 
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
+APLOG_USE_MODULE(whatkilledus);
+#endif
+
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
