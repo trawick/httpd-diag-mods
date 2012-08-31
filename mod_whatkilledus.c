@@ -27,6 +27,10 @@ APLOG_USE_MODULE(whatkilledus);
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
+#if DIAG_PLATFORM_UNIX
+static int exception_hook_enabled;
+#endif
+
 #if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
@@ -93,6 +97,18 @@ static int whatkilledus_handler(request_rec *r)
     return DECLINED;
 }
 
+static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
+{
+#if DIAG_PLATFORM_UNIX
+    if (!exception_hook_enabled) {
+        ap_log_error(APLOG_MARK, APLOG_ERR, 0, s,
+                     "mod_whatkilledus: EnableExceptionHook must be set to On");
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
+#endif
+    return OK;
+}
+
 static void whatkilledus_register_hooks(apr_pool_t *p)
 {
 #if DIAG_PLATFORM_UNIX
@@ -102,8 +118,31 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
     ap_hook_handler(whatkilledus_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_optional_fn_retrieve(whatkilledus_optional_fn_retrieve, NULL, NULL,
                                  APR_HOOK_MIDDLE);
+    ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
 }
+
+#if DIAG_PLATFORM_UNIX
+static const char *check_exception_hook(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    if (strcasecmp(arg, "on") == 0) {
+        exception_hook_enabled = 1;
+    }
+    else if (strcasecmp(arg, "off") == 0) {
+        exception_hook_enabled = 0;
+    }
+    return DECLINE_CMD;
+}
+#endif
+
+static const command_rec whatkilledus_cmds[] =
+{
+#if DIAG_PLATFORM_UNIX
+    AP_INIT_TAKE1("EnableExceptionHook", check_exception_hook, NULL, RSRC_CONF,
+                  "Check if EnableExceptionHook is On"),
+#endif
+    {NULL}
+};
 
 module AP_MODULE_DECLARE_DATA whatkilledus_module = {
     STANDARD20_MODULE_STUFF,
@@ -111,6 +150,6 @@ module AP_MODULE_DECLARE_DATA whatkilledus_module = {
     NULL,
     NULL,
     NULL,
-    NULL,
+    whatkilledus_cmds,
     whatkilledus_register_hooks
 };
