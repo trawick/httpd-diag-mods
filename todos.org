@@ -28,7 +28,7 @@
 *** DONE Change backtrace-handler to generate backtrace in different flavors for automated regression testing
 *** TODO Tiny automated regression test for 32-bit and 64-bit.
 ** mod_whatkilledus.c
-*** TODO Ensure that only the first crashing thread in the process gets to do any work
+*** DONE Ensure that only the first crashing thread in the process gets to do any work
 *** TODO Create a log file to contain crash reports
 *** DONE Exit with error if EnableExceptionHook is not on (Unix only)
 *** TODO Implement the original mod_whatkilledus feature, with ways to filter out certain logging.

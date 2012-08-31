@@ -40,10 +40,17 @@ static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 static int exception_hook_enabled;
 #endif
 
+static volatile /* imperfect but probably good enough */ int already_crashed = 0;
+
 #if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 {
+    if (already_crashed) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+    ++already_crashed;
+
     if (get_backtrace) {
         bt_param_t p = {0};
         diag_context_t c = {0};
@@ -60,6 +67,11 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 
 static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 {
+    if (already_crashed) {
+        return OK;
+    }
+    ++already_crashed;
+
     if (get_backtrace) {
         bt_param_t p = {0};
 
