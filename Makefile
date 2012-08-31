@@ -48,7 +48,7 @@ endif
 
 endif
 
-TARGETS = testdiag testcrash mod_backtrace.la mod_whatkilledus.la
+TARGETS = testdiag testcrash mod_backtrace.la mod_whatkilledus.la mod_crash.la
 
 all: $(TARGETS)
 
@@ -56,8 +56,14 @@ install: $(TARGETS)
 	$(HTTPD)/bin/apxs -i mod_backtrace.la
 	$(HTTPD)/bin/apxs -i mod_whatkilledus.la
 
+install-mod-crash: mod_crash.la
+	$(HTTPD)/bin/apxs -i mod_crash.la
+
 mod_backtrace.la: mod_backtrace.c mod_backtrace.h diag.h diag.c
 	$(HTTPD)/bin/apxs -Wc,"$(CFLAGS)" -Wl,"$(LDFLAGS)" -c mod_backtrace.c diag.c $(LIBS)
+
+mod_crash.la: mod_crash.c
+	$(HTTPD)/bin/apxs -Wc,"$(CFLAGS)" -Wl,"$(LDFLAGS)" -c mod_crash.c $(LIBS)
 
 mod_whatkilledus.la: mod_whatkilledus.c mod_backtrace.h diag.h diag.c
 	$(HTTPD)/bin/apxs -Wc,"$(CFLAGS)" -Wl,"$(LDFLAGS)" -c mod_whatkilledus.c $(LIBS)

@@ -317,24 +317,6 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
                               whatkilledus_child_term, apr_pool_cleanup_null);
 }
 
-static void crash(request_rec *r)
-{
-    ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
-                  LOG_PREFIX "about to crash");
-
-    *(int *)0xdeadbeef = 0xcafebabe;
-}
-
-static int whatkilledus_handler(request_rec *r)
-{
-    if (!strcmp(r->handler, "whatkilledus-crash-handler")) {
-        crash(r);
-        /* unreached */
-    }
-
-    return DECLINED;
-}
-
 static void banner(server_rec *s)
 {
     const char *userdata_key = "whatkilledus_banner";
@@ -381,7 +363,6 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
     ap_hook_fatal_exception(whatkilledus_fatal_exception, NULL, NULL,
                             APR_HOOK_MIDDLE);
 #endif
-    ap_hook_handler(whatkilledus_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_optional_fn_retrieve(whatkilledus_optional_fn_retrieve, NULL, NULL,
                                  APR_HOOK_MIDDLE);
     ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
