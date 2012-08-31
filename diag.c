@@ -259,7 +259,6 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 
 #endif /* WIN32 */
 
-#if DIAG_PLATFORM_UNIX
 static const char *end_of_field(const char *s)
 {
     ++s;
@@ -294,16 +293,19 @@ static void output_frame(char *outch, char *lastoutch, int fields,
         fn_missing = 1;
     }
 
-    if ((fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
+    /* makes no sense to print offset if function is missing */
+    if (!fn_missing && (fields & DIAG_BTFIELDS_FN_OFFSET) && offset) {
         outch = add_string(outch, lastoutch, "+", NULL);
         outch = add_string(outch, lastoutch, offset, end_of_field(offset));
     }
 
     if ((fn_missing || (fields & DIAG_BTFIELDS_ADDRESS)) && address) {
+        if (!fn_missing) {
+            outch = add_string(outch, lastoutch, " ", NULL);
+        }
         outch = add_string(outch, lastoutch, address, end_of_field(address));
     }
 }
-#endif /* UNIX */
 
 #if DIAG_PLATFORM_LINUX
 /* ./testdiag(diag_backtrace+0x75)[0x401824] */
@@ -636,9 +638,6 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     CONTEXT context;
     HANDLE process = GetCurrentProcess();
     HANDLE thread = GetCurrentThread();
-    char symbol_buffer[512] = {0};
-    IMAGEHLP_SYMBOL64 *symbol = (IMAGEHLP_SYMBOL64 *)&symbol_buffer;
-    DWORD64 ignored;
 
     if (c) {
         context = *c->context;
@@ -676,6 +675,16 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
                        SymGetModuleBase64,         /* GetModuleBaseRoutine */
                        NULL)                       /* TranslateAddress */
            == TRUE) {
+        char symbol_buffer[128] = {0};
+        IMAGEHLP_SYMBOL64 *symbol = (IMAGEHLP_SYMBOL64 *)&symbol_buffer;
+        DWORD64 ignored;
+        const char *function;
+        const char *offset;
+        char address_buf[20], offset_buf[20];
+        char buf[128];
+        char *outch = buf;
+        const char *lastoutch = buf + sizeof buf - 1;
+
         cur++;
         if (cur > count) { /* avoid loop on corrupted chain, respect caller's wishes */
             break;
@@ -684,37 +693,32 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         symbol->MaxNameLength = sizeof(symbol_buffer) - sizeof(IMAGEHLP_SYMBOL64);
         ignored = 0;
         if (SymGetSymFromAddr64(process, stackframe.AddrPC.Offset, &ignored, symbol) != TRUE) {
-            char *outch = symbol->Name;
-            const char *lastoutch = outch + symbol->MaxNameLength - 1;
-
-            outch = add_string(outch, lastoutch, "no-symbol-", NULL);
-            add_int(outch, lastoutch, (long long)GetLastError(), 10);
+            function = NULL;
+            offset = NULL;
         }
-        {
-            char buf[128] = "no-data";
-            char *outch = buf;
-            const char *lastoutch = buf + sizeof buf - 1;
+        else {
+            function = symbol->Name;
+            add_int(offset_buf, offset_buf + sizeof offset_buf - 1,
+                    stackframe.AddrPC.Offset - symbol->Address, 16);
+            offset = offset_buf;
+        }
 
-            if (p->backtrace_fields & DIAG_BTFIELDS_FUNCTION) {
-                outch = add_string(outch, lastoutch, symbol->Name, NULL);
-            }
+        add_int(address_buf, address_buf + sizeof address_buf - 1,
+                stackframe.AddrPC.Offset, 16);
 
-            if (p->backtrace_fields & DIAG_BTFIELDS_ADDRESS) {
-                if (outch != buf) {
-                    outch = add_string(outch, lastoutch, " ", NULL);
-                }
+        output_frame(outch, lastoutch, p->backtrace_fields,
+                     NULL, /* no module path */
+                     NULL, /* no module */
+                     function,
+                     offset,
+                     address_buf);
 
-                outch = add_int(outch, lastoutch, stackframe.AddrPC.Offset, 16);
-
-            }
-
-            if (o->output_mode == DIAG_CALL_FN) {
-                o->output_fn(o->user_data, buf);
-            }
-            else {
-                WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
-                WriteFile(o->outfile, "\r\n", 2, NULL, NULL);
-            }
+        if (o->output_mode == DIAG_CALL_FN) {
+            o->output_fn(o->user_data, buf);
+        }
+        else {
+            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+            WriteFile(o->outfile, "\r\n", 2, NULL, NULL);
         }
     }
 
