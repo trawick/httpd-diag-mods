@@ -172,6 +172,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
     char *lastoutch = buf + sizeof buf - 1;
     const char *ch;
     int i;
+    DWORD bytes_written;
     
     if (c->exception_record) {
         outch = add_string(outch, lastoutch, "Exception code:    ", NULL);
@@ -192,7 +193,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 
         if (o->output_mode == DIAG_WRITE_FD) {
             outch = add_string(outch, lastoutch, "\r\n", NULL);
-            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+            WriteFile(o->outfile, buf, strlen(buf), &bytes_written, NULL);
         }
         else {
             o->output_fn(o->user_data, buf);
@@ -205,7 +206,7 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 
         if (o->output_mode == DIAG_WRITE_FD) {
             outch = add_string(outch, lastoutch, "\r\n", NULL);
-            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
+            WriteFile(o->outfile, buf, strlen(buf), &bytes_written, NULL);
         }
         else {
             o->output_fn(o->user_data, buf);
@@ -639,6 +640,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     CONTEXT context;
     HANDLE process = GetCurrentProcess();
     HANDLE thread = GetCurrentThread();
+    DWORD bytes_written;
 
     if (c) {
         context = *c->context;
@@ -718,8 +720,8 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
             o->output_fn(o->user_data, buf);
         }
         else {
-            WriteFile(o->outfile, buf, strlen(buf), NULL, NULL);
-            WriteFile(o->outfile, "\r\n", 2, NULL, NULL);
+            WriteFile(o->outfile, buf, strlen(buf), &bytes_written, NULL);
+            WriteFile(o->outfile, "\r\n", 2, &bytes_written, NULL);
         }
     }
 

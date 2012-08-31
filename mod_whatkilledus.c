@@ -172,6 +172,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     HANDLE logfile;
     SYSTEMTIME now;
     char buf[128];
+    DWORD bytes_written;
 
     if (already_crashed) {
         return EXCEPTION_CONTINUE_SEARCH;
@@ -193,8 +194,8 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     build_header(buf, sizeof buf, now.wYear, now.wMonth, now.wDay,
                  now.wHour, now.wMinute, now.wSecond);
 
-    WriteFile(logfile, buf, strlen(buf), NULL, NULL);
-    WriteFile(logfile, "\r\n", 2, NULL, NULL);
+    WriteFile(logfile, buf, strlen(buf), &bytes_written, NULL);
+    WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
 
     p.output_mode = BT_OUTPUT_FILE;
     p.output_style = BT_OUTPUT_MEDIUM;
@@ -205,12 +206,12 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 
     if (describe_exception) {
         describe_exception(&p, &c);
-        WriteFile(logfile, "\r\n", 2, NULL, NULL);
+        WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
     }
 
     if (get_backtrace) {
         get_backtrace(&p, &c);
-        WriteFile(logfile, "\r\n", 2, NULL, NULL);
+        WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
     }
 
     CloseHandle(logfile);

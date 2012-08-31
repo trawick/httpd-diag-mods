@@ -99,6 +99,7 @@ static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overr
 static void fmt2(void *user_data, const char *s)
 {
     bt_param_t *p = user_data;
+    DWORD bytes_written;
     
     switch(p->output_mode) {
     case BT_OUTPUT_BUFFER:
@@ -108,8 +109,8 @@ static void fmt2(void *user_data, const char *s)
         break;
     case BT_OUTPUT_FILE:
 #if DIAG_PLATFORM_WINDOWS
-        WriteFile(p->outfile, s, strlen(s), NULL, NULL);
-        WriteFile(p->outfile, "\r\n", 2, NULL, NULL);
+        WriteFile(p->outfile, s, strlen(s), &bytes_written, NULL);
+        WriteFile(p->outfile, "\r\n", 2, &bytes_written, NULL);
 #else
         write(p->outfile, s, strlen(s));
         write(p->outfile, "\n", 1);
