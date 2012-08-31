@@ -117,7 +117,7 @@ static void fmt2(void *user_data, const char *s)
         break;
     default: /* should be BT_OUTPUT_ERROR_LOG: */
         ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, main_server,
-                     "%s", s);
+                     LOG_PREFIX "%s", s);
         break;
     }
 }
@@ -415,7 +415,7 @@ static int backtrace_handler(request_rec *r)
     if (!strcmp(r->handler, "backtrace-handler")) {
         backtrace(r);
         ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
-                      "---MoD_bAcKtRaCe---");
+                      LOG_PREFIX "---MoD_bAcKtRaCe---");
         return OK;
     }
 
@@ -449,7 +449,7 @@ static void load_symbols(apr_pool_t *p, server_rec *s)
     }
     else {
         ap_log_error(APLOG_MARK, APLOG_INFO, 0, s,
-                     "Symbol path set to %s", symbolpath);
+                     LOG_PREFIX "Symbol path set to %s", symbolpath);
     }
 
     if (apr_stat(&finfo, ap_server_root_relative(p, "bin/httpd.pdb"), APR_FINFO_MIN, p)
