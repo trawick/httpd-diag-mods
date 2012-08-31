@@ -24,6 +24,12 @@
 APLOG_USE_MODULE(whatkilledus);
 #endif
 
+#if DIAG_PLATFORM_UNIX
+#define DEFAULT_REL_LOGFILENAME "logs/whatkilledus_log"
+#else
+#define DEFAULT_REL_LOGFILENAME "logs/whatkilledus.log"
+#endif
+
 /* Use this LOG_PREFIX only on non-debug messages.  This provides a module
  * identifer with httpd < 2.4.
  */
@@ -42,24 +48,49 @@ static int exception_hook_enabled;
 
 static volatile /* imperfect but probably good enough */ int already_crashed = 0;
 
+static server_rec *main_server;
+static const char *logfilename;
+
 #if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 {
+    bt_param_t p = {0};
+    diag_context_t c = {0};
+    HANDLE logfile;
+
     if (already_crashed) {
         return EXCEPTION_CONTINUE_SEARCH;
     }
     ++already_crashed;
 
-    if (get_backtrace) {
-        bt_param_t p = {0};
-        diag_context_t c = {0};
+    logfile = CreateFile(logfilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                         OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-        p.output_mode = BT_OUTPUT_ERROR_LOG;
-        p.output_style = BT_OUTPUT_LONG;
-        c.context = ep->ContextRecord;
+    if (logfile == INVALID_HANDLE_VALUE) {
+        /* nothing to do */
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+
+    SetFilePointer(logfile, 0, NULL, FILE_END);
+
+    p.output_mode = BT_OUTPUT_FILE;
+    p.output_style = BT_OUTPUT_LONG;
+    p.outfile = logfile;
+
+    c.context = ep->ContextRecord;
+    c.exception_record = ep->ExceptionRecord;
+
+    if (describe_exception) {
+        describe_exception(&p, &c);
+    }
+
+    if (get_backtrace) {
         get_backtrace(&p, &c);
     }
+
+    CloseHandle(logfile);
+
     return EXCEPTION_CONTINUE_SEARCH;
 }
 
@@ -67,10 +98,31 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 
 static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 {
+    bt_param_t p = {0};
+    diag_context_t c = {0};
+    int logfile;
+
     if (already_crashed) {
         return OK;
     }
     ++already_crashed;
+
+    logfile = open(logfilename, O_WRONLY | O_APPEND | O_CREAT,
+                   S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    if (logfile == -1) {
+        /* nothing to do */
+        return OK;
+    }
+
+    p.output_mode = BT_OUTPUT_FILE;
+    p.output_style = BT_OUTPUT_LONG;
+    p.outfile = logfile;
+
+    c.signal = ei->sig;
+
+    if (describe_exception) {
+        describe_exception(&p, &c);
+    }
 
     if (get_backtrace) {
         bt_param_t p = {0};
@@ -79,6 +131,9 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
         p.output_style = BT_OUTPUT_LONG;
         get_backtrace(&p, NULL);
     }
+
+    close(logfile);
+
     return OK;
 }
 
@@ -92,6 +147,8 @@ static void whatkilledus_optional_fn_retrieve(void)
 
 static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 {
+    main_server = s;
+
 #if DIAG_PLATFORM_WINDOWS
     /* must back this out before this DLL is unloaded;
      * but previous exception filter might have been unloaded too
@@ -127,6 +184,9 @@ static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_poo
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 #endif
+
+    logfilename = ap_server_root_relative(pconf, DEFAULT_REL_LOGFILENAME);
+
     return OK;
 }
 
