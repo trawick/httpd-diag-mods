@@ -275,8 +275,41 @@ static void SKIP_mini_backtrace(char *buf, int buflen, int to_keep)
 static int SKIP_backtrace_log(const ap_errorlog_info *info,
                               const char *arg, char *buf, int buflen)
 {
-    SKIP_mini_backtrace(buf, buflen, 5);
-    return strlen(buf);
+    int log = 0;
+
+    if (arg) {
+        if (arg[0] == '/' && arg[strlen(arg) - 1] == '/') {
+            char searchbuf[128];
+
+            apr_cpystrn(searchbuf, arg + 1, sizeof searchbuf);
+            searchbuf[strlen(searchbuf) - 1] = '\0';
+            if (ap_strstr_c(info->format, searchbuf) != NULL) {
+                log = 1;
+            }
+        }
+        else if (!memcmp(arg, "error==", 7)) {
+            if (atoi(arg + 7) == info->status) {
+                log = 1;
+            }
+        }
+        else if (!memcmp(arg, "oserror==", 9)) {
+            if (atoi(arg + 9) == info->status - APR_OS_START_SYSERR) {
+                log = 1;
+            }
+        }
+        else {
+            apr_cpystrn(buf, "unrecognized fmt", buflen);
+            return strlen(buf);
+        }
+    }
+
+    if (log) {
+        SKIP_mini_backtrace(buf, buflen, 5);
+        return strlen(buf);
+    }
+    else {
+        return 0;
+    }
 }
 #endif /* MODBT_HAVE_ERRORLOG_HANDLER */
 
@@ -381,6 +414,8 @@ static int backtrace_handler(request_rec *r)
 {
     if (!strcmp(r->handler, "backtrace-handler")) {
         backtrace(r);
+        ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
+                      "---MoD_bAcKtRaCe---");
         return OK;
     }
 
