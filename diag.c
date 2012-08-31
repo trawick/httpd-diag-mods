@@ -226,9 +226,10 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
     outch = add_int(outch, lastoutch, (long long)getpid(), 10);
     outch = add_string(outch, lastoutch, " received signal ", NULL);
     outch = add_int(outch, lastoutch, (long long)c->signal, 10);
-    outch = add_string(outch, lastoutch, ".\n", NULL);
+    outch = add_string(outch, lastoutch, ".", NULL);
     
     if (o->output_mode == DIAG_WRITE_FD) {
+        outch = add_string(outch, lastoutch, "\n", NULL);
         write(o->outfile, buf, strlen(buf));
     }
     else {
@@ -245,8 +246,8 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
             outch = add_string(outch, lastoutch, "Faulting instruction: ", NULL);
         }
         outch = add_pointer(outch, lastoutch, c->info->si_addr);
-        outch = add_string(outch, lastoutch, "\n", NULL);
         if (o->output_mode == DIAG_WRITE_FD) {
+            outch = add_string(outch, lastoutch, "\n", NULL);
             write(o->outfile, buf, strlen(buf));
         }
         else {
