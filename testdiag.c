@@ -49,52 +49,32 @@ int y(void)
 #else
     o.outfile = STDOUT_FILENO;
 #endif
+
+#define TESTCASE(btfields)                                           \
+    printf("---------------------------------------------------\n"); \
+    printf("testdiag: " #btfields "\n");                             \
+    p.backtrace_fields = (btfields);                                 \
+    diag_backtrace(&o, &p, NULL);                                    \
+    printf("\n")
+
     o.output_mode = DIAG_WRITE_FD;
-    p.backtrace_fields = DIAG_BTFIELDS_ALL;
-    printf("Raw display to stdout:\n");
-    diag_backtrace(&o, &p, NULL);
-
-    printf("\n");
+    TESTCASE(DIAG_BTFIELDS_ALL);
 
     o.output_mode = DIAG_CALL_FN;
     o.output_fn = fmt;
-    p.backtrace_fields = DIAG_BTFIELDS_ADDRESS;
-    printf("Format address via callback:\n");
-    diag_backtrace(&o, &p, NULL);
 
-    printf("\n");
+    TESTCASE(DIAG_BTFIELDS_ADDRESS);
 
-    o.output_mode = DIAG_CALL_FN;
-    o.output_fn = fmt;
-    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET;
-    printf("Format function name and offset via callback:\n");
-    diag_backtrace(&o, &p, NULL);
+    TESTCASE(DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET);
 
-    printf("\n");
+    TESTCASE(DIAG_BTFIELDS_FUNCTION);
 
-    o.output_mode = DIAG_CALL_FN;
-    o.output_fn = fmt;
-    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
-    printf("Format function name via callback:\n");
-    diag_backtrace(&o, &p, NULL);
+    TESTCASE(DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME);
 
-    printf("\n");
+    TESTCASE(DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH);
 
-    o.output_mode = DIAG_CALL_FN;
-    o.output_fn = fmt;
-    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME;
-    printf("Format function name and module name via callback:\n");
-    diag_backtrace(&o, &p, NULL);
-
-    printf("\n");
-
-    o.output_mode = DIAG_CALL_FN;
-    o.output_fn = fmt;
-    p.backtrace_fields = DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH;
-    printf("Format function name and module path via callback:\n");
-    diag_backtrace(&o, &p, NULL);
-
-    printf("\n");
+    printf("---------------------------------------------------\n");
+    printf("testdiag: ONELINER\n");
 
     {
         char linebuf[1024];
@@ -105,7 +85,6 @@ int y(void)
         o.output_fn = line_fmt;
         p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
         p.backtrace_count = 3;
-        printf("Format function name via one-liner callback:\n");
         diag_backtrace(&o, &p, NULL);
         if (linebuf[strlen(linebuf) - 1] == '<') {
             linebuf[strlen(linebuf) - 1] = '\0';
