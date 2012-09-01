@@ -19,6 +19,7 @@
 #include "httpd.h"
 #include "http_config.h"
 #include "http_log.h"
+#include "http_protocol.h"
 #include "ap_mpm.h"
 
 #include "mod_backtrace.h"
@@ -37,8 +38,10 @@ APLOG_USE_MODULE(whatkilledus);
 
 #if DIAG_PLATFORM_UNIX
 #define DEFAULT_REL_LOGFILENAME "logs/whatkilledus_log"
+#define END_OF_LINE "\n"
 #else
 #define DEFAULT_REL_LOGFILENAME "logs/whatkilledus.log"
+#define END_OF_LINE "\r\n"
 #endif
 
 /* Use this LOG_PREFIX only on non-debug messages.  This provides a module
@@ -65,6 +68,8 @@ static volatile /* imperfect but probably good enough */ int already_crashed = 0
 
 static server_rec *main_server;
 static const char *logfilename;
+
+static const char *global_logdata;
 
 static char *add_string(char *outch, const char *lastoutch,
                         const char *in_first, const char *in_last_param)
@@ -226,6 +231,11 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
         WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
     }
 
+    if (global_logdata) {
+        WriteFile(logfile, global_logdata, strlen(global_logdata), &bytes_written,
+                  NULL);
+    }
+
     CloseHandle(logfile);
 
     return EXCEPTION_CONTINUE_SEARCH;
@@ -285,6 +295,72 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 }
 
 #endif
+
+static int count_header_log_length(void *user_data, const char *key, const char *value)
+{
+    apr_size_t *count = user_data;
+
+    *count += strlen(key) + strlen(":") + strlen(value) + strlen(END_OF_LINE);
+
+    return 1;
+}
+
+typedef struct {
+    char *outch;
+    char *lastoutch;
+} copy_header_user_data_t;
+
+static int copy_headers(void *user_data, const char *key, const char *value)
+{
+    copy_header_user_data_t *chud = user_data;
+
+    chud->outch = add_string(chud->outch, chud->lastoutch, key, NULL);
+    chud->outch = add_string(chud->outch, chud->lastoutch, ":", NULL);
+    chud->outch = add_string(chud->outch, chud->lastoutch, value, NULL);
+    chud->outch = add_string(chud->outch, chud->lastoutch, END_OF_LINE, NULL);
+}
+
+/* This follows mod_log_forensic's post-read-request hook.
+ */
+static int whatkilledus_post_read_request(request_rec *r)
+{
+    apr_size_t count;
+    char *logdata;
+    copy_header_user_data_t chud = {0};
+
+    if (r->prev) {
+        return DECLINED;
+    }
+
+    /* prepare the request report for the potential crash, ready to write to 
+     * the log file handle
+     */
+    count = 0;
+    count += strlen("Request line:" END_OF_LINE);
+    count += strlen(r->the_request);
+    count += strlen(END_OF_LINE);
+    count += strlen("Request headers:" END_OF_LINE);
+    apr_table_do(count_header_log_length, &count, r->headers_in, NULL);
+    count += strlen(END_OF_LINE);
+    count += 1; /* terminating '\0' */
+
+    logdata = apr_palloc(r->pool, count);
+
+    chud.outch = logdata;
+    chud.lastoutch = logdata + count - 1;
+
+    chud.outch = add_string(chud.outch, chud.lastoutch, "Request line:" END_OF_LINE, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, r->the_request, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, "Request headers:" END_OF_LINE, NULL);
+    /* insert headers */
+    apr_table_do(copy_headers, &chud, r->headers_in, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+
+    global_logdata = logdata;
+
+    return OK;
+}
 
 static void whatkilledus_optional_fn_retrieve(void)
 {
@@ -376,6 +452,7 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
                                  APR_HOOK_MIDDLE);
     ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_post_read_request(whatkilledus_post_read_request, NULL, NULL, APR_HOOK_REALLY_FIRST);
 }
 
 #if DIAG_PLATFORM_UNIX

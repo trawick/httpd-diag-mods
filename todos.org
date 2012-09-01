@@ -20,7 +20,7 @@
 *** DONE Implement missing features on Windows
 *** DONE (handled differently) Make sure we respect platform defines added by httpd
 *** DONE Get callers to call backtrace at startup to force loading of native functions so that dynamic linker isn't used in a signal handler.
-*** TODO Tiny automated regression test for 32-bit and 64-bit.
+*** DONE Tiny automated regression test for 32-bit and 64-bit.
 ** mod_backtrace.c/mod_backtrace.h
 *** DONE Handle SymInitialize() on Windows with warnings for missing .pdb files for httpd, automatically adding to existing symbol path, etc.
 *** DONE Add error log handler for 2.2
@@ -31,9 +31,15 @@
 *** DONE Ensure that only the first crashing thread in the process gets to do any work
 *** DONE Create a log file to contain crash reports
 *** DONE Exit with error if EnableExceptionHook is not on (Unix only)
-*** TODO Implement the original mod_whatkilledus feature, with ways to filter out certain logging.
+*** DONE Basic implementation of original mod_whatkilledus feature.
+*** TODO Escape nasty stuff in the headers.
+*** TODO Fix thread-safety of request-specific data.
+*** TODO Add ways to filter out certain logging.
 *** DONE Don't compile in the crash handler by default.
 *** DONE Back out the exception filter as appropriate.
+*** TODO Regression test once original feature is implemented.
+*** TODO Report should give the pid of the crashing process.
+*** TODO mod_crash should display pid for regression testing.
 ** Web site
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/
