@@ -38,16 +38,67 @@ if config.has_option(section, 'HTTPD24_INSTALLS'):
 else:
     httpd24_installs = []
 
+if sys.platform == 'win32':
+    testcrash = '.\testcrash.exe'
+    testdiag = '.\testdiag.exe'
+else:
+    testcrash = './testcrash'
+    testdiag = './testdiag'
+
 for httpd in httpd22_installs + httpd24_installs:
     print "Building for %s..." % (httpd)
 
+    logfile = open("regress.log", "w")
+
     os.putenv('HTTPD', httpd)
     try:
-        rc = subprocess.call(bldcmd)
+        rc = subprocess.call(bldcmd, stdout=logfile, stderr=subprocess.STDOUT)
     except:
         print "couldn't run, error", sys.exc_info()[0]
         raise
 
+    logfile.close()
+
+    print "Testing..."
+
     if rc != 0:
         print "rc:", rc
         sys.exit(1)
+
+    logfile = open("regress.log", "w")
+    try:
+        rc = subprocess.call([testcrash], stdout=logfile, stderr=None, shell=False)
+    except:
+        print "couldn't run, error", sys.exc_info()[0]
+        raise
+
+    logfile.close()
+
+    if sys.platform == 'win32':
+        required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
+    else:
+        required_lines = ['Invalid memory address: 0xDEADBEEF']
+
+    lines = open("regress.log").readlines()
+    for rl in required_lines:
+        if not rl + '\n' in lines:
+            print "fail"
+            assert False
+
+    logfile = open("regress.log", "w")
+    try:
+        rc = subprocess.call([testdiag], stdout=logfile, stderr=None, shell=False)
+    except:
+        print "couldn't run, error", sys.exc_info()[0]
+        raise
+
+    logfile.close()
+
+    required_lines = ['testdiag: ONELINER', 'y<x<w']
+
+    lines = open("regress.log").readlines()
+    for rl in required_lines:
+        if not rl + '\n' in lines:
+            print "fail"
+            assert False
+
