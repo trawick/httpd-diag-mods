@@ -1,0 +1,13 @@
+
+Changes with version 2.0
+
+   Versions 2.0 and above of mod_backtrace and mod_whatkilledus are
+   complete rewrites by Jeff Trawick of earlier modules of the same names
+   which provided similar functionality.
+
+   The original versions of the modules were written by me and, with the
+   permission by my employer at the time, submitted to the Apache
+   HTTP Server Project for possible inclusion.  They were accepted to
+   Apache HTTP Server 1.3 and committed in February 2004.  They were not
+   committed to the Apache HTTP Server 2.x tree, but instead were distributed
+   from http://people.apache.org/~trawick/ for many years.
