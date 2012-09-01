@@ -14,6 +14,7 @@
  */
 
 #include <assert.h>
+#include <time.h>
 
 #include "httpd.h"
 #include "http_config.h"

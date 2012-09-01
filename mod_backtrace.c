@@ -101,8 +101,10 @@ static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overr
 static void fmt2(void *user_data, const char *s)
 {
     bt_param_t *p = user_data;
+#if DIAG_PLATFORM_WINDOWS
     DWORD bytes_written;
-    
+#endif
+
     switch(p->output_mode) {
     case BT_OUTPUT_BUFFER:
         if (strlen(s) + strlen(p->buffer) + 1 < p->buffer_size) {
