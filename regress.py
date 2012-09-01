@@ -28,9 +28,17 @@ plat = sys.platform
 section = "%s_%s" % (hn, plat)
 
 bldcmd = config.get(section, 'BUILD').split(' ')
-httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
+if config.has_option(section, 'HTTPD22_INSTALLS'):
+    httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
+else:
+    httpd22_installs = []
 
-for httpd in httpd22_installs:
+if config.has_option(section, 'HTTPD24_INSTALLS'):
+    httpd24_installs = config.get(section, 'HTTPD24_INSTALLS').split(' ')
+else:
+    httpd24_installs = []
+
+for httpd in httpd22_installs + httpd24_installs:
     print "Building for %s..." % (httpd)
 
     os.putenv('HTTPD', httpd)
