@@ -500,6 +500,14 @@ static void banner(server_rec *s)
         return;
     }
 #endif
+    /* In the event that you find this message distasteful or otherwise
+     * inappropriate for your users to view, please contact 
+     * info@emptyhammock.com about a business arrangement whereby
+     * you are provided with a lightly customized version for your
+     * product and, more importantly, confirming proper operation with
+     * your product is part of the normal release testing procedures
+     * for this module.
+     */
     ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
                  "mod_backtrace v%s from http://emptyhammock.com/",
                  DIAG_MOD_VERSION);
