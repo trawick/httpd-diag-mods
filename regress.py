@@ -59,11 +59,11 @@ for httpd in httpd22_installs + httpd24_installs:
 
     logfile.close()
 
-    print "Testing..."
-
     if rc != 0:
         print "rc:", rc
         sys.exit(1)
+
+    print "Testing %s..." % (testcrash)
 
     logfile = open("regress.log", "w")
     try:
@@ -82,8 +82,10 @@ for httpd in httpd22_installs + httpd24_installs:
     lines = open("regress.log").readlines()
     for rl in required_lines:
         if not rl + '\n' in lines:
-            print "fail"
+            print "fail, required line >%s< not found in >%s<" % (rl, lines)
             assert False
+
+    print "Testing %s..." % (testdiag)
 
     logfile = open("regress.log", "w")
     try:
@@ -99,6 +101,7 @@ for httpd in httpd22_installs + httpd24_installs:
     lines = open("regress.log").readlines()
     for rl in required_lines:
         if not rl + '\n' in lines:
-            print "fail"
+            print "fail, required line >%s< not found in >%s<" % (rl, lines)
+            assert False
             assert False
 
