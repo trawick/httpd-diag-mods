@@ -39,8 +39,8 @@ else:
     httpd24_installs = []
 
 if sys.platform == 'win32':
-    testcrash = '.\testcrash.exe'
-    testdiag = '.\testdiag.exe'
+    testcrash = '.\\testcrash.exe'
+    testdiag = '.\\testdiag.exe'
 else:
     testcrash = './testcrash'
     testdiag = './testdiag'
