@@ -72,7 +72,7 @@ static const char *logfilename;
 #if DIAG_PLATFORM_WINDOWS
 static __declspec(thread) const char *thread_logdata;
 #else
-static const char *global_logdata;
+__thread const char *thread_logdata;
 #endif
 
 static char *add_string(char *outch, const char *lastoutch,
@@ -274,11 +274,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     c.context = ep->ContextRecord;
     c.exception_record = ep->ExceptionRecord;
 
-#if DIAG_PLATFORM_WINDOWS
     logdata = thread_logdata;
-#else
-    logdata = global_logdata;
-#endif
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -319,11 +315,7 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
                  tm.tm_hour, tm.tm_min, tm.tm_sec);
     c.signal = ei->sig;
 
-#if DIAG_PLATFORM_WINDOWS
     logdata = thread_logdata;
-#else
-    logdata = global_logdata;
-#endif
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -362,11 +354,7 @@ static int copy_headers(void *user_data, const char *key, const char *value)
 
 static apr_status_t clear_request_logdata(void *unused)
 {
-#if DIAG_PLATFORM_WINDOWS
     thread_logdata = NULL;
-#else
-    global_logdata = NULL;
-#endif
     return APR_SUCCESS;
 }
 
@@ -407,11 +395,7 @@ static int whatkilledus_post_read_request(request_rec *r)
     apr_table_do(copy_headers, &chud, r->headers_in, NULL);
     chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
 
-#if DIAG_PLATFORM_WINDOWS
     thread_logdata = logdata;
-#else
-    global_logdata = logdata;
-#endif
 
     apr_pool_cleanup_register(r->pool, NULL,
                               clear_request_logdata, apr_pool_cleanup_null);
