@@ -16,6 +16,7 @@
 #include "httpd.h"
 #include "http_config.h"
 #include "http_log.h"
+#include "http_protocol.h"
 
 #if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
 APLOG_USE_MODULE(crash);
@@ -34,6 +35,11 @@ static void crash(request_rec *r)
 {
     ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
                   LOG_PREFIX "about to crash");
+
+    ap_set_content_type(r, "text/plain");
+    ap_rprintf(r, "Crashing in process %" APR_PID_T_FMT, getpid());
+    ap_rflush(r);
+    apr_sleep(apr_time_msec(500));
 
     *(int *)0xdeadbeef = 0xcafebabe;
 }
