@@ -71,9 +71,9 @@ static const char *logfilename;
 
 #if DIAG_PLATFORM_WINDOWS
 static __declspec(thread) const char *thread_logdata;
-#endif
-
+#else
 static const char *global_logdata;
+#endif
 
 static char *add_string(char *outch, const char *lastoutch,
                         const char *in_first, const char *in_last_param)
@@ -243,7 +243,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 #endif
 
     if (logdata) {
-        WriteFile(logfile, global_logdata, strlen(global_logdata), &bytes_written,
+        WriteFile(logfile, logdata, strlen(logdata), &bytes_written,
                   NULL);
     }
 
@@ -380,7 +380,11 @@ static int whatkilledus_post_read_request(request_rec *r)
     apr_table_do(copy_headers, &chud, r->headers_in, NULL);
     chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
 
+#if DIAG_PLATFORM_WINDOWS
+    thread_logdata = logdata;
+#else
     global_logdata = logdata;
+#endif
 
     apr_pool_cleanup_register(r->pool, NULL,
                               clear_request_logdata, apr_pool_cleanup_null);
