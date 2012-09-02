@@ -18,6 +18,12 @@
 #include "http_log.h"
 #include "http_protocol.h"
 
+#include "diagplat.h"
+
+#if DIAG_PLATFORM_UNIX
+#include <unistd.h>
+#endif
+
 #if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
 APLOG_USE_MODULE(crash);
 #endif
