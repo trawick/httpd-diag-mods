@@ -43,7 +43,7 @@ static void crash(request_rec *r)
                   LOG_PREFIX "about to crash");
 
     ap_set_content_type(r, "text/plain");
-    ap_rprintf(r, "Crashing in process %" APR_PID_T_FMT, getpid());
+    ap_rprintf(r, "Crashing in process %" APR_PID_T_FMT "...\n", getpid());
     ap_rflush(r);
     apr_sleep(apr_time_msec(500));
 
