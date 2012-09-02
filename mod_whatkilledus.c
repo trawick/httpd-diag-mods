@@ -231,6 +231,8 @@ static void write_report(file_handle_t logfile,
     if (logdata) {
         write_file(logfile, logdata, strlen(logdata));
     }
+
+    write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
 }
 
 #if DIAG_PLATFORM_WINDOWS
