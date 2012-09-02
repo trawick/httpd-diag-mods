@@ -180,6 +180,60 @@ static void build_header(char *buf, size_t buflen,
 }
 
 #if DIAG_PLATFORM_WINDOWS
+typedef int file_handle_t;
+
+static void write_file(HANDLE logfile,
+                       const char *buf,
+                       size_t buflen)
+{
+    DWORD bytes_written;
+
+    WriteFile(logfile, buf, buflen, &bytes_written, NULL);
+}
+#else
+typedef int file_handle_t;
+    
+static void write_file(int logfile,
+                       const char *buf,
+                       size_t buflen)
+{
+    write(logfile, buf, buflen);
+}
+#endif
+
+static void write_report(file_handle_t logfile,
+                         bt_param_t *p,
+                         diag_context_t *c,
+                         const char *heading,
+                         const char *logdata)
+{
+    p->output_mode = BT_OUTPUT_FILE;
+    p->output_style = BT_OUTPUT_MEDIUM;
+    p->outfile = logfile;
+
+    write_file(logfile, heading, strlen(heading));
+    write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
+
+    if (describe_exception) {
+        describe_exception(p, c);
+        write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
+    }
+
+    if (get_backtrace) {
+#if DIAG_PLATFORM_WINDOWS
+        get_backtrace(p, c);
+#else
+        get_backtrace(p, NULL);
+#endif
+        write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
+    }
+
+    if (logdata) {
+        write_file(logfile, logdata, strlen(logdata));
+    }
+}
+
+#if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
 {
@@ -216,25 +270,8 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     build_header(buf, sizeof buf, now.wYear, now.wMonth, now.wDay,
                  now.wHour, now.wMinute, now.wSecond);
 
-    WriteFile(logfile, buf, strlen(buf), &bytes_written, NULL);
-    WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
-
-    p.output_mode = BT_OUTPUT_FILE;
-    p.output_style = BT_OUTPUT_MEDIUM;
-    p.outfile = logfile;
-
     c.context = ep->ContextRecord;
     c.exception_record = ep->ExceptionRecord;
-
-    if (describe_exception) {
-        describe_exception(&p, &c);
-        WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
-    }
-
-    if (get_backtrace) {
-        get_backtrace(&p, &c);
-        WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
-    }
 
 #if DIAG_PLATFORM_WINDOWS
     logdata = thread_logdata;
@@ -242,10 +279,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     logdata = global_logdata;
 #endif
 
-    if (logdata) {
-        WriteFile(logfile, logdata, strlen(logdata), &bytes_written,
-                  NULL);
-    }
+    write_report(logfile, &p, &c, buf, logdata);
 
     CloseHandle(logfile);
 
@@ -262,6 +296,7 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
     time_t now;
     struct tm tm;
     char buf[128];
+    const char *logdata;
 
     if (already_crashed) {
         return OK;
@@ -281,24 +316,15 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
 
     build_header(buf, sizeof buf, 1900 + tm.tm_year, 1 + tm.tm_mon, tm.tm_mday,
                  tm.tm_hour, tm.tm_min, tm.tm_sec);
-    write(logfile, buf, strlen(buf));
-    write(logfile, "\n", 1);
-
-    p.output_mode = BT_OUTPUT_FILE;
-    p.output_style = BT_OUTPUT_MEDIUM;
-    p.outfile = logfile;
-
     c.signal = ei->sig;
 
-    if (describe_exception) {
-        describe_exception(&p, &c);
-        write(logfile, "\n", 1);
-    }
+#if DIAG_PLATFORM_WINDOWS
+    logdata = thread_logdata;
+#else
+    logdata = global_logdata;
+#endif
 
-    if (get_backtrace) {
-        get_backtrace(&p, NULL);
-        write(logfile, "\n", 1);
-    }
+    write_report(logfile, &p, &c, buf, logdata);
 
     close(logfile);
 
