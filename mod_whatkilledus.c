@@ -69,6 +69,10 @@ static volatile /* imperfect but probably good enough */ int already_crashed = 0
 static server_rec *main_server;
 static const char *logfilename;
 
+#if DIAG_PLATFORM_WINDOWS
+static __declspec(thread) const char *thread_logdata;
+#endif
+
 static const char *global_logdata;
 
 static char *add_string(char *outch, const char *lastoutch,
@@ -185,6 +189,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     SYSTEMTIME now;
     char buf[128];
     DWORD bytes_written;
+    const char *logdata;
 
     if (already_crashed) {
         return EXCEPTION_CONTINUE_SEARCH;
@@ -231,7 +236,13 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
         WriteFile(logfile, "\r\n", 2, &bytes_written, NULL);
     }
 
-    if (global_logdata) {
+#if DIAG_PLATFORM_WINDOWS
+    logdata = thread_logdata;
+#else
+    logdata = global_logdata;
+#endif
+
+    if (logdata) {
         WriteFile(logfile, global_logdata, strlen(global_logdata), &bytes_written,
                   NULL);
     }
@@ -322,6 +333,16 @@ static int copy_headers(void *user_data, const char *key, const char *value)
     return 1;
 }
 
+static apr_status_t clear_request_logdata(void *unused)
+{
+#if DIAG_PLATFORM_WINDOWS
+    thread_logdata = NULL;
+#else
+    global_logdata = NULL;
+#endif
+    return APR_SUCCESS;
+}
+
 /* This follows mod_log_forensic's post-read-request hook.
  */
 static int whatkilledus_post_read_request(request_rec *r)
@@ -360,6 +381,9 @@ static int whatkilledus_post_read_request(request_rec *r)
     chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
 
     global_logdata = logdata;
+
+    apr_pool_cleanup_register(r->pool, NULL,
+                              clear_request_logdata, apr_pool_cleanup_null);
 
     return OK;
 }
