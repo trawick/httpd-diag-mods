@@ -44,6 +44,7 @@
 
 #if DIAG_PLATFORM_WINDOWS
 #include <windows.h>
+#include <process.h>
 #endif
 
 static char *add_string(char *outch, const char *lastoutch,
@@ -168,13 +169,26 @@ struct exception_code_entry ec_strs[] = {
 int diag_describe(diag_output_t *o, diag_context_t *c)
 {
     char buf[256];
-    char *outch = buf;
+    char *outch;
     char *lastoutch = buf + sizeof buf - 1;
     const char *ch;
     int i;
     DWORD bytes_written;
     
+    outch = buf;
+    outch = add_string(outch, lastoutch, "Process id:        ", NULL);
+    outch = add_int(outch, lastoutch, (long long)_getpid(), 10);
+
+    if (o->output_mode == DIAG_WRITE_FD) {
+        outch = add_string(outch, lastoutch, "\r\n", NULL);
+        WriteFile(o->outfile, buf, strlen(buf), &bytes_written, NULL);
+    }
+    else {
+        o->output_fn(o->user_data, buf);
+    }
+
     if (c->exception_record) {
+        outch = buf;
         outch = add_string(outch, lastoutch, "Exception code:    ", NULL);
 
         ch = NULL;
@@ -220,14 +234,23 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
 int diag_describe(diag_output_t *o, diag_context_t *c)
 {
     char buf[256];
-    char *outch = buf;
+    char *outch;
     char *lastoutch = buf + sizeof buf - 1;
 
-    outch = add_string(outch, lastoutch, "Child process ", NULL);
-    outch = add_int(outch, lastoutch, (long long)getpid(), 10);
-    outch = add_string(outch, lastoutch, " received signal ", NULL);
+    outch = buf;
+    add_string(outch, lastoutch, "Process id:  ", NULL);
+    add_int(outch, lastoutch, (long long)getpid(), 10);
+    if (o->output_mode == DIAG_WRITE_FD) {
+        outch = add_string(outch, lastoutch, "\n", NULL);
+        write(o->outfile, buf, strlen(buf));
+    }
+    else {
+        o->output_fn(o->user_data, buf);
+    }
+
+    outch = buf;
+    outch = add_string(outch, lastoutch, "Fatal signal: ", NULL);
     outch = add_int(outch, lastoutch, (long long)c->signal, 10);
-    outch = add_string(outch, lastoutch, ".", NULL);
     
     if (o->output_mode == DIAG_WRITE_FD) {
         outch = add_string(outch, lastoutch, "\n", NULL);
