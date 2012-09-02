@@ -21,15 +21,27 @@ import subprocess
 import sys
 import time
 
+if sys.platform == 'win32':
+    log_ext = '.log'
+else:
+    log_ext = '_log'
+
 def test_httpd(section, httpd, skip_startstop):
-    wku_log = os.path.join(httpd, 'logs', 'whatkilledus.log')
+    wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
 
     print section, httpd
 
     shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
 
     if not skip_startstop:
-        print 'Start httpd from install %s now...' % (httpd)
+        if sys.platform == 'win32':
+            print 'Start httpd from install %s now...' % (httpd)
+        else:
+            try:
+                rc = subprocess.call([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
+            except:
+                print "couldn't run, error", sys.exc_info()[0]
+                raise
         time.sleep(10);
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -94,7 +106,14 @@ def test_httpd(section, httpd, skip_startstop):
     assert foohdr_found
 
     if not skip_startstop:
-        print 'Stop httpd from install %s now...' % (httpd)
+        if sys.platform == 'win32':
+            print 'Stop httpd from install %s now...' % (httpd)
+        else:
+            try:
+                rc = subprocess.call([os.path.join(httpd, 'bin', 'apachectl'), 'stop'])
+            except:
+                print "couldn't run, error", sys.exc_info()[0]
+                raise
         time.sleep(10);
 
 config = ConfigParser.RawConfigParser()
@@ -123,8 +142,8 @@ else:
     testcrash = './testcrash'
     testdiag = './testdiag'
 
-skip_bld = 1
-skip_startstop = 1
+skip_bld = 0
+skip_startstop = 0
 
 for httpd in httpd22_installs + httpd24_installs:
 
