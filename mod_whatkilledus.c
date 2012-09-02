@@ -180,7 +180,7 @@ static void build_header(char *buf, size_t buflen,
 }
 
 #if DIAG_PLATFORM_WINDOWS
-typedef int file_handle_t;
+typedef HANDLE file_handle_t;
 
 static void write_file(HANDLE logfile,
                        const char *buf,
@@ -242,7 +242,6 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     HANDLE logfile;
     SYSTEMTIME now;
     char buf[128];
-    DWORD bytes_written;
     const char *logdata;
 
     if (already_crashed) {
