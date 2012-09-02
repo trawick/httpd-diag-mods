@@ -15,9 +15,87 @@
 
 import ConfigParser
 import os
+import shutil
 import socket
 import subprocess
 import sys
+import time
+
+def test_httpd(section, httpd, skip_startstop):
+    wku_log = os.path.join(httpd, 'logs', 'whatkilledus.log')
+
+    print section, httpd
+
+    shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
+
+    if not skip_startstop:
+        print 'Start httpd from install %s now...' % (httpd)
+        time.sleep(10);
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    s.connect(('127.0.0.1', 10080))
+    s.send('GET /backtrace/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\n\r\n')
+
+    rsp = ''
+    while True:
+        tmprsp = s.recv(4096)
+        if tmprsp:
+            rsp += tmprsp
+        else:
+            break
+
+    s.close()
+
+    print "Response:"
+    print rsp
+
+    if os.path.exists(wku_log):
+        os.unlink(wku_log)
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    s.connect(('127.0.0.1', 10080))
+    s.send('GET /crash/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nFooHdr: FooVal\r\n\r\n')
+
+    rsp = ''
+    while True:
+        try:
+            tmprsp = s.recv(1)
+            if tmprsp:
+                rsp += tmprsp
+            else:
+                break
+        except:
+            break
+
+    s.close()
+
+    print "Response:"
+    print rsp
+
+    pid = rsp.split(' ')[-1][:-4]
+    print "Pid that crashed: >%s<" % pid
+
+    log = open(wku_log).readlines()
+    print log
+
+    pid_found = False
+    foohdr_found = False
+    for l in log:
+        if 'Process id:' in l:
+            tpid = l.split()[2]
+            if tpid == pid:
+                pid_found = True
+            else:
+                print "Unexpected pid >%s<" % tpid
+        elif 'FooHdr:FooVal' in l:
+            foohdr_found = True
+
+    assert pid_found
+    assert foohdr_found
+
+    if not skip_startstop:
+        print 'Stop httpd from install %s now...' % (httpd)
+        time.sleep(10);
 
 config = ConfigParser.RawConfigParser()
 config.read('regress.cfg')
@@ -45,23 +123,25 @@ else:
     testcrash = './testcrash'
     testdiag = './testdiag'
 
+skip_bld = 1
+skip_startstop = 1
+
 for httpd in httpd22_installs + httpd24_installs:
-    print "Building for %s..." % (httpd)
 
-    logfile = open("regress.log", "w")
+    if not skip_bld:
+        print "Building for %s..." % (httpd)
+        logfile = open("regress.log", "w")
+        os.putenv('HTTPD', httpd)
+        try:
+            rc = subprocess.call(bldcmd, stdout=logfile, stderr=subprocess.STDOUT)
+        except:
+            print "couldn't run, error", sys.exc_info()[0]
+            raise
+        logfile.close()
 
-    os.putenv('HTTPD', httpd)
-    try:
-        rc = subprocess.call(bldcmd, stdout=logfile, stderr=subprocess.STDOUT)
-    except:
-        print "couldn't run, error", sys.exc_info()[0]
-        raise
-
-    logfile.close()
-
-    if rc != 0:
-        print "rc:", rc
-        sys.exit(1)
+        if rc != 0:
+            print "rc:", rc
+            sys.exit(1)
 
     print "Testing %s..." % (testcrash)
 
@@ -105,3 +185,4 @@ for httpd in httpd22_installs + httpd24_installs:
             assert False
             assert False
 
+    test_httpd(section, httpd, skip_startstop)
