@@ -238,8 +238,8 @@ int diag_describe(diag_output_t *o, diag_context_t *c)
     char *lastoutch = buf + sizeof buf - 1;
 
     outch = buf;
-    add_string(outch, lastoutch, "Process id:  ", NULL);
-    add_int(outch, lastoutch, (long long)getpid(), 10);
+    outch = add_string(outch, lastoutch, "Process id:  ", NULL);
+    outch = add_int(outch, lastoutch, (long long)getpid(), 10);
     if (o->output_mode == DIAG_WRITE_FD) {
         outch = add_string(outch, lastoutch, "\n", NULL);
         write(o->outfile, buf, strlen(buf));
