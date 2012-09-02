@@ -318,6 +318,8 @@ static int copy_headers(void *user_data, const char *key, const char *value)
     chud->outch = add_string(chud->outch, chud->lastoutch, ":", NULL);
     chud->outch = add_string(chud->outch, chud->lastoutch, value, NULL);
     chud->outch = add_string(chud->outch, chud->lastoutch, END_OF_LINE, NULL);
+
+    return 1;
 }
 
 /* This follows mod_log_forensic's post-read-request hook.
