@@ -32,14 +32,17 @@
 *** DONE Create a log file to contain crash reports
 *** DONE Exit with error if EnableExceptionHook is not on (Unix only)
 *** DONE Basic implementation of original mod_whatkilledus feature.
-*** TODO Escape nasty stuff in the headers.
-*** TODO Fix thread-safety of request-specific data.
+*** DONE Escape nasty stuff in the headers.
+*** DONE Fix thread-safety of request-specific data.
 *** TODO Add ways to filter out certain logging.
 *** DONE Don't compile in the crash handler by default.
 *** DONE Back out the exception filter as appropriate.
-*** TODO Regression test once original feature is implemented.
-*** TODO Report should give the pid of the crashing process.
-*** TODO mod_crash should display pid for regression testing.
+*** DONE Regression test once original feature is implemented.
+*** DONE Report should give the pid of the crashing process.
+*** DONE mod_crash should display pid for regression testing.
+*** TODO Have a limit on the amount of memory that can be kept for the request, and display amount that would have been required.
+*** TODO Load testing with different MPMs
+*** TODO mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
 ** Web site
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/
@@ -52,6 +55,7 @@ Essentially: The API is not frozen.  Let me know if you use this.
 *** TODO Credit where credit is due
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
 mod_log_forensic
+*** TODO (From Wikipedia) On Windows operating systems before Windows Vista, __declspec( thread ) has some limitations.  (http://msdn.microsoft.com/en-us/library/2s9wt68x.aspx)
 *** Monetize!
 **** Sell ads.
 **** Ask for money.
