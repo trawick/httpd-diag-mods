@@ -34,13 +34,12 @@
 *** DONE Basic implementation of original mod_whatkilledus feature.
 *** DONE Escape nasty stuff in the headers.
 *** DONE Fix thread-safety of request-specific data.
-*** TODO Add ways to filter out certain logging.
+*** DONE Add ways to filter out certain logging.
 *** DONE Don't compile in the crash handler by default.
 *** DONE Back out the exception filter as appropriate.
 *** DONE Regression test once original feature is implemented.
 *** DONE Report should give the pid of the crashing process.
 *** DONE mod_crash should display pid for regression testing.
-*** TODO Have a limit on the amount of memory that can be kept for the request, and display amount that would have been required.
 *** TODO Load testing with different MPMs
 *** TODO mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
 ** Web site
@@ -83,7 +82,9 @@ If testing of these modules with your product would help, yadayadayada.
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 *** TODO Windows, SymGetModuleInfo64
 ** mod_whatkilledus.c
-*** Allow log file to be customized.
+*** TODO Allow log file to be customized.
+*** TODO Have a limit on the amount of memory that can be kept for the request, and display amount that would have been required.
+*** TODO Allow obscured headers to be specified within vhost
 * httpd enhancements
 ** Unix: use SA_SIGINFO, add siginfo_t to exception info
 ** Windows: implement exception hook

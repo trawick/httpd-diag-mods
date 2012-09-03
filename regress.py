@@ -66,7 +66,7 @@ def test_httpd(section, httpd, skip_startstop):
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s.connect(('127.0.0.1', 10080))
-    s.send('GET /crash/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
+    s.send('GET /crash/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
 
     rsp = ''
     while True:
@@ -93,6 +93,7 @@ def test_httpd(section, httpd, skip_startstop):
     pid_found = False
     foohdr_found = False
     barhdr_found = False
+    x_jeff_found = False
     for l in log:
         if 'Process id:' in l:
             tpid = l.split()[2]
@@ -104,10 +105,13 @@ def test_httpd(section, httpd, skip_startstop):
             foohdr_found = True
         elif 'BarHdr:%01%02%03%04%05%06%07' in l:
             barhdr_found = True
+        elif 'X-Jeff:*******' in l:
+            x_jeff_found = True
 
     assert pid_found
     assert foohdr_found
     assert barhdr_found
+    assert x_jeff_found
 
     if not skip_startstop:
         if sys.platform == 'win32':

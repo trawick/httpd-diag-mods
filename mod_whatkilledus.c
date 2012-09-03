@@ -55,6 +55,12 @@ APLOG_USE_MODULE(whatkilledus);
 #define LOG_PREFIX "mod_whatkilledus: "
 #endif
 
+typedef struct whatkilledus_server_t {
+    apr_array_header_t *obscured;
+} whatkilledus_server_t;
+
+module AP_MODULE_DECLARE_DATA whatkilledus_module;
+
 static APR_OPTIONAL_FN_TYPE(backtrace_describe_exception) *describe_exception;
 static APR_OPTIONAL_FN_TYPE(backtrace_get_backtrace) *get_backtrace;
 
@@ -221,6 +227,24 @@ static char *add_int(char *outch, const char *lastoutch,
     }
 
     return add_string(outch, lastoutch, ch + 1, lastch);
+}
+
+static void *create_whatkilledus_server_conf(apr_pool_t *p, server_rec *s)
+{
+    whatkilledus_server_t *conf;
+
+    conf = (whatkilledus_server_t *)apr_pcalloc(p, sizeof(whatkilledus_server_t));
+
+    return conf;
+}
+
+static void *merge_whatkilledus_server_conf(apr_pool_t *p, void *basev, void *overridesv)
+{
+    whatkilledus_server_t *base = (whatkilledus_server_t *)basev;
+    whatkilledus_server_t *overrides = (whatkilledus_server_t *)overridesv;
+    whatkilledus_server_t *conf = (whatkilledus_server_t *)apr_pmemdup(p, base, sizeof(*conf));
+
+    return conf; /* no overrides currently */
 }
 
 static void build_header(char *buf, size_t buflen,
@@ -430,15 +454,38 @@ static int count_header_log_length(void *user_data, const char *key, const char 
 typedef struct {
     char *outch;
     char *lastoutch;
+    apr_array_header_t *obscured;
 } copy_header_user_data_t;
 
 static int copy_headers(void *user_data, const char *key, const char *value)
 {
     copy_header_user_data_t *chud = user_data;
+    int obscure_value = 0;
 
     chud->outch = add_escaped_string(chud->outch, chud->lastoutch, key, NULL);
     chud->outch = add_string(chud->outch, chud->lastoutch, ":", NULL);
-    chud->outch = add_escaped_string(chud->outch, chud->lastoutch, value, NULL);
+
+    if (chud->obscured) {
+        int i;
+        for (i = 0; i < chud->obscured->nelts; i++) {
+            if (!strcasecmp(key, APR_ARRAY_IDX(chud->obscured, i, char *))) {
+                obscure_value = 1;
+                break;
+            }
+        }
+    }
+
+    if (obscure_value) {
+        size_t len = strlen(value);
+
+        while (len > 0) {
+            chud->outch = add_string(chud->outch, chud->lastoutch, "*", NULL);
+            len--;
+        }
+    }
+    else {
+        chud->outch = add_escaped_string(chud->outch, chud->lastoutch, value, NULL);
+    }
     chud->outch = add_string(chud->outch, chud->lastoutch, END_OF_LINE, NULL);
 
     return 1;
@@ -457,6 +504,8 @@ static int whatkilledus_post_read_request(request_rec *r)
     apr_size_t count;
     char *logdata;
     copy_header_user_data_t chud = {0};
+    whatkilledus_server_t *conf = ap_get_module_config(r->server->module_config,
+                                                       &whatkilledus_module);
 
     if (r->prev) {
         return DECLINED;
@@ -484,6 +533,7 @@ static int whatkilledus_post_read_request(request_rec *r)
     chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
     chud.outch = add_string(chud.outch, chud.lastoutch, "Request headers:" END_OF_LINE, NULL);
     /* insert headers */
+    chud.obscured = conf->obscured;
     apr_table_do(copy_headers, &chud, r->headers_in, NULL);
 
     thread_logdata = logdata;
@@ -600,12 +650,35 @@ static const char *check_exception_hook(cmd_parms *cmd, void *dummy, const char 
 }
 #endif
 
+static const char *set_obscured_headers(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    whatkilledus_server_t *conf = ap_get_module_config(cmd->server->module_config,
+                                                       &whatkilledus_module);
+    void *new_entry;
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
+    if (!conf->obscured) {
+        conf->obscured = apr_array_make(cmd->pool, 10, sizeof(char *));
+    }
+
+    new_entry = apr_array_push(conf->obscured);
+    *(char **)new_entry = apr_pstrdup(cmd->pool, arg);
+
+    return NULL;
+}
+
 static const command_rec whatkilledus_cmds[] =
 {
 #if DIAG_PLATFORM_UNIX
     AP_INIT_TAKE1("EnableExceptionHook", check_exception_hook, NULL, RSRC_CONF,
                   "Check if EnableExceptionHook is On"),
 #endif
+    AP_INIT_ITERATE("WhatkilledusObscuredHeaders", set_obscured_headers, NULL,
+                    RSRC_CONF,
+                    "List request headers whose values should be obscured in the log"),
     {NULL}
 };
 
@@ -613,8 +686,8 @@ module AP_MODULE_DECLARE_DATA whatkilledus_module = {
     STANDARD20_MODULE_STUFF,
     NULL,
     NULL,
-    NULL,
-    NULL,
+    create_whatkilledus_server_conf,
+    merge_whatkilledus_server_conf,
     whatkilledus_cmds,
     whatkilledus_register_hooks
 };
