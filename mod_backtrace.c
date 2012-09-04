@@ -52,6 +52,12 @@ APLOG_USE_MODULE(backtrace);
 #define LOG_PREFIX "mod_backtrace: "
 #endif
 
+#if DIAG_PLATFORM_UNIX
+#define END_OF_LINE "\n"
+#else
+#define END_OF_LINE "\r\n"
+#endif
+
 module AP_MODULE_DECLARE_DATA backtrace_module;
 static server_rec *main_server;
 #if DIAG_PLATFORM_WINDOWS
@@ -68,6 +74,28 @@ typedef struct backtrace_server_t {
     int dummy;
 #endif
 } backtrace_server_t;
+
+#if DIAG_PLATFORM_WINDOWS
+typedef HANDLE file_handle_t;
+
+static void write_file(HANDLE logfile,
+                       const char *buf,
+                       size_t buflen)
+{
+    DWORD bytes_written;
+
+    WriteFile(logfile, buf, buflen, &bytes_written, NULL);
+}
+#else
+typedef int file_handle_t;
+    
+static void write_file(int logfile,
+                       const char *buf,
+                       size_t buflen)
+{
+    write(logfile, buf, buflen);
+}
+#endif
 
 static void *create_backtrace_server_conf(apr_pool_t *p, server_rec *s)
 {
@@ -101,9 +129,6 @@ static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overr
 static void fmt2(void *user_data, const char *s)
 {
     bt_param_t *p = user_data;
-#if DIAG_PLATFORM_WINDOWS
-    DWORD bytes_written;
-#endif
 
     switch(p->output_mode) {
     case BT_OUTPUT_BUFFER:
@@ -112,13 +137,8 @@ static void fmt2(void *user_data, const char *s)
         }
         break;
     case BT_OUTPUT_FILE:
-#if DIAG_PLATFORM_WINDOWS
-        WriteFile(p->outfile, s, strlen(s), &bytes_written, NULL);
-        WriteFile(p->outfile, "\r\n", 2, &bytes_written, NULL);
-#else
-        write(p->outfile, s, strlen(s));
-        write(p->outfile, "\n", 1);
-#endif
+        write_file(p->outfile, s, strlen(s));
+        write_file(p->outfile, END_OF_LINE, strlen(END_OF_LINE));
         break;
     default: /* should be BT_OUTPUT_ERROR_LOG: */
         ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, main_server,
