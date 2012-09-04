@@ -69,6 +69,12 @@ APLOG_USE_MODULE(whatkilledus);
 
 typedef struct whatkilledus_server_t {
     apr_array_header_t *obscured;
+    unsigned int obscure_user: 1;
+    unsigned int obscure_password: 1;
+    unsigned int obscure_query: 1;
+    unsigned int obscure_fragment: 1;
+    unsigned int obscure_unparsed: 1;
+    unsigned int obscure_parsed: 1;
 } whatkilledus_server_t;
 
 module AP_MODULE_DECLARE_DATA whatkilledus_module;
@@ -157,6 +163,15 @@ static char *add_string(char *outch, const char *lastoutch,
     }
     *outch = '\0';
 
+    return outch;
+}
+
+static char *add_obscured_field(char *outch, const char *lastoutch, size_t len)
+{
+    while (len) {
+        outch = add_string(outch, lastoutch, "*", NULL);
+        --len;
+    }
     return outch;
 }
 
@@ -255,7 +270,7 @@ static void *create_whatkilledus_server_conf(apr_pool_t *p, server_rec *s)
 static void *merge_whatkilledus_server_conf(apr_pool_t *p, void *basev, void *overridesv)
 {
     whatkilledus_server_t *base = (whatkilledus_server_t *)basev;
-    whatkilledus_server_t *overrides = (whatkilledus_server_t *)overridesv;
+    /* whatkilledus_server_t *overrides = (whatkilledus_server_t *)overridesv; */
     whatkilledus_server_t *conf = (whatkilledus_server_t *)apr_pmemdup(p, base, sizeof(*conf));
 
     return conf; /* no overrides currently */
@@ -553,9 +568,72 @@ static int whatkilledus_post_read_request(request_rec *r)
      * the log file handle
      */
     count = 0;
-    count += strlen("Request line:" END_OF_LINE);
-    count += strlen(r->the_request);
-    count += strlen(END_OF_LINE);
+
+    if (!conf->obscure_unparsed) {
+        count += strlen("Request line (unparsed):" END_OF_LINE);
+        count += strlen(r->the_request);
+        count += strlen(END_OF_LINE);
+    }
+
+    if (!conf->obscure_parsed) {
+        count += strlen("Request line (parsed):" END_OF_LINE);
+        if (r->method && r->method[0]) {
+            count += strlen(r->method);
+            count += strlen(" ");
+        }
+        /* r->parsed_uri */
+        if (r->parsed_uri.scheme && r->parsed_uri.scheme[0]) {
+            count += strlen(r->parsed_uri.scheme);
+            count += strlen(":");
+        }
+        if (r->parsed_uri.user && r->parsed_uri.user[0]) {
+            if (conf->obscure_user) {
+                count += strlen("********");
+            }
+            else {
+                count += strlen(r->parsed_uri.user);
+            }
+            count += strlen(":");
+        }
+        if (r->parsed_uri.password && r->parsed_uri.password[0]) {
+            if (conf->obscure_password) {
+                count += strlen("********");
+            }
+            else {
+                count += strlen(r->parsed_uri.password);
+            }
+            count += strlen(" ");
+        }
+
+        if (r->parsed_uri.hostname && r->parsed_uri.hostname[0]) {
+            count += strlen(r->parsed_uri.hostname);
+        }
+
+        if (r->parsed_uri.port_str && r->parsed_uri.port_str[0]) {
+            count += strlen(":");
+            count += strlen(r->parsed_uri.port_str);
+        }
+
+        if (r->parsed_uri.hostname || r->parsed_uri.port_str) {
+            count += strlen(" ");
+        }
+
+        if (r->parsed_uri.path && r->parsed_uri.path[0]) {
+            count += strlen(r->parsed_uri.path);
+        }
+
+        if (r->parsed_uri.query && r->parsed_uri.query[0]) {
+            count += strlen(r->parsed_uri.query);
+        }
+
+        if (r->parsed_uri.fragment && r->parsed_uri.fragment[0]) {
+            count += strlen("#");
+            count += strlen(r->parsed_uri.fragment);
+        }
+
+        count += strlen(END_OF_LINE);
+    }
+
     count += strlen("Request headers:" END_OF_LINE);
     apr_table_do(count_header_log_length, &count, r->headers_in, NULL);
     count += strlen(END_OF_LINE);
@@ -566,9 +644,79 @@ static int whatkilledus_post_read_request(request_rec *r)
     chud.outch = logdata;
     chud.lastoutch = logdata + count - 1;
 
-    chud.outch = add_string(chud.outch, chud.lastoutch, "Request line:" END_OF_LINE, NULL);
-    chud.outch = add_string(chud.outch, chud.lastoutch, r->the_request, NULL);
-    chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+    if (!conf->obscure_unparsed) {
+        chud.outch = add_string(chud.outch, chud.lastoutch, "Request line (unparsed):" END_OF_LINE, NULL);
+        chud.outch = add_string(chud.outch, chud.lastoutch, r->the_request, NULL);
+        chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+    }
+
+    if (!conf->obscure_parsed) {
+        chud.outch = add_string(chud.outch, chud.lastoutch, "Request line (parsed):" END_OF_LINE, NULL);
+        if (r->method && r->method[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, r->method, NULL);
+            chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
+        }
+        if (r->parsed_uri.scheme && r->parsed_uri.scheme[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.scheme, NULL);
+            chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
+        }
+        if (r->parsed_uri.user && r->parsed_uri.user[0]) {
+            if (conf->obscure_user) {
+                chud.outch = add_obscured_field(chud.outch, chud.lastoutch, 8);
+            }
+            else {
+                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.user, NULL);
+            }
+            chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
+        }
+        if (r->parsed_uri.password && r->parsed_uri.password[0]) {
+            if (conf->obscure_password) {
+                chud.outch = add_obscured_field(chud.outch, chud.lastoutch, 8);
+            }
+            else {
+                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.password, NULL);
+            }
+            chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
+        }
+
+        if (r->parsed_uri.hostname && r->parsed_uri.hostname[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.hostname, NULL);
+        }
+
+        if (r->parsed_uri.port_str && r->parsed_uri.port_str[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
+            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.port_str, NULL);
+        }
+
+        if (r->parsed_uri.hostname || r->parsed_uri.port_str) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
+        }
+
+        if (r->parsed_uri.path && r->parsed_uri.path[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.path, NULL);
+        }
+
+        if (r->parsed_uri.query && r->parsed_uri.query[0]) {
+            if (conf->obscure_query) {
+                chud.outch = add_obscured_field(chud.outch, chud.lastoutch, strlen(r->parsed_uri.query));
+            }
+            else {
+                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.query, NULL);
+            }
+        }
+
+        if (r->parsed_uri.fragment && r->parsed_uri.fragment[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, "#", NULL);
+            if (conf->obscure_fragment) {
+                chud.outch = add_obscured_field(chud.outch, chud.lastoutch, strlen(r->parsed_uri.fragment));
+            }
+            else {
+                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.fragment, NULL);
+            }
+        }
+        chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+    }
+
     chud.outch = add_string(chud.outch, chud.lastoutch, "Request headers:" END_OF_LINE, NULL);
     /* insert headers */
     chud.obscured = conf->obscured;
@@ -725,6 +873,40 @@ static const char *set_obscured_headers(cmd_parms *cmd, void *dummy, const char 
     return NULL;
 }
 
+static const char *set_obscured_requestlinefields(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    whatkilledus_server_t *conf = ap_get_module_config(cmd->server->module_config,
+                                                       &whatkilledus_module);
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
+    if (!strcasecmp(arg, "user")) {
+        conf->obscure_user = 1;
+    }
+    else if (!strcasecmp(arg, "password")) {
+        conf->obscure_password = 1;
+    }
+    else if (!strcasecmp(arg, "query")) {
+        conf->obscure_query = 1;
+    }
+    else if (!strcasecmp(arg, "fragment")) {
+        conf->obscure_fragment = 1;
+    }
+    else if (!strcasecmp(arg, "unparsed-line")) {
+        conf->obscure_unparsed = 1;
+    }
+    else if (!strcasecmp(arg, "parsed-line")) {
+        conf->obscure_parsed = 1;
+    }
+    else {
+        return apr_pstrcat(cmd->pool, "Invalid argument to WhatkilledusObscuredRequestLineFields: ",
+                           arg, NULL);
+    }
+    return NULL;
+}
+
 static const command_rec whatkilledus_cmds[] =
 {
 #if DIAG_PLATFORM_UNIX
@@ -734,6 +916,9 @@ static const command_rec whatkilledus_cmds[] =
     AP_INIT_ITERATE("WhatkilledusObscuredHeaders", set_obscured_headers, NULL,
                     RSRC_CONF,
                     "List request headers whose values should be obscured in the log"),
+    AP_INIT_ITERATE("WhatkilledusObscuredRequestLineFields", set_obscured_requestlinefields, NULL,
+                    RSRC_CONF,
+                    "List request line fields whose values should be obscured in the log"),
     {NULL}
 };
 
