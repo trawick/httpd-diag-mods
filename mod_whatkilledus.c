@@ -34,6 +34,18 @@
 #include <sys/stat.h>
 #endif
 
+#ifndef WKU_USE_PTHREAD_SPECIFIC
+#if DIAG_PLATFORM_MACOSX
+#define WKU_USE_PTHREAD_SPECIFIC 1
+#else
+#define WKU_USE_PTHREAD_SPECIFIC 0
+#endif
+#endif
+
+#if WKU_USE_PTHREAD_SPECIFIC
+#include <pthread.h>
+#endif
+
 #if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
 APLOG_USE_MODULE(whatkilledus);
 #endif
@@ -77,10 +89,12 @@ static volatile /* imperfect but probably good enough */ int already_crashed = 0
 static server_rec *main_server;
 static const char *logfilename;
 
-#if DIAG_PLATFORM_WINDOWS
+#if WKU_USE_PTHREAD_SPECIFIC
+static pthread_key_t *thread_logdata_key;
+#elif DIAG_PLATFORM_WINDOWS
 static __declspec(thread) const char *thread_logdata;
 #else
-__thread const char *thread_logdata;
+static __thread const char *thread_logdata;
 #endif
 
 /* contents of test_char.h */
@@ -376,7 +390,16 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     c.context = ep->ContextRecord;
     c.exception_record = ep->ExceptionRecord;
 
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        logdata = pthread_getspecific(*thread_logdata_key);
+    }
+    else {
+        logdata = NULL;
+    }
+#else
     logdata = thread_logdata;
+#endif
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -417,7 +440,16 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
                  tm.tm_hour, tm.tm_min, tm.tm_sec);
     c.signal = ei->sig;
 
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        logdata = pthread_getspecific(*thread_logdata_key);
+    }
+    else {
+        logdata = NULL;
+    }
+#else
     logdata = thread_logdata;
+#endif
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -493,7 +525,13 @@ static int copy_headers(void *user_data, const char *key, const char *value)
 
 static apr_status_t clear_request_logdata(void *unused)
 {
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        pthread_setspecific(*thread_logdata_key, NULL);
+    }
+#else
     thread_logdata = NULL;
+#endif
     return APR_SUCCESS;
 }
 
@@ -536,7 +574,13 @@ static int whatkilledus_post_read_request(request_rec *r)
     chud.obscured = conf->obscured;
     apr_table_do(copy_headers, &chud, r->headers_in, NULL);
 
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        pthread_setspecific(*thread_logdata_key, logdata);
+    }
+#else
     thread_logdata = logdata;
+#endif
 
     apr_pool_cleanup_register(r->pool, NULL,
                               clear_request_logdata, apr_pool_cleanup_null);
@@ -570,6 +614,17 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
      * but previous exception filter might have been unloaded too
      */
     old_exception_filter = SetUnhandledExceptionFilter(whatkilledus_crash_handler);
+#endif
+
+#if WKU_USE_PTHREAD_SPECIFIC
+    thread_logdata_key = malloc(sizeof *thread_logdata_key);
+    if (pthread_key_create(thread_logdata_key, NULL) != 0) {
+        free(thread_logdata_key);
+        thread_logdata_key = NULL;
+        ap_log_error(APLOG_MARK, APLOG_ERR, errno, s,
+                     LOG_PREFIX "pthread_key_create() failed, request information "
+                     "won't be present in crash reports");
+    }
 #endif
 
     apr_pool_cleanup_register(p, NULL,
