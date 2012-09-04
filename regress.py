@@ -28,8 +28,12 @@ else:
 
 def test_httpd(section, httpd, skip_startstop):
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
+    err_log = os.path.join(httpd, 'logs', 'error' + log_ext);
 
     print section, httpd
+
+    if os.path.exists(err_log):
+        os.unlink(err_log)
 
     shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
 
@@ -84,8 +88,8 @@ def test_httpd(section, httpd, skip_startstop):
     print "Response:"
     print rsp
 
-    pid = rsp.split(' ')[-1][:-4]
-    print "Pid that crashed: >%s<" % pid
+    crashing_pid = rsp.split(' ')[-1][:-4]
+    print "Pid that crashed: >%s<" % crashing_pid
 
     log = open(wku_log).readlines()
     print log
@@ -97,7 +101,7 @@ def test_httpd(section, httpd, skip_startstop):
     for l in log:
         if 'Process id:' in l:
             tpid = l.split()[2]
-            if tpid == pid:
+            if tpid == crashing_pid:
                 pid_found = True
             else:
                 print "Unexpected pid >%s<" % tpid
@@ -123,6 +127,41 @@ def test_httpd(section, httpd, skip_startstop):
                 print "couldn't run, error", sys.exc_info()[0]
                 raise
         time.sleep(10);
+
+    errlog = open(err_log).readlines()
+    print errlog
+
+    wku_version_found = False
+    bt_version_found = False
+    bt_eyecatcher_found = False
+    child_pid_exit_found = False
+    httpd_terminated_found = False
+
+    for l in errlog:
+        if 'seg fault or similar nasty error' in l:
+            print l
+            assert False
+        elif 'mod_backtrace v2.00 from' in l:
+            bt_version_found = True
+        elif 'mod_whatkilledus v2.00 from' in l:
+            wku_version_found = True
+        elif '---MoD_bAcKtRaCe---' in l:
+            bt_eyecatcher_found = True
+        elif 'child pid ' in l and 'exit signal' in l:
+            exited_pid = l[l.find('child pid '):].split()[2]
+            if exited_pid == crashing_pid:
+                child_pid_exit_found = True
+            else:
+                print "Unexpected crashing child:", l
+                assert False
+        elif 'caught SIGTERM' in l:
+            httpd_terminated_found = True
+
+    assert wku_version_found
+    assert bt_version_found
+    assert bt_eyecatcher_found
+    assert child_pid_exit_found
+    assert httpd_terminated_found
 
 config = ConfigParser.RawConfigParser()
 config.read('regress.cfg')
