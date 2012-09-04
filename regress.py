@@ -117,6 +117,8 @@ def test_httpd(section, httpd, skip_startstop):
     assert barhdr_found
     assert x_jeff_found
 
+    time.sleep(10) # child just crashed, may take a while for process to dump core
+
     if not skip_startstop:
         if sys.platform == 'win32':
             print 'Stop httpd from install %s now...' % (httpd)
