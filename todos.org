@@ -42,32 +42,18 @@
 *** DONE mod_crash should display pid for regression testing.
 *** TODO Load testing with different MPMs
 *** TODO mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
-** Web site
+*** TODO Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.
+** Web site and documentation
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/
 *** TODO Create release mechanism, document how to build
 **** Need /usr/ports/devel/libexecinfo on FreeBSD
 *** TODO Document portability issues
+*** TODO Change people.apache.org artifacts to point to emptyhammock as appropriate.
 **** Garbage with DIAG_WRITE_FD on FreeBSD; see http://lists.freebsd.org/pipermail/freebsd-ports-bugs/2012-March/230175.html
-*** TODO Create notes about the APIs for mod_backtrace and diag
-Essentially: The API is not frozen.  Let me know if you use this.
 *** TODO Credit where credit is due
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
 mod_log_forensic
-*** TODO (From Wikipedia) On Windows operating systems before Windows Vista, __declspec( thread ) has some limitations.  (http://msdn.microsoft.com/en-us/library/2s9wt68x.aspx)
-*** Monetize!
-**** Sell ads.
-**** Ask for money.
-If you or your employer is using one of these modules to increase revenue
-of any kind, decrease expenses, or improve customer satisfaction, please
-e-mail info@emptyhammock.com to see how you can help continue the 
-development of this software.
-
-If a custom version of these modules for distribution with your product
-or from your site would enhance your product, please contact
-info@emptyhammock.com.
-
-If testing of these modules with your product would help, yadayadayada.
 * 2nd release tasks
 ** diag.c/diag.h
 *** TODO Document API
@@ -85,6 +71,23 @@ If testing of these modules with your product would help, yadayadayada.
 *** TODO Allow log file to be customized.
 *** TODO Have a limit on the amount of memory that can be kept for the request, and display amount that would have been required.
 *** TODO Allow obscured headers to be specified within vhost
+** Web site
+*** TODO Create notes about the APIs for mod_backtrace and diag
+Essentially: The API is not frozen.  Let me know if you use this.
+*** TODO (From Wikipedia) On Windows operating systems before Windows Vista, __declspec( thread ) has some limitations.  (http://msdn.microsoft.com/en-us/library/2s9wt68x.aspx)
+*** Monetize!
+**** Sell ads.
+**** Ask for money.
+If you or your employer is using one of these modules to increase revenue
+of any kind, decrease expenses, or improve customer satisfaction, please
+e-mail info@emptyhammock.com to see how you can help continue the 
+development of this software.
+
+If a custom version of these modules for distribution with your product
+or from your site would enhance your product, please contact
+info@emptyhammock.com.
+
+If testing of these modules with your product would help, yadayadayada.
 * httpd enhancements
 ** Unix: use SA_SIGINFO, add siginfo_t to exception info
 ** Windows: implement exception hook
