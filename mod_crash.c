@@ -15,6 +15,7 @@
 
 #include "httpd.h"
 #include "http_config.h"
+#include "http_connection.h"
 #include "http_log.h"
 #include "http_protocol.h"
 
@@ -37,7 +38,9 @@ APLOG_USE_MODULE(crash);
 #define LOG_PREFIX "mod_crash: "
 #endif
 
-static void crash(request_rec *r)
+static int crash_next_connection;
+
+static void crash_request(request_rec *r)
 {
     ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
                   LOG_PREFIX "about to crash");
@@ -50,19 +53,50 @@ static void crash(request_rec *r)
     *(int *)0xdeadbeef = 0xcafebabe;
 }
 
+static void crash_no_connection(server_rec *s)
+{
+    ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
+                 LOG_PREFIX "about to crash");
+
+    *(int *)0xdeadbeef = 0xcafebabe;
+}
+
 static int crash_handler(request_rec *r)
 {
     if (!strcmp(r->handler, "crash-handler")) {
-        crash(r);
+
+        if (r->args && !strcasecmp(r->args, "next-conn")) {
+            ap_set_content_type(r, "text/plain");
+            ap_rprintf(r, "The next connection in process %" APR_PID_T_FMT " will crash.\n", getpid());
+            ap_rflush(r);
+            apr_sleep(apr_time_msec(500));
+            crash_next_connection = 1;
+            return OK;
+        }
+
+        crash_request(r);
         /* unreached */
     }
 
     return DECLINED;
 }
 
+static conn_rec *crash_create_connection(apr_pool_t *ptrans,
+                                         server_rec *server,
+                                         apr_socket_t *csd, long id, void *sbh,
+                                         apr_bucket_alloc_t *alloc)
+{
+    if (crash_next_connection) {
+        crash_no_connection(server);
+    }
+    return NULL;
+}
+
 static void crash_register_hooks(apr_pool_t *p)
 {
     ap_hook_handler(crash_handler, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_create_connection(crash_create_connection,
+                              NULL, NULL, APR_HOOK_REALLY_FIRST);
 }
 
 module AP_MODULE_DECLARE_DATA crash_module = {
