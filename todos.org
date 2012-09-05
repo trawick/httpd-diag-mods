@@ -2,10 +2,10 @@
 ** Build testing
 *** Windows
 **** TODO Create testbed with ASF 2.2, ApacheLounge 2.2, ASF 2.4, ApacheLounge 2.2, PHP with each
-**** TODO Create automated test script or checklist, with mechanism for saving results
+**** DONE Create automated test script or checklist, with mechanism for saving results
 *** Linux
 **** TODO Create testbed with 2.2 and 2.4, PHP with each
-**** TODO Create automated test script with mechanism for saving results
+**** DONE Create automated test script with mechanism for saving results
 **** TODO Compare with output of original mod_whatkilledus and mod_backtrace
 *** Solaris, FreeBSD, OS X
 **** TODO something similar to Linux
