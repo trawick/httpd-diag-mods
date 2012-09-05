@@ -80,6 +80,7 @@ def test_httpd(section, httpd, skip_startstop):
                 print 'httpd start failed:'
                 print msgs
                 raise
+            add_to_log(msgs)
 
         time.sleep(10)
 
