@@ -156,6 +156,9 @@ def test_httpd(section, httpd, skip_startstop):
             else:
                 print "Unexpected crashing child:", l
                 assert False
+        elif 'child process exited with status ' in l and 'Restarting' in l:
+            # this is Windows; the child pid isn't included in the message :(
+            child_pid_exit_found = True
         elif 'caught SIGTERM' in l:
             httpd_terminated_found = True
 
