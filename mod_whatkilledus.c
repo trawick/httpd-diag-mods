@@ -623,6 +623,7 @@ static int whatkilledus_post_read_request(request_rec *r)
         }
 
         if (r->parsed_uri.query && r->parsed_uri.query[0]) {
+            count += 1; /* "?" */
             count += strlen(r->parsed_uri.query);
         }
 
@@ -697,6 +698,7 @@ static int whatkilledus_post_read_request(request_rec *r)
         }
 
         if (r->parsed_uri.query && r->parsed_uri.query[0]) {
+            chud.outch = add_string(chud.outch, chud.lastoutch, "?", NULL);
             if (conf->obscure_query) {
                 chud.outch = add_obscured_field(chud.outch, chud.lastoutch, strlen(r->parsed_uri.query));
             }
