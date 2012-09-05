@@ -24,19 +24,28 @@ import time
 if sys.platform == 'win32':
     log_ext = '.log'
     httpd_exe = 'httpd.exe'
+    testcrash = '.\\testcrash.exe'
+    testdiag = '.\\testdiag.exe'
 else:
     log_ext = '_log'
     httpd_exe = 'apachectl'
+    testcrash = './testcrash'
+    testdiag = './testdiag'
+
+def add_to_log(arg):
+    logfile = open("regress.log", "a")
+    print >> logfile, arg
+    logfile.close()
 
 def get_cmd_output(args):
-    logfile = open("regress.log", "w")
+    logfile = open("regress.tmp", "w")
     try:
         rc = subprocess.call(args, stdout=logfile, stderr=subprocess.STDOUT)
     except:
         print "couldn't run, error", sys.exc_info()[0]
         raise
     logfile.close()
-    return open("regress.log").readlines()
+    return (rc, open("regress.tmp").readlines())
 
 def test_httpd(section, httpd, skip_startstop):
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
@@ -49,7 +58,8 @@ def test_httpd(section, httpd, skip_startstop):
 
     shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
 
-    version_output = get_cmd_output([os.path.join(httpd, 'bin', httpd_exe), '-v'])
+    (rc, version_output) = get_cmd_output([os.path.join(httpd, 'bin', httpd_exe), '-v'])
+    add_to_log(version_output)
     print version_output[0],
     if 'Apache/2.2' in version_output[0]:
         httpdver = 22
@@ -79,8 +89,8 @@ def test_httpd(section, httpd, skip_startstop):
 
     s.close()
 
-    print "Response:"
-    print rsp
+    add_to_log("Response from /backtrace/ request:")
+    add_to_log(rsp)
 
     if os.path.exists(wku_log):
         os.unlink(wku_log)
@@ -102,14 +112,15 @@ def test_httpd(section, httpd, skip_startstop):
 
     s.close()
 
-    print "Response:"
-    print rsp
+    add_to_log("Response from /crash/ request:")
+    add_to_log(rsp)
 
     crashing_pid = rsp.split(' ')[-1][:-4]
-    print "Pid that crashed: >%s<" % crashing_pid
+    add_to_log("Pid that crashed: >%s<" % crashing_pid)
 
     log = open(wku_log).readlines()
-    print log
+    add_to_log("%s:" % wku_log)
+    add_to_log(log)
 
     pid_found = False
     foohdr_found = False
@@ -148,7 +159,8 @@ def test_httpd(section, httpd, skip_startstop):
         time.sleep(10);
 
     errlog = open(err_log).readlines()
-    print errlog
+    add_to_log("%s:" % err_log)
+    add_to_log(errlog)
 
     wku_version_found = False
     bt_version_found = False
@@ -197,6 +209,9 @@ def test_httpd(section, httpd, skip_startstop):
     assert child_pid_exit_found
     assert httpd_terminated_found
 
+if os.path.exists("regress.log"):
+    os.unlink("regress.log")
+
 config = ConfigParser.RawConfigParser()
 config.read('regress.cfg')
 
@@ -204,6 +219,8 @@ hn = socket.gethostname()
 plat = sys.platform
 
 section = "%s_%s" % (hn, plat)
+
+add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
 
 bldcmd = config.get(section, 'BUILD').split(' ')
 if config.has_option(section, 'HTTPD22_INSTALLS'):
@@ -216,13 +233,6 @@ if config.has_option(section, 'HTTPD24_INSTALLS'):
 else:
     httpd24_installs = []
 
-if sys.platform == 'win32':
-    testcrash = '.\\testcrash.exe'
-    testdiag = '.\\testdiag.exe'
-else:
-    testcrash = './testcrash'
-    testdiag = './testdiag'
-
 skip_bld = 0
 skip_startstop = 0
 
@@ -230,57 +240,46 @@ for httpd in httpd22_installs + httpd24_installs:
 
     if not skip_bld:
         print "Building for %s..." % (httpd)
-        logfile = open("regress.log", "w")
+        add_to_log("Building for %s..." % (httpd))
+
         os.putenv('HTTPD', httpd)
-        try:
-            rc = subprocess.call(bldcmd, stdout=logfile, stderr=subprocess.STDOUT)
-        except:
-            print "couldn't run, error", sys.exc_info()[0]
-            raise
-        logfile.close()
+        (rc, build_msgs) = get_cmd_output(bldcmd)
+
+        add_to_log(build_msgs)
+        add_to_log("Build rc: %d" % (rc))
 
         if rc != 0:
             print "rc:", rc
             sys.exit(1)
 
     print "Testing %s..." % (testcrash)
+    add_to_log("Testing %s..." % (testcrash))
 
-    logfile = open("regress.log", "w")
-    try:
-        rc = subprocess.call([testcrash], stdout=logfile, stderr=None, shell=False)
-    except:
-        print "couldn't run, error", sys.exc_info()[0]
-        raise
-
-    logfile.close()
+    (rc, msgs) = get_cmd_output([testcrash])
+    add_to_log(msgs)
+    add_to_log("testcrash rc %d" % rc)
 
     if sys.platform == 'win32':
         required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
     else:
         required_lines = ['Invalid memory address: 0xDEADBEEF']
 
-    lines = open("regress.log").readlines()
     for rl in required_lines:
-        if not rl + '\n' in lines:
-            print "fail, required line >%s< not found in >%s<" % (rl, lines)
+        if not rl + '\n' in msgs:
+            print "fail, required line >%s< not found in >%s<" % (rl, msgs)
             assert False
 
     print "Testing %s..." % (testdiag)
+    add_to_log("Testing %s..." % (testdiag))
 
-    logfile = open("regress.log", "w")
-    try:
-        rc = subprocess.call([testdiag], stdout=logfile, stderr=None, shell=False)
-    except:
-        print "couldn't run, error", sys.exc_info()[0]
-        raise
-
-    logfile.close()
+    (rc, msgs) = get_cmd_output([testdiag])
+    add_to_log(msgs)
+    add_to_log("testdiag rc %d" % rc)
 
     required_lines = ['testdiag: ONELINER', 'y<x<w']
 
-    lines = open("regress.log").readlines()
     for rl in required_lines:
-        if not rl + '\n' in lines:
+        if not rl + '\n' in msgs:
             print "fail, required line >%s< not found in >%s<" % (rl, lines)
             assert False
             assert False
