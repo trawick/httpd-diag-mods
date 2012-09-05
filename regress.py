@@ -232,6 +232,10 @@ section = "%s_%s" % (hn, plat)
 
 add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
 
+(rc, msgs) = get_cmd_output(['hg', 'identify', '-ni'])
+add_to_log('Code version:')
+add_to_log(msgs)
+
 bldcmd = config.get(section, 'BUILD').split(' ')
 if config.has_option(section, 'HTTPD22_INSTALLS'):
     httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
