@@ -186,6 +186,9 @@ def test_httpd(section, httpd, skip_startstop):
             child_pid_exit_found = True
         elif 'caught SIGTERM' in l:
             httpd_terminated_found = True
+        elif 'Parent: Child process exited successfully' in l:
+            # this is Windows; this is the last [notice] message with 2.2
+            httpd_terminated_found = True
 
     assert wku_version_found
     assert bt_version_found
