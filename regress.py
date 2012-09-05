@@ -97,7 +97,7 @@ def test_httpd(section, httpd, skip_startstop):
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s.connect(('127.0.0.1', 10080))
-    s.send('GET /crash/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
+    s.send('GET /crash/foo\1\2\3/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
 
     rsp = ''
     while True:
@@ -143,7 +143,7 @@ def test_httpd(section, httpd, skip_startstop):
         elif 'Request line (unparsed):' in l:
             print "This line should not appear:", l
             assert False
-        elif 'GET /crash/?****************' in l:
+        elif 'GET /crash/foo%01%02%03/?****************' in l:
             obscured_query_found = True
 
     assert pid_found

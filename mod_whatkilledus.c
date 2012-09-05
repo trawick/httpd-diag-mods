@@ -175,7 +175,7 @@ static char *add_obscured_field(char *outch, const char *lastoutch, size_t len)
     return outch;
 }
 
-/* This is the equivalent of log_scape() in mod_log_forensic. */
+/* This is the equivalent of log_escape() in mod_log_forensic. */
 static char *add_escaped_string(char *outch, const char *lastoutch,
                                 const char *in_first, const char *in_last_param)
 {
@@ -338,6 +338,8 @@ static void write_report(file_handle_t logfile,
                          const char *heading,
                          const char *logdata)
 {
+    static const char *no_request_msg = "No request was active." END_OF_LINE;
+
     p->output_mode = BT_OUTPUT_FILE;
     p->output_style = BT_OUTPUT_MEDIUM;
     p->outfile = logfile;
@@ -361,6 +363,9 @@ static void write_report(file_handle_t logfile,
 
     if (logdata) {
         write_file(logfile, logdata, strlen(logdata));
+    }
+    else {
+        write_file(logfile, no_request_msg, strlen(no_request_msg));
     }
 
     write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
@@ -571,47 +576,47 @@ static int whatkilledus_post_read_request(request_rec *r)
 
     if (!conf->obscure_unparsed) {
         count += strlen("Request line (unparsed):" END_OF_LINE);
-        count += strlen(r->the_request);
+        count += count_string(r->the_request);
         count += strlen(END_OF_LINE);
     }
 
     if (!conf->obscure_parsed) {
         count += strlen("Request line (parsed):" END_OF_LINE);
         if (r->method && r->method[0]) {
-            count += strlen(r->method);
+            count += count_string(r->method);
             count += strlen(" ");
         }
         /* r->parsed_uri */
         if (r->parsed_uri.scheme && r->parsed_uri.scheme[0]) {
-            count += strlen(r->parsed_uri.scheme);
+            count += count_string(r->parsed_uri.scheme);
             count += strlen(":");
         }
         if (r->parsed_uri.user && r->parsed_uri.user[0]) {
             if (conf->obscure_user) {
-                count += strlen("********");
+                count += strlen("********"); /* always 8 no matter how long */
             }
             else {
-                count += strlen(r->parsed_uri.user);
+                count += count_string(r->parsed_uri.user);
             }
             count += strlen(":");
         }
         if (r->parsed_uri.password && r->parsed_uri.password[0]) {
             if (conf->obscure_password) {
-                count += strlen("********");
+                count += strlen("********"); /* always 8 no matter how long */
             }
             else {
-                count += strlen(r->parsed_uri.password);
+                count += count_string(r->parsed_uri.password);
             }
             count += strlen(" ");
         }
 
         if (r->parsed_uri.hostname && r->parsed_uri.hostname[0]) {
-            count += strlen(r->parsed_uri.hostname);
+            count += count_string(r->parsed_uri.hostname);
         }
 
         if (r->parsed_uri.port_str && r->parsed_uri.port_str[0]) {
             count += strlen(":");
-            count += strlen(r->parsed_uri.port_str);
+            count += count_string(r->parsed_uri.port_str);
         }
 
         if (r->parsed_uri.hostname || r->parsed_uri.port_str) {
@@ -619,17 +624,17 @@ static int whatkilledus_post_read_request(request_rec *r)
         }
 
         if (r->parsed_uri.path && r->parsed_uri.path[0]) {
-            count += strlen(r->parsed_uri.path);
+            count += count_string(r->parsed_uri.path);
         }
 
         if (r->parsed_uri.query && r->parsed_uri.query[0]) {
             count += 1; /* "?" */
-            count += strlen(r->parsed_uri.query);
+            count += count_string(r->parsed_uri.query);
         }
 
         if (r->parsed_uri.fragment && r->parsed_uri.fragment[0]) {
             count += strlen("#");
-            count += strlen(r->parsed_uri.fragment);
+            count += count_string(r->parsed_uri.fragment);
         }
 
         count += strlen(END_OF_LINE);
@@ -647,18 +652,18 @@ static int whatkilledus_post_read_request(request_rec *r)
 
     if (!conf->obscure_unparsed) {
         chud.outch = add_string(chud.outch, chud.lastoutch, "Request line (unparsed):" END_OF_LINE, NULL);
-        chud.outch = add_string(chud.outch, chud.lastoutch, r->the_request, NULL);
+        chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->the_request, NULL);
         chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
     }
 
     if (!conf->obscure_parsed) {
         chud.outch = add_string(chud.outch, chud.lastoutch, "Request line (parsed):" END_OF_LINE, NULL);
         if (r->method && r->method[0]) {
-            chud.outch = add_string(chud.outch, chud.lastoutch, r->method, NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->method, NULL);
             chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
         }
         if (r->parsed_uri.scheme && r->parsed_uri.scheme[0]) {
-            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.scheme, NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.scheme, NULL);
             chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
         }
         if (r->parsed_uri.user && r->parsed_uri.user[0]) {
@@ -666,7 +671,7 @@ static int whatkilledus_post_read_request(request_rec *r)
                 chud.outch = add_obscured_field(chud.outch, chud.lastoutch, 8);
             }
             else {
-                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.user, NULL);
+                chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.user, NULL);
             }
             chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
         }
@@ -675,26 +680,26 @@ static int whatkilledus_post_read_request(request_rec *r)
                 chud.outch = add_obscured_field(chud.outch, chud.lastoutch, 8);
             }
             else {
-                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.password, NULL);
+                chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.password, NULL);
             }
             chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
         }
 
         if (r->parsed_uri.hostname && r->parsed_uri.hostname[0]) {
-            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.hostname, NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.hostname, NULL);
         }
 
         if (r->parsed_uri.port_str && r->parsed_uri.port_str[0]) {
             chud.outch = add_string(chud.outch, chud.lastoutch, ":", NULL);
-            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.port_str, NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.port_str, NULL);
         }
 
         if (r->parsed_uri.hostname || r->parsed_uri.port_str) {
-            chud.outch = add_string(chud.outch, chud.lastoutch, " ", NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, " ", NULL);
         }
 
         if (r->parsed_uri.path && r->parsed_uri.path[0]) {
-            chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.path, NULL);
+            chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.path, NULL);
         }
 
         if (r->parsed_uri.query && r->parsed_uri.query[0]) {
@@ -703,7 +708,7 @@ static int whatkilledus_post_read_request(request_rec *r)
                 chud.outch = add_obscured_field(chud.outch, chud.lastoutch, strlen(r->parsed_uri.query));
             }
             else {
-                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.query, NULL);
+                chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.query, NULL);
             }
         }
 
@@ -713,7 +718,7 @@ static int whatkilledus_post_read_request(request_rec *r)
                 chud.outch = add_obscured_field(chud.outch, chud.lastoutch, strlen(r->parsed_uri.fragment));
             }
             else {
-                chud.outch = add_string(chud.outch, chud.lastoutch, r->parsed_uri.fragment, NULL);
+                chud.outch = add_escaped_string(chud.outch, chud.lastoutch, r->parsed_uri.fragment, NULL);
             }
         }
         chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
