@@ -44,7 +44,7 @@
 *** TODO Load testing with different MPMs
 *** TODO mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
 *** DONE Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.  Ensure that Greg's "Seg fault" message is not logged.
-*** TODO Regression: Test obscuring of request line fields
+*** DONE Regression: Test obscuring of request line fields
 ** Web site and documentation
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/

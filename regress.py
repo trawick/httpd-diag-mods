@@ -97,7 +97,7 @@ def test_httpd(section, httpd, skip_startstop):
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s.connect(('127.0.0.1', 10080))
-    s.send('GET /crash/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
+    s.send('GET /crash/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
 
     rsp = ''
     while True:
@@ -126,6 +126,7 @@ def test_httpd(section, httpd, skip_startstop):
     foohdr_found = False
     barhdr_found = False
     x_jeff_found = False
+    obscured_query_found = False
     for l in log:
         if 'Process id:' in l:
             tpid = l.split()[2]
@@ -139,11 +140,17 @@ def test_httpd(section, httpd, skip_startstop):
             barhdr_found = True
         elif 'X-Jeff:*******' in l:
             x_jeff_found = True
+        elif 'Request line (unparsed):' in l:
+            print "This line should not appear:", l
+            assert False
+        elif 'GET /crash/?****************' in l:
+            obscured_query_found = True
 
     assert pid_found
     assert foohdr_found
     assert barhdr_found
     assert x_jeff_found
+    assert obscured_query_found
 
     time.sleep(10) # child just crashed, may take a while for process to dump core
 
