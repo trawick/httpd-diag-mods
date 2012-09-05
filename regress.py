@@ -38,14 +38,17 @@ def add_to_log(arg):
     logfile.close()
 
 def get_cmd_output(args):
-    logfile = open("regress.tmp", "w")
+    logfilename = "regress.tmp"
+    logfile = open(logfilename, "w")
     try:
         rc = subprocess.call(args, stdout=logfile, stderr=subprocess.STDOUT)
     except:
         print "couldn't run, error", sys.exc_info()[0]
         raise
     logfile.close()
-    return (rc, open("regress.tmp").readlines())
+    msgs = open(logfilename).readlines()
+    os.unlink(logfilename)
+    return (rc, msgs)
 
 def test_httpd(section, httpd, skip_startstop):
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
