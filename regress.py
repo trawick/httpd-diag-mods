@@ -23,8 +23,20 @@ import time
 
 if sys.platform == 'win32':
     log_ext = '.log'
+    httpd_exe = 'httpd.exe'
 else:
     log_ext = '_log'
+    httpd_exe = 'apachectl'
+
+def get_cmd_output(args):
+    logfile = open("regress.log", "w")
+    try:
+        rc = subprocess.call(args, stdout=logfile, stderr=subprocess.STDOUT)
+    except:
+        print "couldn't run, error", sys.exc_info()[0]
+        raise
+    logfile.close()
+    return open("regress.log").readlines()
 
 def test_httpd(section, httpd, skip_startstop):
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
@@ -37,16 +49,21 @@ def test_httpd(section, httpd, skip_startstop):
 
     shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
 
+    version_output = get_cmd_output([os.path.join(httpd, 'bin', httpd_exe), '-v'])
+    print version_output[0],
+    if 'Apache/2.2' in version_output[0]:
+        httpdver = 22
+    elif 'Apache/2.4' in version_output[0]:
+        httpdver = 24
+    else:
+        raise Exception("Unknown server version (%s)" % version_output[0])
+
     if not skip_startstop:
         if sys.platform == 'win32':
             print 'Start httpd from install %s now...' % (httpd)
         else:
-            try:
-                rc = subprocess.call([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
-            except:
-                print "couldn't run, error", sys.exc_info()[0]
-                raise
-        time.sleep(10);
+            get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
+        time.sleep(10)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s.connect(('127.0.0.1', 10080))
@@ -136,6 +153,7 @@ def test_httpd(section, httpd, skip_startstop):
     wku_version_found = False
     bt_version_found = False
     bt_eyecatcher_found = False
+    bt_backtrace_found = False
     child_pid_exit_found = False
     httpd_terminated_found = False
 
@@ -149,6 +167,11 @@ def test_httpd(section, httpd, skip_startstop):
             wku_version_found = True
         elif '---MoD_bAcKtRaCe---' in l:
             bt_eyecatcher_found = True
+            if httpdver == 24:
+                if 'backtrace_handler<ap_run_handler<ap_invoke_handler' in l:
+                    bt_backtrace_found = True
+        elif httpdver == 22 and 'mod_backtrace: backtrace_handler<' in l:
+            bt_backtrace_found = True
         elif 'child pid ' in l and 'exit signal' in l:
             exited_pid = l[l.find('child pid '):].split()[2]
             if exited_pid == crashing_pid:
@@ -165,6 +188,7 @@ def test_httpd(section, httpd, skip_startstop):
     assert wku_version_found
     assert bt_version_found
     assert bt_eyecatcher_found
+    assert bt_backtrace_found
     assert child_pid_exit_found
     assert httpd_terminated_found
 
