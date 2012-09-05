@@ -123,7 +123,7 @@ static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overr
     }
 #endif
 
-    return overrides;
+    return conf;
 }
 
 static void fmt2(void *user_data, const char *s)
@@ -440,7 +440,10 @@ static int backtrace_handler(request_rec *r)
     if (!strcmp(r->handler, "backtrace-handler")) {
         backtrace(r);
         ap_log_rerror(APLOG_MARK, APLOG_NOTICE, 0, r,
-                      LOG_PREFIX "---MoD_bAcKtRaCe---");
+                      /* no LOG_PREFIX */ "---MoD_bAcKtRaCe---");
+        /* If this has LOG_PREFIX, the regression test configuration won't
+         * result in a backtrace for this message.
+         */
         return OK;
     }
 
