@@ -168,11 +168,11 @@ def test_httpd(section, httpd, skip_startstop):
         elif '---MoD_bAcKtRaCe---' in l:
             bt_eyecatcher_found = True
             if httpdver == 24:
-                if 'backtrace_handler<ap_run_handler<ap_invoke_handler' in l:
+                if '<ap_run_handler<ap_invoke_handler<' in l:
                     bt_backtrace_found = True
                 elif 'diag_backtrace_init<diag_backtrace_init' in l:
                     bt_backtrace_found = True
-        elif httpdver == 22 and ('mod_backtrace: backtrace_handler<' in l or '<ap_run_handler' in l):
+        elif httpdver == 22 and 'mod_backtrace: ' in l and '<ap_' in l:
             bt_backtrace_found = True
         elif 'child pid ' in l and 'exit signal' in l:
             exited_pid = l[l.find('child pid '):].split()[2]
