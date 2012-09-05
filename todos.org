@@ -26,7 +26,7 @@
 *** DONE Add error log handler for 2.2
 *** DONE Add a way to control backtrace in error log based on severity and string matching and maybe APR error code
 *** DONE Change backtrace-handler to generate backtrace in different flavors for automated regression testing
-*** TODO Tiny automated regression test for 32-bit and 64-bit.
+*** DONE Tiny automated regression test for 32-bit and 64-bit.  It must check the backtrace in the error log.
 ** mod_whatkilledus.c
 *** DONE Ensure that only the first crashing thread in the process gets to do any work
 *** DONE Create a log file to contain crash reports
@@ -43,7 +43,7 @@
 *** DONE Allow portions of URL to be obscured.
 *** TODO Load testing with different MPMs
 *** TODO mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
-*** TODO Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.  Ensure that Greg's "Seg fault" message is not logged.
+*** DONE Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.  Ensure that Greg's "Seg fault" message is not logged.
 *** TODO Regression: Test obscuring of request line fields
 ** Web site and documentation
 *** TODO Create it!
