@@ -14,6 +14,9 @@ dirname = 'wku_bt-%s' % (version)
 if os.path.exists(dirname):
     raise Exception("%s should not already exist" % (dirname))
 
+if os.path.exists(dirname + '.zip'):
+    raise Exception("zip should not already exist")
+
 os.mkdir(dirname, 0755)
 
 cmd = ['cp', '-pR'] + source_files + meta_files + bin_files + [dirname]
