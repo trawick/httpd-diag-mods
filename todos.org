@@ -1,14 +1,14 @@
 * 1st release tasks
 ** Build testing
 *** Windows
-**** TODO Create testbed with ASF 2.2, ApacheLounge 2.2, ASF 2.4, ApacheLounge 2.2, PHP with each
+**** DONE Create testbed with ASF 2.2, ApacheLounge 2.4
 **** DONE Create automated test script or checklist, with mechanism for saving results
 *** Linux
-**** TODO Create testbed with 2.2 and 2.4, PHP with each
+**** DONE Create testbed with 2.2 and 2.4
 **** DONE Create automated test script with mechanism for saving results
 **** TODO Compare with output of original mod_whatkilledus and mod_backtrace
 *** Solaris, FreeBSD, OS X
-**** TODO something similar to Linux
+**** DONE something similar to Linux
 ** diag.c/diag.h
 *** DONE Add better test coverage to testdiag
 *** DONE Remove DIAG_MODE_xxx; either you provide context info or you don't
@@ -45,11 +45,11 @@
 *** DONE mod_crash: add ways to crash with connection-but-not-request and no-connection, and test with mod_whatkilledus
 *** DONE Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.  Ensure that Greg's "Seg fault" message is not logged.
 *** DONE Regression: Test obscuring of request line fields
-*** TODO Test with screwy request lines (e.g., CONNECT).
 *** DONE Provide information about client connection.
+*** DONE Simplify directive names.
 ** Web site and documentation
 *** TODO Create it!
-*** TODO Migrate old information from http://people.apache.org/~trawick/
+*** TODO Replace old information from http://people.apache.org/~trawick/
 *** TODO Create release mechanism, document how to build
 **** Need /usr/ports/devel/libexecinfo on FreeBSD
 *** TODO Change people.apache.org artifacts to point to emptyhammock as appropriate.
@@ -57,6 +57,10 @@
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
 mod_log_forensic
 * 2nd release tasks
+** Testbeds
+*** Add PHP to all
+*** Windows: ASF 2.4 if available
+*** Windows: Apachelounge 2.2
 ** diag.c/diag.h
 *** TODO Document API
 *** TODO ucontext_t on Linux and other non-Solaris Unix?
@@ -70,6 +74,7 @@ mod_log_forensic
 *** TODO Use __malloc_hook/__realloc_hook or similar to see if malloc() is being used within the signal handler.
 *** TODO Windows, SymGetModuleInfo64
 ** mod_whatkilledus.c
+*** TODO Test with screwy request lines (e.g., CONNECT).
 *** TODO Allow log file to be customized.
 *** TODO Have a limit on the amount of memory that can be kept for the request, and display amount that would have been required.
 *** TODO Allow obscured headers to be specified within vhost.
