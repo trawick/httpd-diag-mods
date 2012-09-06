@@ -48,12 +48,12 @@
 *** DONE Provide information about client connection.
 *** DONE Simplify directive names.
 ** Web site and documentation
-*** TODO Create it!
-*** TODO Replace old information from http://people.apache.org/~trawick/
-*** TODO Create release mechanism, document how to build
+*** DONE Create it!
+*** DONE Document how to build
 **** Need /usr/ports/devel/libexecinfo on FreeBSD
-*** TODO Change people.apache.org artifacts to point to emptyhammock as appropriate.
-*** TODO Credit where credit is due
+*** DONE Create release mechanism.
+*** DONE Change people.apache.org artifacts to point to emptyhammock as appropriate.
+*** DONE Credit where credit is due
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
 mod_log_forensic, test_char.h
 * 2nd release tasks
