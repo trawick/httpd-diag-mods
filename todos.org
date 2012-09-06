@@ -6,7 +6,7 @@
 *** Linux
 **** DONE Create testbed with 2.2 and 2.4
 **** DONE Create automated test script with mechanism for saving results
-**** TODO Compare with output of original mod_whatkilledus and mod_backtrace
+**** DONE Compare with output of original mod_whatkilledus and mod_backtrace
 *** Solaris, FreeBSD, OS X
 **** DONE something similar to Linux
 ** diag.c/diag.h
@@ -55,7 +55,7 @@
 *** TODO Change people.apache.org artifacts to point to emptyhammock as appropriate.
 *** TODO Credit where credit is due
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
-mod_log_forensic
+mod_log_forensic, test_char.h
 * 2nd release tasks
 ** Testbeds
 *** Add PHP to all
@@ -80,6 +80,7 @@ mod_log_forensic
 *** TODO Allow obscured headers to be specified within vhost.
 *** TODO Allow granular control over obscured cookies.
 *** TODO Allow more granular control over aspects of the request URL that should be obscured.
+*** TODO Log the address of main(), modules, request_rec, conn_rec, etc.
 ** Web site and documentation
 *** TODO Document portability issues
 **** Garbage with DIAG_WRITE_FD on FreeBSD; see http://lists.freebsd.org/pipermail/freebsd-ports-bugs/2012-March/230175.html
