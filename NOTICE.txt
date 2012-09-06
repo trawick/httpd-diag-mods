@@ -1,0 +1,10 @@
+mod_whatkilledus and mod_backtrace
+Copyright 2012 Jeff Trawick, http://emptyhammock.com/
+
+This product contains small pieces of mod_log_forensic as well as the
+contents of test_char.h, both developed at The Apache Software Foundation
+(http://www.apache.org/) and covered by the same license as this product.
+
+This is a new implementation of earlier modules of the same name which
+were part of Apache HTTP Server 1.3 but not Apache HTTP Server 2.0 and
+above.
