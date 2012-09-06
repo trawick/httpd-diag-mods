@@ -224,6 +224,8 @@ def test_httpd(section, httpd, skip_startstop):
                     bt_backtrace_found = True
                 elif 'backtrace_handler<ap_run_handler' in l: # Apachelounge build with no .pdb files
                     bt_backtrace_found = True
+                elif ' [0x' in l and '<0x' in l: # Ubuntu 11-64
+                    bt_backtrace_found = True
         elif httpdver == 22 and 'mod_backtrace: ' in l and '<ap_' in l:
             bt_backtrace_found = True
         elif 'child pid ' in l and 'exit signal' in l:
