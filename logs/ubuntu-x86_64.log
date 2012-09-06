@@ -1,0 +1,263 @@
+Starting tests on trawick-ThinkPad-T61p_linux2 at Thu Sep  6 14:30:04 2012
+Code version:
+['fd9fe7a0789d+ 1164+\n']
+Building for /home/trawick/inst/22-64...
+['Building for platform Linux\n', 'rm -f testdiag testcrash mod_backtrace.la mod_whatkilledus.la mod_crash.la *.o\n', 'gcc -DDIAG_BITS_64 -O0 -Wall -rdynamic   -c -o testdiag.o testdiag.c\n', 'gcc -c -DDIAG_BITS_64 -O0 -Wall -rdynamic -g diag.c\n', 'gcc -O0 -Wall -rdynamic -o testdiag -g testdiag.o diag.o \n', 'gcc -c -DDIAG_BITS_64 -O0 -Wall -rdynamic -g testcrash.c\n', 'gcc -O0 -Wall -rdynamic -o testcrash -g testcrash.o diag.o \n', '/home/trawick/inst/22-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_backtrace.c diag.c \n', '/home/trawick/inst/22-64/build/libtool --silent --mode=compile /usr/bin/gcc -m64 -prefer-pic -O0  -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -I/home/trawick/inst/22-64/include  -I/home/trawick/inst/22-64/include   -I/home/trawick/inst/22-64/include  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_backtrace.lo mod_backtrace.c && touch mod_backtrace.slo\n', '/home/trawick/inst/22-64/build/libtool --silent --mode=compile /usr/bin/gcc -m64 -prefer-pic -O0  -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -I/home/trawick/inst/22-64/include  -I/home/trawick/inst/22-64/include   -I/home/trawick/inst/22-64/include  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o diag.lo diag.c && touch diag.slo\n', '/home/trawick/inst/22-64/build/libtool --silent --mode=link /usr/bin/gcc -m64 -o mod_backtrace.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/22-64/modules -module -avoid-version    diag.lo mod_backtrace.lo\n', '/home/trawick/inst/22-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_whatkilledus.c \n', '/home/trawick/inst/22-64/build/libtool --silent --mode=compile /usr/bin/gcc -m64 -prefer-pic -O0  -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -I/home/trawick/inst/22-64/include  -I/home/trawick/inst/22-64/include   -I/home/trawick/inst/22-64/include  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_whatkilledus.lo mod_whatkilledus.c && touch mod_whatkilledus.slo\n', '/home/trawick/inst/22-64/build/libtool --silent --mode=link /usr/bin/gcc -m64 -o mod_whatkilledus.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/22-64/modules -module -avoid-version    mod_whatkilledus.lo\n', '/home/trawick/inst/22-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_crash.c \n', '/home/trawick/inst/22-64/build/libtool --silent --mode=compile /usr/bin/gcc -m64 -prefer-pic -O0  -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -I/home/trawick/inst/22-64/include  -I/home/trawick/inst/22-64/include   -I/home/trawick/inst/22-64/include  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_crash.lo mod_crash.c && touch mod_crash.slo\n', '/home/trawick/inst/22-64/build/libtool --silent --mode=link /usr/bin/gcc -m64 -o mod_crash.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/22-64/modules -module -avoid-version    mod_crash.lo\n', '/home/trawick/inst/22-64/bin/apxs -i mod_backtrace.la\n', "/home/trawick/inst/22-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/22-64/build/libtool' mod_backtrace.la /home/trawick/inst/22-64/modules\n", '/home/trawick/inst/22-64/build/libtool --mode=install cp mod_backtrace.la /home/trawick/inst/22-64/modules/\n', 'cp .libs/mod_backtrace.so /home/trawick/inst/22-64/modules/mod_backtrace.so\n', 'cp .libs/mod_backtrace.lai /home/trawick/inst/22-64/modules/mod_backtrace.la\n', 'cp .libs/mod_backtrace.a /home/trawick/inst/22-64/modules/mod_backtrace.a\n', 'chmod 644 /home/trawick/inst/22-64/modules/mod_backtrace.a\n', 'ranlib /home/trawick/inst/22-64/modules/mod_backtrace.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/22-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/22-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/22-64/modules/mod_backtrace.so\n', '/home/trawick/inst/22-64/bin/apxs -i mod_whatkilledus.la\n', "/home/trawick/inst/22-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/22-64/build/libtool' mod_whatkilledus.la /home/trawick/inst/22-64/modules\n", '/home/trawick/inst/22-64/build/libtool --mode=install cp mod_whatkilledus.la /home/trawick/inst/22-64/modules/\n', 'cp .libs/mod_whatkilledus.so /home/trawick/inst/22-64/modules/mod_whatkilledus.so\n', 'cp .libs/mod_whatkilledus.lai /home/trawick/inst/22-64/modules/mod_whatkilledus.la\n', 'cp .libs/mod_whatkilledus.a /home/trawick/inst/22-64/modules/mod_whatkilledus.a\n', 'chmod 644 /home/trawick/inst/22-64/modules/mod_whatkilledus.a\n', 'ranlib /home/trawick/inst/22-64/modules/mod_whatkilledus.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/22-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/22-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/22-64/modules/mod_whatkilledus.so\n', '/home/trawick/inst/22-64/bin/apxs -i mod_crash.la\n', "/home/trawick/inst/22-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/22-64/build/libtool' mod_crash.la /home/trawick/inst/22-64/modules\n", '/home/trawick/inst/22-64/build/libtool --mode=install cp mod_crash.la /home/trawick/inst/22-64/modules/\n', 'cp .libs/mod_crash.so /home/trawick/inst/22-64/modules/mod_crash.so\n', 'cp .libs/mod_crash.lai /home/trawick/inst/22-64/modules/mod_crash.la\n', 'cp .libs/mod_crash.a /home/trawick/inst/22-64/modules/mod_crash.a\n', 'chmod 644 /home/trawick/inst/22-64/modules/mod_crash.a\n', 'ranlib /home/trawick/inst/22-64/modules/mod_crash.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/22-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/22-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/22-64/modules/mod_crash.so\n']
+Build rc: 0
+Testing ./testcrash...
+['Process id:  18822\n', 'Fatal signal: 11\n', 'Invalid memory address: 0xDEADBEEF\n', 'Backtrace to file descriptor:\n', './testcrash(diag_backtrace+0x7c)[0x401a31]\n', './testcrash[0x400d7d]\n', '/lib/x86_64-linux-gnu/libc.so.6(+0x36420)[0x7f29cfd7d420]\n', './testcrash(y+0x9)[0x400dc2]\n', './testcrash(x+0x9)[0x400dd8]\n', './testcrash(w+0x9)[0x400de3]\n', './testcrash(main+0x67)[0x400e4c]\n', '/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xed)[0x7f29cfd6830d]\n', './testcrash[0x400bb9]\n', 'Backtrace to callback:\n', 'testcrash:0x400db7\n', 'libc.so.6:0x7f29cfd7d420\n', 'testcrash:y+0x9\n', 'testcrash:x+0x9\n', 'testcrash:w+0x9\n', 'testcrash:main+0x67\n', 'libc.so.6:__libc_start_main+0xed\n', 'testcrash:0x400bb9\n']
+testcrash rc -11
+Testing ./testdiag...
+['./testdiag(diag_backtrace+0x7c)[0x401cbd]\n', './testdiag(y+0xa0)[0x400e25]\n', './testdiag(x+0x9)[0x4010c1]\n', './testdiag(w+0x9)[0x4010cc]\n', './testdiag(main+0x9)[0x4010d7]\n', '/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xed)[0x7fd2e3b7330d]\n', './testdiag[0x400c49]\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0x400e80\n', '0x4010c1\n', '0x4010cc\n', '0x4010d7\n', '0x7fd2e3b7330d\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x141\n', 'x+0x9\n', 'w+0x9\n', 'main+0x9\n', '__libc_start_main+0xed\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__libc_start_main\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'testdiag:y\n', 'testdiag:x\n', 'testdiag:w\n', 'testdiag:main\n', 'libc.so.6:__libc_start_main\n', 'testdiag:0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', './testdiag:y\n', './testdiag:x\n', './testdiag:w\n', './testdiag:main\n', '/lib/x86_64-linux-gnu/libc.so.6:__libc_start_main\n', './testdiag:0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
+testdiag rc 0
+['Server version: Apache/2.2.23 (Unix)\n', 'Server built:   Aug 22 2012 20:57:08\n']
+["httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1 for ServerName\n"]
+Response from /backtrace/ request:
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 18:30:09 GMT
+Server: Apache/2.2.23 (Unix) DAV/2 mod_fcgid/2.3.7-dev mod_ssl/2.2.23-dev OpenSSL/1.0.0e
+Content-Length: 2761
+Connection: close
+Content-Type: text/plain
+
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
+/home/trawick/inst/22-64/modules/mod_backtrace.so:0x7f183effcb96
+/home/trawick/inst/22-64/modules/mod_backtrace.so:0x7f183effcdc8
+/home/trawick/inst/22-64/bin/httpd:0x43f276
+/home/trawick/inst/22-64/bin/httpd:0x43fb5f
+/home/trawick/inst/22-64/bin/httpd:0x450f03
+/home/trawick/inst/22-64/bin/httpd:0x44de14
+/home/trawick/inst/22-64/bin/httpd:0x448fbb
+/home/trawick/inst/22-64/bin/httpd:0x449496
+/home/trawick/inst/22-64/bin/httpd:0x458320
+/home/trawick/inst/22-64/bin/httpd:0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
+mod_backtrace.so:0x7f183effcbdb
+mod_backtrace.so:0x7f183effcdc8
+httpd:0x43f276
+httpd:0x43fb5f
+httpd:0x450f03
+httpd:0x44de14
+httpd:0x448fbb
+httpd:0x449496
+httpd:0x458320
+httpd:0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME
+/home/trawick/inst/22-64/modules/mod_backtrace.so:0x7f183effcc20
+/home/trawick/inst/22-64/modules/mod_backtrace.so:0x7f183effcdc8
+/home/trawick/inst/22-64/bin/httpd:0x43f276
+/home/trawick/inst/22-64/bin/httpd:0x43fb5f
+/home/trawick/inst/22-64/bin/httpd:0x450f03
+/home/trawick/inst/22-64/bin/httpd:0x44de14
+/home/trawick/inst/22-64/bin/httpd:0x448fbb
+/home/trawick/inst/22-64/bin/httpd:0x449496
+/home/trawick/inst/22-64/bin/httpd:0x458320
+/home/trawick/inst/22-64/bin/httpd:0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FUNCTION
+0x7f183effcc65
+0x7f183effcdc8
+ap_run_handler
+ap_invoke_handler
+ap_process_request
+0x44de14
+ap_run_process_connection
+ap_process_connection
+0x458320
+0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FN_OFFSET
+0x7f183effccaa
+0x7f183effcdc8
+0x43f276
+0x43fb5f
+0x450f03
+0x44de14
+0x448fbb
+0x449496
+0x458320
+0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
+0x7f183effccef
+0x7f183effcdc8
+ap_run_handler+0x5b
+ap_invoke_handler+0x16f
+ap_process_request+0x6d
+0x44de14
+ap_run_process_connection+0x5b
+ap_process_connection+0x67
+0x458320
+0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_ADDRESS
+0x7f183effcd34
+0x7f183effcdc8
+0x43f276
+0x43fb5f
+0x450f03
+0x44de14
+0x448fbb
+0x449496
+0x458320
+0x458c13
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
+0x7f183effcd79
+0x7f183effcdc8
+ap_run_handler+0x5b 0x43f276
+ap_invoke_handler+0x16f 0x43fb5f
+ap_process_request+0x6d 0x450f03
+0x44de14
+ap_run_process_connection+0x5b 0x448fbb
+ap_process_connection+0x67 0x449496
+0x458320
+0x458c13
+
+Response from /crash/ request:
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 18:30:09 GMT
+Server: Apache/2.2.23 (Unix) DAV/2 mod_fcgid/2.3.7-dev mod_ssl/2.2.23-dev OpenSSL/1.0.0e
+Connection: close
+Content-Type: text/plain
+
+Crashing in process 18833...
+
+Pid that crashed: >18833<
+/home/trawick/inst/22-64/logs/whatkilledus_log:
+['**** Crash at 2012-09-06 14:30:09\n', 'Process id:  18833\n', 'Fatal signal: 11\n', '\n', '/home/trawick/inst/22-64/modules/mod_backtrace.so:0x7f183effc4d6\n', '/home/trawick/inst/22-64/modules/mod_whatkilledus.so:0x7f183ebf49e7\n', '/home/trawick/inst/22-64/modules/mod_whatkilledus.so:0x7f183ebf4c0a\n', '/home/trawick/inst/22-64/bin/httpd:ap_run_fatal_exception+0x5b 0x44a7de\n', '/home/trawick/inst/22-64/bin/httpd:0x44bf4b\n', '/home/trawick/inst/22-64/bin/httpd:0x44bf85\n', '/lib/x86_64-linux-gnu/libpthread.so.0:0x7f18491fa060\n', '/home/trawick/inst/22-64/modules/mod_crash.so:0x7f183edf8953\n', '/home/trawick/inst/22-64/modules/mod_crash.so:0x7f183edf8a7a\n', '/home/trawick/inst/22-64/bin/httpd:ap_run_handler+0x5b 0x43f276\n', '/home/trawick/inst/22-64/bin/httpd:ap_invoke_handler+0x16f 0x43fb5f\n', '/home/trawick/inst/22-64/bin/httpd:ap_process_request+0x6d 0x450f03\n', '/home/trawick/inst/22-64/bin/httpd:0x44de14\n', '/home/trawick/inst/22-64/bin/httpd:ap_run_process_connection+0x5b 0x448fbb\n', '/home/trawick/inst/22-64/bin/httpd:ap_process_connection+0x67 0x449496\n', '/home/trawick/inst/22-64/bin/httpd:0x458320\n', '/home/trawick/inst/22-64/bin/httpd:0x458c13\n', '/home/trawick/inst/22-64/lib/libapr-1.so.0:0x7f1849434ee3\n', '/lib/x86_64-linux-gnu/libpthread.so.0:0x7f18491f1efc\n', '/lib/x86_64-linux-gnu/libc.so.6:clone+0x6d 0x7f1848f2c59d\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:46244->127.0.0.1:10080\n', '\n']
+/home/trawick/inst/22-64/logs/error_log:
+['[Thu Sep 06 14:30:08 2012] [notice] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 14:30:08 2012] [notice] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 14:30:08 2012] [notice] FIPS mode: 0\n', '[Thu Sep 06 14:30:08 2012] [warn] Init: Session Cache is not configured [hint: SSLSessionCache]\n', "[Thu Sep 06 14:30:08 2012] [warn] RSA server certificate CommonName (CN) `Jeff Tunnel' does NOT match server name!?\n", '[Thu Sep 06 14:30:08 2012] [notice] Digest: generating secret for digest authentication ...\n', '[Thu Sep 06 14:30:08 2012] [notice] Digest: done\n', '[Thu Sep 06 14:30:09 2012] [notice] FIPS mode: 0\n', "[Thu Sep 06 14:30:09 2012] [warn] RSA server certificate CommonName (CN) `Jeff Tunnel' does NOT match server name!?\n", '[Thu Sep 06 14:30:09 2012] [notice] Apache/2.2.23 (Unix) DAV/2 mod_fcgid/2.3.7-dev mod_ssl/2.2.23-dev OpenSSL/1.0.0e configured -- resuming normal operations\n', '[Thu Sep 06 14:30:09 2012] [notice] [client 127.0.0.1] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 14:30:09 2012] [notice] [client 127.0.0.1] mod_backtrace: 0x7f183effc7c9<0x7f183effc9c9<0x4451bf<0x7f183effcdf6<ap_run_handler\n', '[Thu Sep 06 14:30:09 2012] [notice] [client 127.0.0.1] mod_crash: about to crash\n', '[Thu Sep 06 14:30:10 2012] [notice] child pid 18833 exit signal Segmentation fault (11)\n', '[Thu Sep 06 14:30:20 2012] [notice] caught SIGTERM, shutting down\n']
+Building for /home/trawick/inst/24-64...
+['Building for platform Linux\n', 'rm -f testdiag testcrash mod_backtrace.la mod_whatkilledus.la mod_crash.la *.o\n', 'gcc -DDIAG_BITS_64 -O0 -Wall -rdynamic   -c -o testdiag.o testdiag.c\n', 'gcc -c -DDIAG_BITS_64 -O0 -Wall -rdynamic -g diag.c\n', 'gcc -O0 -Wall -rdynamic -o testdiag -g testdiag.o diag.o \n', 'gcc -c -DDIAG_BITS_64 -O0 -Wall -rdynamic -g testcrash.c\n', 'gcc -O0 -Wall -rdynamic -o testcrash -g testcrash.o diag.o \n', '/home/trawick/inst/24-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_backtrace.c diag.c \n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=compile /usr/bin/gcc -m64 -std=gnu99 -prefer-pic   -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -Wpointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wformat -Wformat-security -Werror=format-security -I/usr/include/libxml2 -I/home/trawick/inst/24-64/include  -I/home/trawick/inst/apr14-64/include/apr-1   -I/home/trawick/inst/apr14-64/include/apr-1  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_backtrace.lo mod_backtrace.c && touch mod_backtrace.slo\n', 'mod_backtrace.c: In function \xe2\x80\x98merge_backtrace_server_conf\xe2\x80\x99:\n', 'mod_backtrace.c:114:25: warning: unused variable \xe2\x80\x98overrides\xe2\x80\x99 [-Wunused-variable]\n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=compile /usr/bin/gcc -m64 -std=gnu99 -prefer-pic   -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -Wpointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wformat -Wformat-security -Werror=format-security -I/usr/include/libxml2 -I/home/trawick/inst/24-64/include  -I/home/trawick/inst/apr14-64/include/apr-1   -I/home/trawick/inst/apr14-64/include/apr-1  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o diag.lo diag.c && touch diag.slo\n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=link /usr/bin/gcc -m64 -std=gnu99    -o mod_backtrace.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/24-64/modules -module -avoid-version    diag.lo mod_backtrace.lo\n', '/home/trawick/inst/24-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_whatkilledus.c \n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=compile /usr/bin/gcc -m64 -std=gnu99 -prefer-pic   -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -Wpointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wformat -Wformat-security -Werror=format-security -I/usr/include/libxml2 -I/home/trawick/inst/24-64/include  -I/home/trawick/inst/apr14-64/include/apr-1   -I/home/trawick/inst/apr14-64/include/apr-1  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_whatkilledus.lo mod_whatkilledus.c && touch mod_whatkilledus.slo\n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=link /usr/bin/gcc -m64 -std=gnu99    -o mod_whatkilledus.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/24-64/modules -module -avoid-version    mod_whatkilledus.lo\n', '/home/trawick/inst/24-64/bin/apxs -Wc,"-DDIAG_BITS_64 -O0 -Wall -rdynamic" -Wl,"-O0 -Wall -rdynamic" -c mod_crash.c \n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=compile /usr/bin/gcc -m64 -std=gnu99 -prefer-pic   -D_REENTRANT -D_GNU_SOURCE -DAP_DEBUG -g -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -pthread -Wpointer-arith -Wdeclaration-after-statement -Werror=declaration-after-statement -Wformat -Wformat-security -Werror=format-security -I/usr/include/libxml2 -I/home/trawick/inst/24-64/include  -I/home/trawick/inst/apr14-64/include/apr-1   -I/home/trawick/inst/apr14-64/include/apr-1  -DDIAG_BITS_64 -O0 -Wall -rdynamic  -c -o mod_crash.lo mod_crash.c && touch mod_crash.slo\n', '/home/trawick/inst/apr14-64/build-1/libtool --silent --mode=link /usr/bin/gcc -m64 -std=gnu99    -o mod_crash.la -O0 -Wall -rdynamic  -rpath /home/trawick/inst/24-64/modules -module -avoid-version    mod_crash.lo\n', '/home/trawick/inst/24-64/bin/apxs -i mod_backtrace.la\n', "/home/trawick/inst/24-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/apr14-64/build-1/libtool' mod_backtrace.la /home/trawick/inst/24-64/modules\n", '/home/trawick/inst/apr14-64/build-1/libtool --mode=install install mod_backtrace.la /home/trawick/inst/24-64/modules/\n', 'install .libs/mod_backtrace.so /home/trawick/inst/24-64/modules/mod_backtrace.so\n', 'install .libs/mod_backtrace.lai /home/trawick/inst/24-64/modules/mod_backtrace.la\n', 'install .libs/mod_backtrace.a /home/trawick/inst/24-64/modules/mod_backtrace.a\n', 'chmod 644 /home/trawick/inst/24-64/modules/mod_backtrace.a\n', 'ranlib /home/trawick/inst/24-64/modules/mod_backtrace.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/24-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/24-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/24-64/modules/mod_backtrace.so\n', '/home/trawick/inst/24-64/bin/apxs -i mod_whatkilledus.la\n', "/home/trawick/inst/24-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/apr14-64/build-1/libtool' mod_whatkilledus.la /home/trawick/inst/24-64/modules\n", '/home/trawick/inst/apr14-64/build-1/libtool --mode=install install mod_whatkilledus.la /home/trawick/inst/24-64/modules/\n', 'install .libs/mod_whatkilledus.so /home/trawick/inst/24-64/modules/mod_whatkilledus.so\n', 'install .libs/mod_whatkilledus.lai /home/trawick/inst/24-64/modules/mod_whatkilledus.la\n', 'install .libs/mod_whatkilledus.a /home/trawick/inst/24-64/modules/mod_whatkilledus.a\n', 'chmod 644 /home/trawick/inst/24-64/modules/mod_whatkilledus.a\n', 'ranlib /home/trawick/inst/24-64/modules/mod_whatkilledus.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/24-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/24-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/24-64/modules/mod_whatkilledus.so\n', '/home/trawick/inst/24-64/bin/apxs -i mod_crash.la\n', "/home/trawick/inst/24-64/build/instdso.sh SH_LIBTOOL='/home/trawick/inst/apr14-64/build-1/libtool' mod_crash.la /home/trawick/inst/24-64/modules\n", '/home/trawick/inst/apr14-64/build-1/libtool --mode=install install mod_crash.la /home/trawick/inst/24-64/modules/\n', 'install .libs/mod_crash.so /home/trawick/inst/24-64/modules/mod_crash.so\n', 'install .libs/mod_crash.lai /home/trawick/inst/24-64/modules/mod_crash.la\n', 'install .libs/mod_crash.a /home/trawick/inst/24-64/modules/mod_crash.a\n', 'chmod 644 /home/trawick/inst/24-64/modules/mod_crash.a\n', 'ranlib /home/trawick/inst/24-64/modules/mod_crash.a\n', 'PATH="$PATH:/sbin" ldconfig -n /home/trawick/inst/24-64/modules\n', '----------------------------------------------------------------------\n', 'Libraries have been installed in:\n', '   /home/trawick/inst/24-64/modules\n', '\n', 'If you ever happen to want to link against installed libraries\n', 'in a given directory, LIBDIR, you must either use libtool, and\n', "specify the full pathname of the library, or use the `-LLIBDIR'\n", 'flag during linking and do at least one of the following:\n', "   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable\n", '     during execution\n', "   - add LIBDIR to the `LD_RUN_PATH' environment variable\n", '     during linking\n', "   - use the `-Wl,--rpath -Wl,LIBDIR' linker flag\n", "   - have your system administrator add LIBDIR to `/etc/ld.so.conf'\n", '\n', 'See any operating system documentation about shared libraries for\n', 'more information, such as the ld(1) and ld.so(8) manual pages.\n', '----------------------------------------------------------------------\n', 'chmod 755 /home/trawick/inst/24-64/modules/mod_crash.so\n']
+Build rc: 0
+Testing ./testcrash...
+['Process id:  20073\n', 'Fatal signal: 11\n', 'Invalid memory address: 0xDEADBEEF\n', 'Backtrace to file descriptor:\n', './testcrash(diag_backtrace+0x7c)[0x401a31]\n', './testcrash[0x400d7d]\n', '/lib/x86_64-linux-gnu/libc.so.6(+0x36420)[0x7f56de6b8420]\n', './testcrash(y+0x9)[0x400dc2]\n', './testcrash(x+0x9)[0x400dd8]\n', './testcrash(w+0x9)[0x400de3]\n', './testcrash(main+0x67)[0x400e4c]\n', '/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xed)[0x7f56de6a330d]\n', './testcrash[0x400bb9]\n', 'Backtrace to callback:\n', 'testcrash:0x400db7\n', 'libc.so.6:0x7f56de6b8420\n', 'testcrash:y+0x9\n', 'testcrash:x+0x9\n', 'testcrash:w+0x9\n', 'testcrash:main+0x67\n', 'libc.so.6:__libc_start_main+0xed\n', 'testcrash:0x400bb9\n']
+testcrash rc -11
+Testing ./testdiag...
+['./testdiag(diag_backtrace+0x7c)[0x401cbd]\n', './testdiag(y+0xa0)[0x400e25]\n', './testdiag(x+0x9)[0x4010c1]\n', './testdiag(w+0x9)[0x4010cc]\n', './testdiag(main+0x9)[0x4010d7]\n', '/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xed)[0x7f774451930d]\n', './testdiag[0x400c49]\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0x400e80\n', '0x4010c1\n', '0x4010cc\n', '0x4010d7\n', '0x7f774451930d\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x141\n', 'x+0x9\n', 'w+0x9\n', 'main+0x9\n', '__libc_start_main+0xed\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__libc_start_main\n', '0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'testdiag:y\n', 'testdiag:x\n', 'testdiag:w\n', 'testdiag:main\n', 'libc.so.6:__libc_start_main\n', 'testdiag:0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', './testdiag:y\n', './testdiag:x\n', './testdiag:w\n', './testdiag:main\n', '/lib/x86_64-linux-gnu/libc.so.6:__libc_start_main\n', './testdiag:0x400c49\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
+testdiag rc 0
+['Server version: Apache/2.4.3-dev (Unix)\n', 'Server built:   Aug 10 2012 13:51:22\n']
+[]
+Response from /backtrace/ request:
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 18:30:30 GMT
+Server: Apache/2.4.3-dev (Unix) OpenSSL/1.0.0e
+Content-Length: 2830
+Connection: close
+Content-Type: text/plain
+
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
+/home/trawick/inst/24-64/modules/mod_backtrace.so:0x7f8398bf7aa5
+/home/trawick/inst/24-64/modules/mod_backtrace.so:0x7f8398bf7cd7
+/home/trawick/inst/24-64/bin/httpd:0x45008e
+/home/trawick/inst/24-64/bin/httpd:0x450966
+/home/trawick/inst/24-64/bin/httpd:0x46c46d
+/home/trawick/inst/24-64/bin/httpd:0x46c552
+/home/trawick/inst/24-64/bin/httpd:0x468eab
+/home/trawick/inst/24-64/bin/httpd:0x468fc1
+/home/trawick/inst/24-64/bin/httpd:0x45d68b
+/home/trawick/inst/24-64/bin/httpd:0x45db8d
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
+mod_backtrace.so:0x7f8398bf7aea
+mod_backtrace.so:0x7f8398bf7cd7
+httpd:0x45008e
+httpd:0x450966
+httpd:0x46c46d
+httpd:0x46c552
+httpd:0x468eab
+httpd:0x468fc1
+httpd:0x45d68b
+httpd:0x45db8d
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME
+/home/trawick/inst/24-64/modules/mod_backtrace.so:0x7f8398bf7b2f
+/home/trawick/inst/24-64/modules/mod_backtrace.so:0x7f8398bf7cd7
+/home/trawick/inst/24-64/bin/httpd:0x45008e
+/home/trawick/inst/24-64/bin/httpd:0x450966
+/home/trawick/inst/24-64/bin/httpd:0x46c46d
+/home/trawick/inst/24-64/bin/httpd:0x46c552
+/home/trawick/inst/24-64/bin/httpd:0x468eab
+/home/trawick/inst/24-64/bin/httpd:0x468fc1
+/home/trawick/inst/24-64/bin/httpd:0x45d68b
+/home/trawick/inst/24-64/bin/httpd:0x45db8d
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FUNCTION
+0x7f8398bf7b74
+0x7f8398bf7cd7
+ap_run_handler
+ap_invoke_handler
+ap_process_async_request
+ap_process_request
+0x468eab
+0x468fc1
+ap_run_process_connection
+ap_process_connection
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FN_OFFSET
+0x7f8398bf7bb9
+0x7f8398bf7cd7
+0x45008e
+0x450966
+0x46c46d
+0x46c552
+0x468eab
+0x468fc1
+0x45d68b
+0x45db8d
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
+0x7f8398bf7bfe
+0x7f8398bf7cd7
+ap_run_handler+0x5b
+ap_invoke_handler+0x173
+ap_process_async_request+0x264
+ap_process_request+0x24
+0x468eab
+0x468fc1
+ap_run_process_connection+0x5b
+ap_process_connection+0x66
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_ADDRESS
+0x7f8398bf7c43
+0x7f8398bf7cd7
+0x45008e
+0x450966
+0x46c46d
+0x46c552
+0x468eab
+0x468fc1
+0x45d68b
+0x45db8d
+----------------------------------------------------
+mod_backtrace: DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
+0x7f8398bf7c88
+0x7f8398bf7cd7
+ap_run_handler+0x5b 0x45008e
+ap_invoke_handler+0x173 0x450966
+ap_process_async_request+0x264 0x46c46d
+ap_process_request+0x24 0x46c552
+0x468eab
+0x468fc1
+ap_run_process_connection+0x5b 0x45d68b
+ap_process_connection+0x66 0x45db8d
+
+Response from /crash/ request:
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 18:30:30 GMT
+Server: Apache/2.4.3-dev (Unix) OpenSSL/1.0.0e
+Connection: close
+Content-Type: text/plain
+
+Crashing in process 20085...
+
+Pid that crashed: >20085<
+/home/trawick/inst/24-64/logs/whatkilledus_log:
+['**** Crash at 2012-09-06 14:30:30\n', 'Process id:  20085\n', 'Fatal signal: 11\n', '\n', '/home/trawick/inst/24-64/modules/mod_backtrace.so:0x7f8398bf73b1\n', '/home/trawick/inst/24-64/modules/mod_whatkilledus.so:0x7f83987ef9f7\n', '/home/trawick/inst/24-64/modules/mod_whatkilledus.so:0x7f83987efc1a\n', '/home/trawick/inst/24-64/bin/httpd:ap_run_fatal_exception+0x5b 0x430562\n', '/home/trawick/inst/24-64/bin/httpd:0x4616a5\n', '/home/trawick/inst/24-64/bin/httpd:0x4616df\n', '/lib/x86_64-linux-gnu/libpthread.so.0:0x7f839fb76060\n', '/home/trawick/inst/24-64/modules/mod_crash.so:0x7f83989f3986\n', '/home/trawick/inst/24-64/modules/mod_crash.so:0x7f83989f3ad8\n', '/home/trawick/inst/24-64/bin/httpd:ap_run_handler+0x5b 0x45008e\n', '/home/trawick/inst/24-64/bin/httpd:ap_invoke_handler+0x173 0x450966\n', '/home/trawick/inst/24-64/bin/httpd:ap_process_async_request+0x264 0x46c46d\n', '/home/trawick/inst/24-64/bin/httpd:ap_process_request+0x24 0x46c552\n', '/home/trawick/inst/24-64/bin/httpd:0x468eab\n', '/home/trawick/inst/24-64/bin/httpd:0x468fc1\n', '/home/trawick/inst/24-64/bin/httpd:ap_run_process_connection+0x5b 0x45d68b\n', '/home/trawick/inst/24-64/bin/httpd:ap_process_connection+0x66 0x45db8d\n', '/home/trawick/inst/24-64/modules/mod_mpm_worker.so:0x7f839ef5441a\n', '/home/trawick/inst/24-64/modules/mod_mpm_worker.so:0x7f839ef5516a\n', '/home/trawick/inst/apr14-64/lib/libapr-1.so.0:0x7f839fdb14ab\n', '/lib/x86_64-linux-gnu/libpthread.so.0:0x7f839fb6defc\n', '/lib/x86_64-linux-gnu/libc.so.6:clone+0x6d 0x7f839f8a859d\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:46250->127.0.0.1:10080  (user agent at 127.0.0.1:46250)\n', '\n']
+/home/trawick/inst/24-64/logs/error_log:
+['[Thu Sep 06 14:30:28.819929 2012] [unique_id:info] [pid 20080:tid 140203310511904] AH01566: using ip addr 127.0.1.1\n', '[Thu Sep 06 14:30:29.005804 2012] [ssl:debug] [pid 20080:tid 140203310511904] ssl_engine_pphrase.c(181): AH02199: SSL not enabled on vhost foo:80, skipping SSL setup\n', '[Thu Sep 06 14:30:29.005840 2012] [ssl:debug] [pid 20080:tid 140203310511904] ssl_engine_pphrase.c(181): AH02199: SSL not enabled on vhost foo:10080, skipping SSL setup\n', '[Thu Sep 06 14:30:29.032327 2012] [ssl:info] [pid 20080:tid 140203310511904] AH01887: Init: Initializing (virtual) servers for SSL\n', '[Thu Sep 06 14:30:29.032356 2012] [ssl:info] [pid 20080:tid 140203310511904] AH01876: mod_ssl/2.4.3-dev compiled against Server: Apache/2.4.3-dev, Library: OpenSSL/1.0.0e\n', '[Thu Sep 06 14:30:29.032439 2012] [backtrace:notice] [pid 20080:tid 140203310511904] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 14:30:29.032450 2012] [whatkilledus:notice] [pid 20080:tid 140203310511904] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 14:30:29.044325 2012] [unique_id:info] [pid 20081:tid 140203310511904] AH01566: using ip addr 127.0.1.1\n', '[Thu Sep 06 14:30:30.004902 2012] [ssl:debug] [pid 20081:tid 140203310511904] ssl_engine_pphrase.c(181): AH02199: SSL not enabled on vhost foo:80, skipping SSL setup\n', '[Thu Sep 06 14:30:30.004991 2012] [ssl:debug] [pid 20081:tid 140203310511904] ssl_engine_pphrase.c(181): AH02199: SSL not enabled on vhost foo:10080, skipping SSL setup\n', '[Thu Sep 06 14:30:30.087183 2012] [ssl:warn] [pid 20081:tid 140203310511904] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]\n', '[Thu Sep 06 14:30:30.087206 2012] [ssl:info] [pid 20081:tid 140203310511904] AH01887: Init: Initializing (virtual) servers for SSL\n', '[Thu Sep 06 14:30:30.087239 2012] [ssl:info] [pid 20081:tid 140203310511904] AH01876: mod_ssl/2.4.3-dev compiled against Server: Apache/2.4.3-dev, Library: OpenSSL/1.0.0e\n', '[Thu Sep 06 14:30:30.089193 2012] [proxy:debug] [pid 20083:tid 140203310511904] proxy_util.c(1657): AH00925: initializing worker proxy:reverse shared\n', '[Thu Sep 06 14:30:30.089255 2012] [proxy:debug] [pid 20083:tid 140203310511904] proxy_util.c(1697): AH00927: initializing worker proxy:reverse local\n', '[Thu Sep 06 14:30:30.089308 2012] [proxy:debug] [pid 20083:tid 140203310511904] proxy_util.c(1729): AH00930: initialized pool in child 20083 for (*) min=0 max=25 smax=25\n', '[Thu Sep 06 14:30:30.089705 2012] [mpm_worker:notice] [pid 20081:tid 140203310511904] AH00292: Apache/2.4.3-dev (Unix) OpenSSL/1.0.0e configured -- resuming normal operations\n', '[Thu Sep 06 14:30:30.089729 2012] [mpm_worker:info] [pid 20081:tid 140203310511904] AH00293: Server built: Aug 10 2012 13:51:22\n', "[Thu Sep 06 14:30:30.089759 2012] [core:notice] [pid 20081:tid 140203310511904] AH00094: Command line: '/home/trawick/inst/24-64/bin/httpd'\n", '[Thu Sep 06 14:30:30.089777 2012] [mpm_worker:debug] [pid 20081:tid 140203310511904] worker.c(1820): AH00294: Accept mutex: sysvsem (default: sysvsem)\n', '[Thu Sep 06 14:30:30.090147 2012] [proxy:debug] [pid 20085:tid 140203310511904] proxy_util.c(1657): AH00925: initializing worker proxy:reverse shared\n', '[Thu Sep 06 14:30:30.090187 2012] [proxy:debug] [pid 20085:tid 140203310511904] proxy_util.c(1697): AH00927: initializing worker proxy:reverse local\n', '[Thu Sep 06 14:30:30.090228 2012] [proxy:debug] [pid 20085:tid 140203310511904] proxy_util.c(1729): AH00930: initialized pool in child 20085 for (*) min=0 max=25 smax=25\n', '[Thu Sep 06 14:30:30.091268 2012] [proxy:debug] [pid 20084:tid 140203310511904] proxy_util.c(1657): AH00925: initializing worker proxy:reverse shared\n', '[Thu Sep 06 14:30:30.091323 2012] [proxy:debug] [pid 20084:tid 140203310511904] proxy_util.c(1697): AH00927: initializing worker proxy:reverse local\n', '[Thu Sep 06 14:30:30.091363 2012] [proxy:debug] [pid 20084:tid 140203310511904] proxy_util.c(1729): AH00930: initialized pool in child 20084 for (*) min=0 max=25 smax=25\n', '[Thu Sep 06 14:30:30.092270 2012] [authz_core:debug] [pid 20083:tid 140203012093696] mod_authz_core.c(805): [client 127.0.0.1:46249] AH01626: authorization result of Require all granted: granted\n', '[Thu Sep 06 14:30:30.092311 2012] [authz_core:debug] [pid 20083:tid 140203012093696] mod_authz_core.c(805): [client 127.0.0.1:46249] AH01626: authorization result of <RequireAny>: granted\n', '[Thu Sep 06 14:30:30.096309 2012] [backtrace:notice] [pid 20083:tid 140203012093696] [0x7f8398bf76a4<0x7f8398bf7962<0x457e36<0x458592<0x7f8398bf7d28] [client 127.0.0.1:46249] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 14:30:30.097939 2012] [authz_core:debug] [pid 20085:tid 140203121198848] mod_authz_core.c(805): [client 127.0.0.1:46250] AH01626: authorization result of Require all granted: granted\n', '[Thu Sep 06 14:30:30.097961 2012] [authz_core:debug] [pid 20085:tid 140203121198848] mod_authz_core.c(805): [client 127.0.0.1:46250] AH01626: authorization result of <RequireAny>: granted\n', '[Thu Sep 06 14:30:30.098021 2012] [crash:notice] [pid 20085:tid 140203121198848] [client 127.0.0.1:46250] about to crash\n', '[Thu Sep 06 14:30:31.090719 2012] [core:notice] [pid 20081:tid 140203310511904] AH00052: child pid 20085 exit signal Segmentation fault (11)\n', '[Thu Sep 06 14:30:31.092448 2012] [proxy:debug] [pid 20167:tid 140203310511904] proxy_util.c(1657): AH00925: initializing worker proxy:reverse shared\n', '[Thu Sep 06 14:30:31.092503 2012] [proxy:debug] [pid 20167:tid 140203310511904] proxy_util.c(1697): AH00927: initializing worker proxy:reverse local\n', '[Thu Sep 06 14:30:31.092548 2012] [proxy:debug] [pid 20167:tid 140203310511904] proxy_util.c(1729): AH00930: initialized pool in child 20167 for (*) min=0 max=25 smax=25\n', '[Thu Sep 06 14:30:41.494468 2012] [core:info] [pid 20081:tid 140203310511904] AH00096: removed PID file /home/trawick/inst/24-64/logs/httpd.pid (pid=20081)\n', '[Thu Sep 06 14:30:41.494539 2012] [mpm_worker:notice] [pid 20081:tid 140203310511904] AH00295: caught SIGTERM, shutting down\n']
