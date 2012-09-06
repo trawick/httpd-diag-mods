@@ -75,7 +75,13 @@ def test_httpd(section, httpd, skip_startstop):
         if sys.platform == 'win32':
             print 'Start httpd from install %s now...' % (httpd)
         else:
-            get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
+            (rc, msgs) = get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
+            if rc != 0:
+                print 'httpd start failed:'
+                print msgs
+                raise
+            add_to_log(msgs)
+
         time.sleep(10)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -165,10 +171,10 @@ def test_httpd(section, httpd, skip_startstop):
         if sys.platform == 'win32':
             print 'Stop httpd from install %s now...' % (httpd)
         else:
-            try:
-                rc = subprocess.call([os.path.join(httpd, 'bin', 'apachectl'), 'stop'])
-            except:
-                print "couldn't run, error", sys.exc_info()[0]
+            get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'stop'])
+            if rc != 0:
+                print 'httpd stop failed:'
+                print msgs
                 raise
         time.sleep(10);
 
@@ -235,6 +241,10 @@ plat = sys.platform
 section = "%s_%s" % (hn, plat)
 
 add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
+
+(rc, msgs) = get_cmd_output(['hg', 'identify', '-ni'])
+add_to_log('Code version:')
+add_to_log(msgs)
 
 bldcmd = config.get(section, 'BUILD').split(' ')
 if config.has_option(section, 'HTTPD22_INSTALLS'):
