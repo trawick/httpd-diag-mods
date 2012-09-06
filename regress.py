@@ -50,6 +50,17 @@ def get_cmd_output(args):
     os.unlink(logfilename)
     return (rc, msgs)
 
+def is_active():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    active = False
+    try:
+        s.connect(('127.0.0.1', 10080))
+        active = True
+    except:
+        pass
+    s.close()
+    return active
+
 def test_httpd(section, httpd, skip_startstop):
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
     err_log = os.path.join(httpd, 'logs', 'error' + log_ext);
@@ -82,7 +93,10 @@ def test_httpd(section, httpd, skip_startstop):
                 raise
             add_to_log(msgs)
 
-        time.sleep(10)
+        while not is_active():
+            print '.',
+            time.sleep(1)
+        print
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
     s.connect(('127.0.0.1', 10080))
@@ -176,7 +190,11 @@ def test_httpd(section, httpd, skip_startstop):
                 print 'httpd stop failed:'
                 print msgs
                 raise
-        time.sleep(10);
+        while is_active():
+            print '.',
+            time.sleep(1)
+        print
+        time.sleep(5);
 
     errlog = open(err_log).readlines()
     add_to_log("%s:" % err_log)
