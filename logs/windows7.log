@@ -1,28 +1,28 @@
-Starting tests on Seven_win32 at Thu Sep 06 10:53:01 2012
+Starting tests on Seven_win32 at Thu Sep 06 15:08:18 2012
 Code version:
-['f60e10fa9382 1153\n']
+['64ddd5bc2417 1171\n']
 Building for c:\Apache-2.2.22...
 ['\n', 'Microsoft (R) Program Maintenance Utility Version 10.00.30319.01\n', 'Copyright (C) Microsoft Corporation.  All rights reserved.\n', '\n', '\tdel *.obj *.exe *.so *.pdb *.ilk *.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestdiag.pdb /Fotestdiag.obj testdiag.c\n', 'testdiag.c\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fddiag.pdb /Fodiag.obj diag.c\n', 'diag.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestcrash.pdb /Fotestcrash.obj testcrash.c\n', 'testcrash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testcrash.pdb /out:testcrash.exe testcrash.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache-2.2.22\\include /c /Fdmod_backtrace.pdb /Fomod_backtrace.obj mod_backtrace.c\n', 'mod_backtrace.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache-2.2.22\\lib /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_backtrace.lib and object mod_backtrace.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache-2.2.22\\include  /c /Fdmod_whatkilledus.pdb /Fomod_whatkilledus.obj mod_whatkilledus.c\n', 'mod_whatkilledus.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache-2.2.22\\lib /PDB:mod_whatkilledus.pdb /out:mod_whatkilledus.so mod_whatkilledus.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_whatkilledus.lib and object mod_whatkilledus.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache-2.2.22\\include /c /Fdmod_crash.pdb /Fomod_crash.obj mod_crash.c\n', 'mod_crash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache-2.2.22\\lib /PDB:mod_crash.pdb /out:mod_crash.so mod_crash.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_crash.lib and object mod_crash.exp\n', '\tcopy mod_backtrace.so c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_backtrace.pdb c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.so c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.pdb c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.so c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.pdb c:\\Apache-2.2.22\\modules\n', '        1 file(s) copied.\n']
 Build rc: 0
 Testing .\testcrash.exe...
-['Process id:        2532\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0xE11053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
+['Process id:        7852\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x81053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
 testcrash rc -1073741819
 Testing .\testdiag.exe...
-['y+0x78 0x13310C8\n', 'x+0x8 0x1331348\n', 'w+0x8 0x1331358\n', 'main+0x8 0x1331368\n', '__tmainCRTStartup+0x122 0x13324F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0x1331119\n', '0x1331348\n', '0x1331358\n', '0x1331368\n', '0x13324F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
+['y+0x78 0xF410C8\n', 'x+0x8 0xF41348\n', 'w+0x8 0xF41358\n', 'main+0x8 0xF41368\n', '__tmainCRTStartup+0x122 0xF424F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0xF41119\n', '0xF41348\n', '0xF41358\n', '0xF41368\n', '0xF424F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
 testdiag rc 0
 ['Server version: Apache/2.2.22 (Win32)\n', 'Server built:   Jan 28 2012 11:16:39\n']
 Response from /backtrace/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:53:08 GMT
+Date: Thu, 06 Sep 2012 19:08:26 GMT
 Server: Apache/2.2.22 (Win32)
-Content-Length: 2085
+Content-Length: 2109
 Connection: close
 Content-Type: text/plain
 
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
-0x1A18A8
-0x1A17D7
+0x6D4018A8
+0x6D4017D7
 0x6FF02435
 0x6FF027C0
 0x6FF0F01E
@@ -33,8 +33,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x75691287
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
-0x1A18DF
-0x1A17D7
+0x6D4018DF
+0x6D4017D7
 0x6FF02435
 0x6FF027C0
 0x6FF0F01E
@@ -45,8 +45,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
 0x75691287
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME
-0x1A1916
-0x1A17D7
+0x6D401916
+0x6D4017D7
 0x6FF02435
 0x6FF027C0
 0x6FF0F01E
@@ -69,8 +69,8 @@ ap_regkey_value_remove
 itow_s
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_FN_OFFSET
-0x1A1984
-0x1A17D7
+0x6D401984
+0x6D4017D7
 0x6FF02435
 0x6FF027C0
 0x6FF0F01E
@@ -93,8 +93,8 @@ ap_regkey_value_remove+0xC7C
 itow_s+0x4C
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS
-0x1A19F2
-0x1A17D7
+0x6D4019F2
+0x6D4017D7
 0x6FF02435
 0x6FF027C0
 0x6FF0F01E
@@ -105,8 +105,8 @@ mod_backtrace: DIAG_BTFIELDS_ADDRESS
 0x75691287
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
-backtrace+0x219 0x1A1A29
-backtrace_handler+0x27 0x1A17D7
+backtrace+0x219 0x6D401A29
+backtrace_handler+0x27 0x6D4017D7
 ap_run_handler+0x25 0x6FF02435
 ap_invoke_handler+0xB0 0x6FF027C0
 ap_die+0x29E 0x6FF0F01E
@@ -118,40 +118,40 @@ itow_s+0x4C 0x75691287
 
 Response from /crash/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:53:08 GMT
+Date: Thu, 06 Sep 2012 19:08:26 GMT
 Server: Apache/2.2.22 (Win32)
 Connection: close
 Content-Type: text/plain
 
-Crashing in process 7056...
+Crashing in process 6164...
 
-Pid that crashed: >7056<
+Pid that crashed: >6164<
 c:\Apache-2.2.22\logs\whatkilledus.log:
-['**** Crash at 2012-09-06 10:53:08\n', 'Process id:        7056\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x6D40113C\n', '\n', 'crash_request+0x5C 0x6D40113C\n', 'crash_handler+0x99 0x6D4010C9\n', 'ap_run_handler+0x25 0x6FF02435\n', 'ap_invoke_handler+0xB0 0x6FF027C0\n', 'ap_die+0x29E 0x6FF0F01E\n', 'ap_get_request_note+0x1D0C 0x6FF0ADBC\n', 'ap_run_process_connection+0x25 0x6FF050A5\n', 'ap_process_connection+0x33 0x6FF05363\n', 'ap_regkey_value_remove+0xC7C 0x6FF1DF6C\n', 'itow_s+0x4C 0x75691287\n', 'endthreadex+0x6C 0x75691328\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:55278->127.0.0.1:10080\n', '\n']
+['**** Crash at 2012-09-06 15:08:26\n', 'Process id:        6164\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x6D63113C\n', '\n', 'crash_request+0x5C 0x6D63113C\n', 'crash_handler+0x99 0x6D6310C9\n', 'ap_run_handler+0x25 0x6FF02435\n', 'ap_invoke_handler+0xB0 0x6FF027C0\n', 'ap_die+0x29E 0x6FF0F01E\n', 'ap_get_request_note+0x1D0C 0x6FF0ADBC\n', 'ap_run_process_connection+0x25 0x6FF050A5\n', 'ap_process_connection+0x33 0x6FF05363\n', 'ap_regkey_value_remove+0xC7C 0x6FF1DF6C\n', 'itow_s+0x4C 0x75691287\n', 'endthreadex+0x6C 0x75691328\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:56138->127.0.0.1:10080\n', '\n']
 c:\Apache-2.2.22\logs\error.log:
-['[Thu Sep 06 10:53:08 2012] [notice] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:53:08 2012] [notice] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:53:08 2012] [notice] Apache/2.2.22 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:53:08 2012] [notice] Server built: Jan 28 2012 11:16:39\n', '[Thu Sep 06 10:53:08 2012] [notice] Parent: Created child process 7056\n', '[Thu Sep 06 10:53:08 2012] [notice] Child 7056: Child process is running\n', '[Thu Sep 06 10:53:08 2012] [warn] mod_backtrace: Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 10:53:08 2012] [notice] Child 7056: Acquired the start mutex.\n', '[Thu Sep 06 10:53:08 2012] [notice] Child 7056: Starting 64 worker threads.\n', '[Thu Sep 06 10:53:08 2012] [notice] Child 7056: Starting thread to listen on port 10080.\n', '[Thu Sep 06 10:53:08 2012] [notice] Child 7056: Starting thread to listen on port 8080.\n', '[Thu Sep 06 10:53:08 2012] [notice] [client 127.0.0.1] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 10:53:08 2012] [notice] [client 127.0.0.1] mod_backtrace: backtrace_handler<ap_run_handler<ap_invoke_handler<ap_die<ap_get_request_note\n', '[Thu Sep 06 10:53:08 2012] [notice] [client 127.0.0.1] mod_crash: about to crash\n', '[Thu Sep 06 10:53:58 2012] [notice] Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 10:53:58 2012] [notice] Apache/2.2.22 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:53:58 2012] [notice] Server built: Jan 28 2012 11:16:39\n', '[Thu Sep 06 10:53:58 2012] [notice] Parent: Created child process 7448\n', 'Apache server interrupted...\n', 'otice] Child 7448: Child process is running\n', '[Thu Sep 06 10:53:58 2012] [warn] mod_backtrace: Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 10:53:58 2012] [notice] Child 7448: Acquired the start mutex.\n', '[Thu Sep 06 10:53:58 2012] [notice] Child 7448: Starting 64 worker threads.\n', '[Thu Sep 06 10:53:58 2012] [notice] Child 7448: Starting thread to listen on port 8080.\n', '[Thu Sep 06 10:53:58 2012] [notice] Child 7448: Starting thread to listen on port 10080.\n', '[Thu Sep 06 10:55:25 2012] [notice] Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 10:55:25 2012] [notice] Child 7448: Exit event signaled. Child process is ending.\n', '[Thu Sep 06 10:55:26 2012] [notice] Child 7448: Released the start mutex\n', '[Thu Sep 06 10:55:27 2012] [notice] Child 7448: All worker threads have exited.\n', '[Thu Sep 06 10:55:27 2012] [notice] Child 7448: Child process is exiting\n', '[Thu Sep 06 10:55:27 2012] [notice] Parent: Child process exited successfully.\n']
+['[Thu Sep 06 15:08:26 2012] [notice] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:08:26 2012] [notice] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:08:26 2012] [notice] Apache/2.2.22 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:08:26 2012] [notice] Server built: Jan 28 2012 11:16:39\n', '[Thu Sep 06 15:08:26 2012] [notice] Parent: Created child process 6164\n', '[Thu Sep 06 15:08:26 2012] [notice] Child 6164: Child process is running\n', '[Thu Sep 06 15:08:26 2012] [warn] mod_backtrace: Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 15:08:26 2012] [notice] Child 6164: Acquired the start mutex.\n', '[Thu Sep 06 15:08:26 2012] [notice] Child 6164: Starting 64 worker threads.\n', '[Thu Sep 06 15:08:26 2012] [notice] Child 6164: Starting thread to listen on port 10080.\n', '[Thu Sep 06 15:08:26 2012] [notice] Child 6164: Starting thread to listen on port 8080.\n', '[Thu Sep 06 15:08:26 2012] [notice] [client 127.0.0.1] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 15:08:26 2012] [notice] [client 127.0.0.1] mod_backtrace: backtrace_handler<ap_run_handler<ap_invoke_handler<ap_die<ap_get_request_note\n', '[Thu Sep 06 15:08:26 2012] [notice] [client 127.0.0.1] mod_crash: about to crash\n', '[Thu Sep 06 15:09:31 2012] [notice] Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 15:09:31 2012] [notice] Apache/2.2.22 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:09:31 2012] [notice] Server built: Jan 28 2012 11:16:39\n', '[Thu Sep 06 15:09:31 2012] [notice] Parent: Created child process 7332\n', 'Apache server interrupted...\n', 'otice] Child 7332: Child process is running\n', '[Thu Sep 06 15:09:31 2012] [warn] mod_backtrace: Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 15:09:31 2012] [notice] Child 7332: Acquired the start mutex.\n', '[Thu Sep 06 15:09:31 2012] [notice] Child 7332: Starting 64 worker threads.\n', '[Thu Sep 06 15:09:31 2012] [notice] Child 7332: Starting thread to listen on port 10080.\n', '[Thu Sep 06 15:09:31 2012] [notice] Child 7332: Starting thread to listen on port 8080.\n', '[Thu Sep 06 15:09:49 2012] [notice] Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 15:09:49 2012] [notice] Child 7332: Exit event signaled. Child process is ending.\n', '[Thu Sep 06 15:09:50 2012] [notice] Child 7332: Released the start mutex\n', '[Thu Sep 06 15:09:51 2012] [notice] Child 7332: All worker threads have exited.\n', '[Thu Sep 06 15:09:51 2012] [notice] Child 7332: Child process is exiting\n', '[Thu Sep 06 15:09:51 2012] [notice] Parent: Child process exited successfully.\n']
 Building for c:\Apache22...
 ['\n', 'Microsoft (R) Program Maintenance Utility Version 10.00.30319.01\n', 'Copyright (C) Microsoft Corporation.  All rights reserved.\n', '\n', '\tdel *.obj *.exe *.so *.pdb *.ilk *.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestdiag.pdb /Fotestdiag.obj testdiag.c\n', 'testdiag.c\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fddiag.pdb /Fodiag.obj diag.c\n', 'diag.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestcrash.pdb /Fotestcrash.obj testcrash.c\n', 'testcrash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testcrash.pdb /out:testcrash.exe testcrash.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache22\\include /c /Fdmod_backtrace.pdb /Fomod_backtrace.obj mod_backtrace.c\n', 'mod_backtrace.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache22\\lib /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_backtrace.lib and object mod_backtrace.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache22\\include  /c /Fdmod_whatkilledus.pdb /Fomod_whatkilledus.obj mod_whatkilledus.c\n', 'mod_whatkilledus.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache22\\lib /PDB:mod_whatkilledus.pdb /out:mod_whatkilledus.so mod_whatkilledus.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_whatkilledus.lib and object mod_whatkilledus.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache22\\include /c /Fdmod_crash.pdb /Fomod_crash.obj mod_crash.c\n', 'mod_crash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache22\\lib /PDB:mod_crash.pdb /out:mod_crash.so mod_crash.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_crash.lib and object mod_crash.exp\n', '\tcopy mod_backtrace.so c:\\Apache22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_backtrace.pdb c:\\Apache22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.so c:\\Apache22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.pdb c:\\Apache22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.so c:\\Apache22\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.pdb c:\\Apache22\\modules\n', '        1 file(s) copied.\n']
 Build rc: 0
 Testing .\testcrash.exe...
-['Process id:        7676\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x1381053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
+['Process id:        7492\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0xF01053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
 testcrash rc -1073741819
 Testing .\testdiag.exe...
-['y+0x78 0x13710C8\n', 'x+0x8 0x1371348\n', 'w+0x8 0x1371358\n', 'main+0x8 0x1371368\n', '__tmainCRTStartup+0x122 0x13724F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0x1371119\n', '0x1371348\n', '0x1371358\n', '0x1371368\n', '0x13724F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
+['y+0x78 0xE910C8\n', 'x+0x8 0xE91348\n', 'w+0x8 0xE91358\n', 'main+0x8 0xE91368\n', '__tmainCRTStartup+0x122 0xE924F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0xE91119\n', '0xE91348\n', '0xE91358\n', '0xE91368\n', '0xE924F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
 testdiag rc 0
 ['Server version: Apache/2.2.15-dev (Win32)\n', 'Server built:   Dec  5 2009 13:07:28\n']
 Response from /backtrace/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:55:43 GMT
+Date: Thu, 06 Sep 2012 19:10:09 GMT
 Server: Apache/2.2.15-dev (Win32)
-Content-Length: 2128
+Content-Length: 2140
 Connection: close
 Content-Type: text/plain
 
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
-0x1FD18A8
-0x1FD17D7
+0x6D6318A8
+0x6D6317D7
 0x6FF02115
 0x6FF0257C
 0x6FF0F7FC
@@ -162,8 +162,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x74F23433
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
-0x1FD18DF
-0x1FD17D7
+0x6D6318DF
+0x6D6317D7
 0x6FF02115
 0x6FF0257C
 0x6FF0F7FC
@@ -174,8 +174,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
 0x74F23433
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME
-0x1FD1916
-0x1FD17D7
+0x6D631916
+0x6D6317D7
 0x6FF02115
 0x6FF0257C
 0x6FF0F7FC
@@ -198,8 +198,8 @@ worker_main
 endthreadex
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_FN_OFFSET
-0x1FD1984
-0x1FD17D7
+0x6D631984
+0x6D6317D7
 0x6FF02115
 0x6FF0257C
 0x6FF0F7FC
@@ -222,8 +222,8 @@ worker_main+0xA0
 endthreadex+0x44
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS
-0x1FD19F2
-0x1FD17D7
+0x6D6319F2
+0x6D6317D7
 0x6FF02115
 0x6FF0257C
 0x6FF0F7FC
@@ -234,8 +234,8 @@ mod_backtrace: DIAG_BTFIELDS_ADDRESS
 0x74F23433
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
-backtrace+0x219 0x1FD1A29
-backtrace_handler+0x27 0x1FD17D7
+backtrace+0x219 0x6D631A29
+backtrace_handler+0x27 0x6D6317D7
 ap_run_handler+0x25 0x6FF02115
 ap_invoke_handler+0x9C 0x6FF0257C
 ap_process_request+0x3C 0x6FF0F7FC
@@ -247,31 +247,31 @@ endthreadex+0x44 0x74F23433
 
 Response from /crash/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:55:43 GMT
+Date: Thu, 06 Sep 2012 19:10:09 GMT
 Server: Apache/2.2.15-dev (Win32)
 Connection: close
 Content-Type: text/plain
 
-Crashing in process 6668...
+Crashing in process 7296...
 
-Pid that crashed: >6668<
+Pid that crashed: >7296<
 c:\Apache22\logs\whatkilledus.log:
-['**** Crash at 2012-09-06 10:55:43\n', 'Process id:        6668\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x6D40113C\n', '\n', 'crash_request+0x5C 0x6D40113C\n', 'crash_handler+0x99 0x6D4010C9\n', 'ap_run_handler+0x25 0x6FF02115\n', 'ap_invoke_handler+0x9C 0x6FF0257C\n', 'ap_process_request+0x3C 0x6FF0F7FC\n', 'ap_process_http_connection+0x52 0x6FF0AA82\n', 'ap_run_process_connection+0x25 0x6FF04F25\n', 'ap_process_connection+0x32 0x6FF051B2\n', 'worker_main+0xA0 0x6FF1E130\n', 'endthreadex+0x44 0x74F23433\n', 'endthreadex+0xD8 0x74F234C7\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:55370->127.0.0.1:10080\n', '\n']
+['**** Crash at 2012-09-06 15:10:09\n', 'Process id:        7296\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x6D40113C\n', '\n', 'crash_request+0x5C 0x6D40113C\n', 'crash_handler+0x99 0x6D4010C9\n', 'ap_run_handler+0x25 0x6FF02115\n', 'ap_invoke_handler+0x9C 0x6FF0257C\n', 'ap_process_request+0x3C 0x6FF0F7FC\n', 'ap_process_http_connection+0x52 0x6FF0AA82\n', 'ap_run_process_connection+0x25 0x6FF04F25\n', 'ap_process_connection+0x32 0x6FF051B2\n', 'worker_main+0xA0 0x6FF1E130\n', 'endthreadex+0x44 0x74F23433\n', 'endthreadex+0xD8 0x74F234C7\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:56161->127.0.0.1:10080\n', '\n']
 c:\Apache22\logs\error.log:
-['[Thu Sep 06 10:55:42 2012] [notice] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:55:42 2012] [notice] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:55:42 2012] [notice] Apache/2.2.15-dev (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:55:42 2012] [notice] Server built: Dec  5 2009 13:07:28\n', '[Thu Sep 06 10:55:42 2012] [notice] Parent: Created child process 6668\n', '[Thu Sep 06 10:55:42 2012] [debug] mpm_winnt.c(487): Parent: Sent the scoreboard to the child\n', '[Thu Sep 06 10:55:42 2012] [notice] Child 6668: Child process is running\n', '[Thu Sep 06 10:55:42 2012] [debug] mpm_winnt.c(408): Child 6668: Retrieved our scoreboard from the parent.\n', '[Thu Sep 06 10:55:42 2012] [info] Parent: Duplicating socket 256 and sending it to child process 6668\n', '[Thu Sep 06 10:55:42 2012] [info] Parent: Duplicating socket 252 and sending it to child process 6668\n', '[Thu Sep 06 10:55:42 2012] [debug] mpm_winnt.c(605): Parent: Sent 2 listeners to child 6668\n', '[Thu Sep 06 10:55:42 2012] [debug] mpm_winnt.c(564): Child 6668: retrieved 2 listeners from parent\n', '[Thu Sep 06 10:55:42 2012] [info] mod_backtrace: Symbol path set to c:/symbols;c:/Windows/symbols;C:/Apache22/bin;C:/Apache22/modules;\n', '[Thu Sep 06 10:55:42 2012] [notice] Child 6668: Acquired the start mutex.\n', '[Thu Sep 06 10:55:42 2012] [notice] Child 6668: Starting 64 worker threads.\n', '[Thu Sep 06 10:55:42 2012] [notice] Child 6668: Starting thread to listen on port 10080.\n', '[Thu Sep 06 10:55:42 2012] [notice] Child 6668: Starting thread to listen on port 80.\n', '[Thu Sep 06 10:55:43 2012] [notice] [client 127.0.0.1] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 10:55:43 2012] [notice] [client 127.0.0.1] mod_backtrace: backtrace_handler<ap_run_handler<ap_invoke_handler<ap_process_request<ap_process_http_connection\n', '[Thu Sep 06 10:55:43 2012] [notice] [client 127.0.0.1] mod_crash: about to crash\n', '[Thu Sep 06 10:56:02 2012] [notice] Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 10:56:02 2012] [notice] Apache/2.2.15-dev (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:56:02 2012] [notice] Server built: Dec  5 2009 13:07:28\n', '[Thu Sep 06 10:56:02 2012] [notice] Parent: Created child process 3124\n', '[Thu Sep 06 10:56:02 2012] [debug] mpm_winnt.c(487): Parent: Sent the scoreboard to the child\n', '[Thu Sep 06 10:56:02 2012] [notice] Child 3124: Child process is running\n', '[Thu Sep 06 10:56:02 2012] [debug] mpm_winnt.c(408): Child 3124: Retrieved our scoreboard from the parent.\n', '[Thu Sep 06 10:56:02 2012] [info] Parent: Duplicating socket 256 and sending it to child process 3124\n', '[Thu Sep 06 10:56:02 2012] [info] Parent: Duplicating socket 252 and sending it to child process 3124\n', '[Thu Sep 06 10:56:02 2012] [debug] mpm_winnt.c(605): Parent: Sent 2 listeners to child 3124\n', 'Apache server interrupted...\n', 'ebug] mpm_winnt.c(564): Child 3124: retrieved 2 listeners from parent\n', '[Thu Sep 06 10:56:02 2012] [info] mod_backtrace: Symbol path set to c:/symbols;c:/Windows/symbols;C:/Apache22/bin;C:/Apache22/modules;\n', '[Thu Sep 06 10:56:03 2012] [notice] Child 3124: Acquired the start mutex.\n', '[Thu Sep 06 10:56:03 2012] [notice] Child 3124: Starting 64 worker threads.\n', '[Thu Sep 06 10:56:03 2012] [notice] Child 3124: Starting thread to listen on port 10080.\n', '[Thu Sep 06 10:56:03 2012] [notice] Child 3124: Starting thread to listen on port 80.\n', '[Thu Sep 06 10:56:19 2012] [notice] Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 10:56:19 2012] [notice] Child 3124: Exit event signaled. Child process is ending.\n', '[Thu Sep 06 10:56:19 2012] [info] Child 3124: Accept thread exiting.\n', '[Thu Sep 06 10:56:20 2012] [info] Child 3124: Accept thread exiting.\n', '[Thu Sep 06 10:56:20 2012] [notice] Child 3124: Released the start mutex\n', '[Thu Sep 06 10:56:20 2012] [info] Child 3124: 64 threads blocked on the completion port\n', '[Thu Sep 06 10:56:21 2012] [notice] Child 3124: All worker threads have exited.\n', '[Thu Sep 06 10:56:21 2012] [notice] Child 3124: Child process is exiting\n', '[Thu Sep 06 10:56:21 2012] [notice] Parent: Child process exited successfully.\n', '[Thu Sep 06 10:56:21 2012] [info] removed PID file C:/Apache22/logs/httpd.pid (pid=3560)\n']
+['[Thu Sep 06 15:10:09 2012] [notice] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:10:09 2012] [notice] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:10:09 2012] [notice] Apache/2.2.15-dev (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:10:09 2012] [notice] Server built: Dec  5 2009 13:07:28\n', '[Thu Sep 06 15:10:09 2012] [notice] Parent: Created child process 7296\n', '[Thu Sep 06 15:10:09 2012] [debug] mpm_winnt.c(487): Parent: Sent the scoreboard to the child\n', '[Thu Sep 06 15:10:09 2012] [notice] Child 7296: Child process is running\n', '[Thu Sep 06 15:10:09 2012] [debug] mpm_winnt.c(408): Child 7296: Retrieved our scoreboard from the parent.\n', '[Thu Sep 06 15:10:09 2012] [info] Parent: Duplicating socket 256 and sending it to child process 7296\n', '[Thu Sep 06 15:10:09 2012] [info] Parent: Duplicating socket 252 and sending it to child process 7296\n', '[Thu Sep 06 15:10:09 2012] [debug] mpm_winnt.c(605): Parent: Sent 2 listeners to child 7296\n', '[Thu Sep 06 15:10:09 2012] [debug] mpm_winnt.c(564): Child 7296: retrieved 2 listeners from parent\n', '[Thu Sep 06 15:10:09 2012] [info] mod_backtrace: Symbol path set to c:/symbols;c:/Windows/symbols;C:/Apache22/bin;C:/Apache22/modules;\n', '[Thu Sep 06 15:10:09 2012] [notice] Child 7296: Acquired the start mutex.\n', '[Thu Sep 06 15:10:09 2012] [notice] Child 7296: Starting 64 worker threads.\n', '[Thu Sep 06 15:10:09 2012] [notice] Child 7296: Starting thread to listen on port 10080.\n', '[Thu Sep 06 15:10:09 2012] [notice] Child 7296: Starting thread to listen on port 80.\n', '[Thu Sep 06 15:10:09 2012] [notice] [client 127.0.0.1] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 15:10:09 2012] [notice] [client 127.0.0.1] mod_backtrace: backtrace_handler<ap_run_handler<ap_invoke_handler<ap_process_request<ap_process_http_connection\n', '[Thu Sep 06 15:10:09 2012] [notice] [client 127.0.0.1] mod_crash: about to crash\n', '[Thu Sep 06 15:10:36 2012] [notice] Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 15:10:36 2012] [notice] Apache/2.2.15-dev (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:10:36 2012] [notice] Server built: Dec  5 2009 13:07:28\n', '[Thu Sep 06 15:10:36 2012] [notice] Parent: Created child process 7372\n', '[Thu Sep 06 15:10:36 2012] [debug] mpm_winnt.c(487): Parent: Sent the scoreboard to the child\n', '[Thu Sep 06 15:10:36 2012] [notice] Child 7372: Child process is running\n', '[Thu Sep 06 15:10:36 2012] [debug] mpm_winnt.c(408): Child 7372: Retrieved our scoreboard from the parent.\n', '[Thu Sep 06 15:10:36 2012] [info] Parent: Duplicating socket 256 and sending it to child process 7372\n', '[Thu Sep 06 15:10:36 2012] [info] Parent: Duplicating socket 252 and sending it to child process 7372\n', '[Thu Sep 06 15:10:36 2012] [debug] mpm_winnt.c(605): Parent: Sent 2 listeners to child 7372\n', 'Apache server interrupted...\n', 'ebug] mpm_winnt.c(564): Child 7372: retrieved 2 listeners from parent\n', '[Thu Sep 06 15:10:36 2012] [info] mod_backtrace: Symbol path set to c:/symbols;c:/Windows/symbols;C:/Apache22/bin;C:/Apache22/modules;\n', '[Thu Sep 06 15:10:36 2012] [notice] Child 7372: Acquired the start mutex.\n', '[Thu Sep 06 15:10:36 2012] [notice] Child 7372: Starting 64 worker threads.\n', '[Thu Sep 06 15:10:36 2012] [notice] Child 7372: Starting thread to listen on port 10080.\n', '[Thu Sep 06 15:10:36 2012] [notice] Child 7372: Starting thread to listen on port 80.\n', '[Thu Sep 06 15:11:01 2012] [notice] Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 15:11:01 2012] [notice] Child 7372: Exit event signaled. Child process is ending.\n', '[Thu Sep 06 15:11:01 2012] [info] Child 7372: Accept thread exiting.\n', '[Thu Sep 06 15:11:01 2012] [info] Child 7372: Accept thread exiting.\n', '[Thu Sep 06 15:11:02 2012] [notice] Child 7372: Released the start mutex\n', '[Thu Sep 06 15:11:02 2012] [info] Child 7372: 64 threads blocked on the completion port\n', '[Thu Sep 06 15:11:03 2012] [notice] Child 7372: All worker threads have exited.\n', '[Thu Sep 06 15:11:03 2012] [notice] Child 7372: Child process is exiting\n', '[Thu Sep 06 15:11:03 2012] [notice] Parent: Child process exited successfully.\n', '[Thu Sep 06 15:11:03 2012] [info] removed PID file C:/Apache22/logs/httpd.pid (pid=6452)\n']
 Building for c:\Apache24...
 ['\n', 'Microsoft (R) Program Maintenance Utility Version 10.00.30319.01\n', 'Copyright (C) Microsoft Corporation.  All rights reserved.\n', '\n', '\tdel *.obj *.exe *.so *.pdb *.ilk *.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestdiag.pdb /Fotestdiag.obj testdiag.c\n', 'testdiag.c\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fddiag.pdb /Fodiag.obj diag.c\n', 'diag.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi /c /Fdtestcrash.pdb /Fotestcrash.obj testcrash.c\n', 'testcrash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testcrash.pdb /out:testcrash.exe testcrash.obj diag.obj dbghelp.lib\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache24\\include /c /Fdmod_backtrace.pdb /Fomod_backtrace.obj mod_backtrace.c\n', 'mod_backtrace.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache24\\lib /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_backtrace.lib and object mod_backtrace.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache24\\include  /c /Fdmod_whatkilledus.pdb /Fomod_whatkilledus.obj mod_whatkilledus.c\n', 'mod_whatkilledus.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache24\\lib /PDB:mod_whatkilledus.pdb /out:mod_whatkilledus.so mod_whatkilledus.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_whatkilledus.lib and object mod_whatkilledus.exp\n', '\tcl /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi -Ic:\\Apache24\\include /c /Fdmod_crash.pdb /Fomod_crash.obj mod_crash.c\n', 'mod_crash.c\n', '\tlink kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:c:\\Apache24\\lib /PDB:mod_crash.pdb /out:mod_crash.so mod_crash.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib\n', '   Creating library mod_crash.lib and object mod_crash.exp\n', '\tcopy mod_backtrace.so c:\\Apache24\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_backtrace.pdb c:\\Apache24\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.so c:\\Apache24\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_whatkilledus.pdb c:\\Apache24\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.so c:\\Apache24\\modules\n', '        1 file(s) copied.\n', '\tcopy mod_crash.pdb c:\\Apache24\\modules\n', '        1 file(s) copied.\n']
 Build rc: 0
 Testing .\testcrash.exe...
-['Process id:        6780\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0xB51053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
+['Process id:        6464\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0xB81053\n', 'y+0x3\n', 'x+0x8\n', 'w+0x8\n', 'main+0x1D\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n']
 testcrash rc -1073741819
 Testing .\testdiag.exe...
-['y+0x78 0xBB10C8\n', 'x+0x8 0xBB1348\n', 'w+0x8 0xBB1358\n', 'main+0x8 0xBB1368\n', '__tmainCRTStartup+0x122 0xBB24F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0xBB1119\n', '0xBB1348\n', '0xBB1358\n', '0xBB1368\n', '0xBB24F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
+['y+0x78 0x12B10C8\n', 'x+0x8 0x12B1348\n', 'w+0x8 0x12B1358\n', 'main+0x8 0x12B1368\n', '__tmainCRTStartup+0x122 0x12B24F2\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ALL\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_ADDRESS\n', '0x12B1119\n', '0x12B1348\n', '0x12B1358\n', '0x12B1368\n', '0x12B24F2\n', '0x76CC339A\n', '0x779D9EF2\n', '0x779D9EC5\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET\n', 'y+0x10C\n', 'x+0x8\n', 'w+0x8\n', 'main+0x8\n', '__tmainCRTStartup+0x122\n', 'BaseThreadInitThunk+0x12\n', 'RtlInitializeExceptionChain+0x63\n', 'RtlInitializeExceptionChain+0x36\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_NAME\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_MODULE_PATH\n', 'y\n', 'x\n', 'w\n', 'main\n', '__tmainCRTStartup\n', 'BaseThreadInitThunk\n', 'RtlInitializeExceptionChain\n', 'RtlInitializeExceptionChain\n', '\n', '---------------------------------------------------\n', 'testdiag: ONELINER\n', 'y<x<w\n']
 testdiag rc 0
 ['Server version: Apache/2.4.3 (Win32)\n', 'Server built:   Aug 18 2012 12:41:37\n']
 Response from /backtrace/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:56:35 GMT
+Date: Thu, 06 Sep 2012 19:11:37 GMT
 Server: Apache/2.4.3 (Win32)
 Content-Length: 2075
 Connection: close
@@ -279,8 +279,8 @@ Content-Type: text/plain
 
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
-0x690B188C
-0x690B1798
+0x690C188C
+0x690C1798
 0x6D342765
 0x6D342BFE
 0x6D35230E
@@ -291,8 +291,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x6D369D32
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
-0x690B18C7
-0x690B1798
+0x690C18C7
+0x690C1798
 0x6D342765
 0x6D342BFE
 0x6D35230E
@@ -303,8 +303,8 @@ mod_backtrace: DIAG_BTFIELDS_MODULE_NAME
 0x6D369D32
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME
-0x690B1902
-0x690B1798
+0x690C1902
+0x690C1798
 0x6D342765
 0x6D342BFE
 0x6D35230E
@@ -327,8 +327,8 @@ ap_run_process_connection
 ap_regkey_value_remove
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_FN_OFFSET
-0x690B1978
-0x690B1798
+0x690C1978
+0x690C1798
 0x6D342765
 0x6D342BFE
 0x6D35230E
@@ -351,8 +351,8 @@ ap_run_process_connection+0x25
 ap_regkey_value_remove+0x1182
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS
-0x690B19EE
-0x690B1798
+0x690C19EE
+0x690C1798
 0x6D342765
 0x6D342BFE
 0x6D35230E
@@ -363,8 +363,8 @@ mod_backtrace: DIAG_BTFIELDS_ADDRESS
 0x6D369D32
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET
-backtrace+0x239 0x690B1A29
-backtrace_handler+0x28 0x690B1798
+backtrace+0x239 0x690C1A29
+backtrace_handler+0x28 0x690C1798
 ap_run_handler+0x25 0x6D342765
 ap_invoke_handler+0x9E 0x6D342BFE
 ap_die+0x3AE 0x6D35230E
@@ -376,15 +376,15 @@ ap_regkey_value_remove+0x1182 0x6D369D32
 
 Response from /crash/ request:
 HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 14:56:35 GMT
+Date: Thu, 06 Sep 2012 19:11:37 GMT
 Server: Apache/2.4.3 (Win32)
 Connection: close
 Content-Type: text/plain
 
-Crashing in process 7400...
+Crashing in process 4812...
 
-Pid that crashed: >7400<
+Pid that crashed: >4812<
 c:\Apache24\logs\whatkilledus.log:
-['**** Crash at 2012-09-06 10:56:35\n', 'Process id:        7400\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x690A115D\n', '\n', 'crash_request+0x7D 0x690A115D\n', 'crash_handler+0x99 0x690A10C9\n', 'ap_run_handler+0x25 0x6D342765\n', 'ap_invoke_handler+0x9E 0x6D342BFE\n', 'ap_die+0x3AE 0x6D35230E\n', 'ap_die+0x441 0x6D3523A1\n', 'ap_psignature+0x13E1 0x6D34CE31\n', 'ap_psignature+0x1487 0x6D34CED7\n', 'ap_run_process_connection+0x25 0x6D345E15\n', 'ap_regkey_value_remove+0x1182 0x6D369D32\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:55387->127.0.0.1:10080  (user agent at 127.0.0.1:55387)\n', '\n']
+['**** Crash at 2012-09-06 15:11:37\n', 'Process id:        4812\n', 'Exception code:    EXCEPTION_ACCESS_VIOLATION\n', 'Exception address: 0x6909115D\n', '\n', 'crash_request+0x7D 0x6909115D\n', 'crash_handler+0x99 0x690910C9\n', 'ap_run_handler+0x25 0x6D342765\n', 'ap_invoke_handler+0x9E 0x6D342BFE\n', 'ap_die+0x3AE 0x6D35230E\n', 'ap_die+0x441 0x6D3523A1\n', 'ap_psignature+0x13E1 0x6D34CE31\n', 'ap_psignature+0x1487 0x6D34CED7\n', 'ap_run_process_connection+0x25 0x6D345E15\n', 'ap_regkey_value_remove+0x1182 0x6D369D32\n', 'BaseThreadInitThunk+0x12 0x76CC339A\n', 'RtlInitializeExceptionChain+0x63 0x779D9EF2\n', 'RtlInitializeExceptionChain+0x36 0x779D9EC5\n', '\n', 'Request line (parsed):\n', 'GET /crash/foo%01%02%03/?****************\n', 'Request headers:\n', 'Connection:close\n', 'Host:127.0.0.1\n', 'X-Jeff:*******\n', 'FooHdr:FooVal\n', 'BarHdr:%01%02%03%04%05%06%07\n', '\n', 'Client connection:\n', '127.0.0.1:56196->127.0.0.1:10080  (user agent at 127.0.0.1:56196)\n', '\n']
 c:\Apache24\logs\error.log:
-['[Thu Sep 06 10:56:34.213000 2012] [backtrace:notice] [pid 4844:tid 392] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:56:34.214000 2012] [whatkilledus:notice] [pid 4844:tid 392] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 10:56:34.327000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00455: Apache/2.4.3 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:56:34.328000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00456: Server built: Aug 18 2012 12:41:37\n', "[Thu Sep 06 10:56:34.328000 2012] [core:notice] [pid 4844:tid 392] AH00094: Command line: '\\\\apache24\\\\bin\\\\httpd -d C:/Apache24 -D WINDOWS'\n", '[Thu Sep 06 10:56:34.332000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00418: Parent: Created child process 7400\n', '[Thu Sep 06 10:56:34.961000 2012] [backtrace:warn] [pid 7400:tid 412] Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 10:56:34.965000 2012] [mpm_winnt:notice] [pid 7400:tid 412] AH00354: Child: Starting 64 worker threads.\n', '[Thu Sep 06 10:56:35.182000 2012] [backtrace:notice] [pid 7400:tid 1032] [ap_error_log2stderr<ap_register_log_hooks<backtrace_handler<ap_run_handler<ap_invoke_handler] [client 127.0.0.1:55386] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 10:56:35.194000 2012] [crash:notice] [pid 7400:tid 1032] [client 127.0.0.1:55387] about to crash\n', '[Thu Sep 06 10:57:25.971000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00428: Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 10:57:26.153000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00455: Apache/2.4.3 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 10:57:26.153000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00456: Server built: Aug 18 2012 12:41:37\n', "[Thu Sep 06 10:57:26.153000 2012] [core:notice] [pid 4844:tid 392] AH00094: Command line: '\\\\apache24\\\\bin\\\\httpd -d C:/Apache24 -D WINDOWS'\n", '[Thu Sep 06 10:57:26.155000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00418: Parent: Created child process 6904\n', 'Apache server interrupted...\n', '012] [backtrace:warn] [pid 6904:tid 412] Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 10:57:26.743000 2012] [mpm_winnt:notice] [pid 6904:tid 412] AH00354: Child: Starting 64 worker threads.\n', '[Thu Sep 06 10:57:43.185000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00422: Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 10:57:45.186000 2012] [mpm_winnt:notice] [pid 6904:tid 412] AH00364: Child: All worker threads have exited.\n', '[Thu Sep 06 10:57:45.226000 2012] [mpm_winnt:notice] [pid 4844:tid 392] AH00430: Parent: Child process exited successfully.\n']
+['[Thu Sep 06 15:11:37.302000 2012] [backtrace:notice] [pid 1896:tid 392] mod_backtrace v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:11:37.303000 2012] [whatkilledus:notice] [pid 1896:tid 392] mod_whatkilledus v2.00 from http://emptyhammock.com/\n', '[Thu Sep 06 15:11:37.358000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00455: Apache/2.4.3 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:11:37.358000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00456: Server built: Aug 18 2012 12:41:37\n', "[Thu Sep 06 15:11:37.358000 2012] [core:notice] [pid 1896:tid 392] AH00094: Command line: '\\\\apache24\\\\bin\\\\httpd -d C:/Apache24 -D WINDOWS'\n", '[Thu Sep 06 15:11:37.360000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00418: Parent: Created child process 4812\n', '[Thu Sep 06 15:11:37.948000 2012] [backtrace:warn] [pid 4812:tid 412] Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 15:11:37.952000 2012] [mpm_winnt:notice] [pid 4812:tid 412] AH00354: Child: Starting 64 worker threads.\n', '[Thu Sep 06 15:11:37.960000 2012] [backtrace:notice] [pid 4812:tid 1008] [ap_error_log2stderr<ap_register_log_hooks<backtrace_handler<ap_run_handler<ap_invoke_handler] [client 127.0.0.1:56195] ---MoD_bAcKtRaCe---\n', '[Thu Sep 06 15:11:37.968000 2012] [crash:notice] [pid 4812:tid 1008] [client 127.0.0.1:56196] about to crash\n', '[Thu Sep 06 15:12:37.499000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00428: Parent: child process exited with status 3221225477 -- Restarting.\n', '[Thu Sep 06 15:12:37.569000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00455: Apache/2.4.3 (Win32) configured -- resuming normal operations\n', '[Thu Sep 06 15:12:37.569000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00456: Server built: Aug 18 2012 12:41:37\n', "[Thu Sep 06 15:12:37.569000 2012] [core:notice] [pid 1896:tid 392] AH00094: Command line: '\\\\apache24\\\\bin\\\\httpd -d C:/Apache24 -D WINDOWS'\n", '[Thu Sep 06 15:12:37.570000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00418: Parent: Created child process 3388\n', 'Apache server interrupted...\n', '012] [backtrace:warn] [pid 3388:tid 412] Symbol files are not present in the server bin directory; backtraces may not have symbols\n', '[Thu Sep 06 15:12:38.129000 2012] [mpm_winnt:notice] [pid 3388:tid 412] AH00354: Child: Starting 64 worker threads.\n', '[Thu Sep 06 15:12:51.561000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00422: Parent: Received shutdown signal -- Shutting down the server.\n', '[Thu Sep 06 15:12:53.562000 2012] [mpm_winnt:notice] [pid 3388:tid 412] AH00364: Child: All worker threads have exited.\n', '[Thu Sep 06 15:12:53.596000 2012] [mpm_winnt:notice] [pid 1896:tid 392] AH00430: Parent: Child process exited successfully.\n']
