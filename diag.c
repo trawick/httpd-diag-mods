@@ -371,7 +371,10 @@ static void format_frameinfo(const char *s,
     function = firstparen;
     if (function) {
         function += 1;
-        if (*function == ')') {
+        if (*function == ')' || *function == '+') {
+            /* here's one such scenario:
+             * "/home/trawick/inst/24-64/modules/mod_backtrace.so(+0x2b6c) [0x7f2727df4b6c]"
+             */
             function = NULL;
         }
     }
