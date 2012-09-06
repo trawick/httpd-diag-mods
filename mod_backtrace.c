@@ -606,7 +606,7 @@ static const command_rec backtrace_cmds[] =
 {
 #if DIAG_PLATFORM_WINDOWS
     AP_INIT_TAKE1("BacktraceSymbolPath", set_symbol_path, NULL, RSRC_CONF,
-                  "Specify additional directoriess for symbols (e.g., BacktraceSymbolPath c:/dir1;c:/dir2;c:/dir3)"),
+                  "Specify additional directories for symbols (e.g., BacktraceSymbolPath c:/dir1;c:/dir2;c:/dir3)"),
 #endif
 #if MODBT_HAVE_ERRORLOG_HOOK
     AP_INIT_TAKE1("BacktraceErrorLogging", set_error_logging, NULL, RSRC_CONF,
