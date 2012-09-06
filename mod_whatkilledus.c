@@ -880,30 +880,11 @@ static const char *check_exception_hook(cmd_parms *cmd, void *dummy, const char 
 }
 #endif
 
-static const char *set_obscured_headers(cmd_parms *cmd, void *dummy, const char *arg)
+static const char *set_obscured_fields(cmd_parms *cmd, void *dummy, const char *arg)
 {
     whatkilledus_server_t *conf = ap_get_module_config(cmd->server->module_config,
                                                        &whatkilledus_module);
     void *new_entry;
-    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
-    if (err != NULL) {
-        return err;
-    }
-
-    if (!conf->obscured) {
-        conf->obscured = apr_array_make(cmd->pool, 10, sizeof(char *));
-    }
-
-    new_entry = apr_array_push(conf->obscured);
-    *(char **)new_entry = apr_pstrdup(cmd->pool, arg);
-
-    return NULL;
-}
-
-static const char *set_obscured_requestlinefields(cmd_parms *cmd, void *dummy, const char *arg)
-{
-    whatkilledus_server_t *conf = ap_get_module_config(cmd->server->module_config,
-                                                       &whatkilledus_module);
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
     if (err != NULL) {
         return err;
@@ -927,10 +908,19 @@ static const char *set_obscured_requestlinefields(cmd_parms *cmd, void *dummy, c
     else if (!strcasecmp(arg, "parsed-line")) {
         conf->obscure_parsed = 1;
     }
+    else if (!strncasecmp(arg, "hdr:", 4)) {
+        if (!conf->obscured) {
+            conf->obscured = apr_array_make(cmd->pool, 10, sizeof(char *));
+        }
+
+        new_entry = apr_array_push(conf->obscured);
+        *(char **)new_entry = apr_pstrdup(cmd->pool, arg + strlen("hdr:"));
+    }
     else {
-        return apr_pstrcat(cmd->pool, "Invalid argument to WhatkilledusObscuredRequestLineFields: ",
+        return apr_pstrcat(cmd->pool, "Invalid argument to WKUObscureInRequest: ",
                            arg, NULL);
     }
+
     return NULL;
 }
 
@@ -940,12 +930,9 @@ static const command_rec whatkilledus_cmds[] =
     AP_INIT_TAKE1("EnableExceptionHook", check_exception_hook, NULL, RSRC_CONF,
                   "Check if EnableExceptionHook is On"),
 #endif
-    AP_INIT_ITERATE("WhatkilledusObscuredHeaders", set_obscured_headers, NULL,
+    AP_INIT_ITERATE("WKUObscureInRequest", set_obscured_fields, NULL,
                     RSRC_CONF,
-                    "List request headers whose values should be obscured in the log"),
-    AP_INIT_ITERATE("WhatkilledusObscuredRequestLineFields", set_obscured_requestlinefields, NULL,
-                    RSRC_CONF,
-                    "List request line fields whose values should be obscured in the log"),
+                    "List request headers nad fields in the request whose values should be obscured in the log"),
     {NULL}
 };
 
