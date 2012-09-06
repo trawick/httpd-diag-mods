@@ -130,6 +130,7 @@ def test_httpd(section, httpd, skip_startstop):
     barhdr_found = False
     x_jeff_found = False
     obscured_query_found = False
+    client_conn_found = False
     for l in log:
         if 'Process id:' in l:
             tpid = l.split()[2]
@@ -148,12 +149,15 @@ def test_httpd(section, httpd, skip_startstop):
             assert False
         elif 'GET /crash/foo%01%02%03/?****************' in l:
             obscured_query_found = True
+        elif '->127.0.0.1:10080' in l:
+            client_conn_found = True
 
     assert pid_found
     assert foohdr_found
     assert barhdr_found
     assert x_jeff_found
     assert obscured_query_found
+    assert client_conn_found
 
     time.sleep(10) # child just crashed, may take a while for process to dump core
 

@@ -46,6 +46,7 @@
 *** DONE Regression: Ensure that the exit signal message or Windows equivalent is logged, possibly after a delay.  Ensure that Greg's "Seg fault" message is not logged.
 *** DONE Regression: Test obscuring of request line fields
 *** TODO Test with screwy request lines (e.g., CONNECT).
+*** DONE Provide information about client connection.
 ** Web site and documentation
 *** TODO Create it!
 *** TODO Migrate old information from http://people.apache.org/~trawick/

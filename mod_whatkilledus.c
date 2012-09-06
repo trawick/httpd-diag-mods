@@ -560,6 +560,7 @@ static apr_status_t clear_request_logdata(void *unused)
 static int whatkilledus_post_read_request(request_rec *r)
 {
     apr_size_t count;
+    const char *connection;
     char *logdata;
     copy_header_user_data_t chud = {0};
     whatkilledus_server_t *conf = ap_get_module_config(r->server->module_config,
@@ -643,6 +644,21 @@ static int whatkilledus_post_read_request(request_rec *r)
     count += strlen("Request headers:" END_OF_LINE);
     apr_table_do(count_header_log_length, &count, r->headers_in, NULL);
     count += strlen(END_OF_LINE);
+
+    count += strlen("Client connection:" END_OF_LINE);
+    /* connection info */
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
+    connection = apr_psprintf(r->pool, "%pI->%pI  (user agent at %pI)" END_OF_LINE,
+                              r->connection->client_addr,
+                              r->connection->local_addr,
+                              r->useragent_addr);
+#else
+    connection = apr_psprintf(r->pool, "%pI->%pI" END_OF_LINE,
+                              r->connection->remote_addr,
+                              r->connection->local_addr);
+#endif
+    count += strlen(connection);
+
     count += 1; /* terminating '\0' */
 
     logdata = apr_palloc(r->pool, count);
@@ -728,6 +744,10 @@ static int whatkilledus_post_read_request(request_rec *r)
     /* insert headers */
     chud.obscured = conf->obscured;
     apr_table_do(copy_headers, &chud, r->headers_in, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, END_OF_LINE, NULL);
+
+    chud.outch = add_string(chud.outch, chud.lastoutch, "Client connection:" END_OF_LINE, NULL);
+    chud.outch = add_string(chud.outch, chud.lastoutch, connection, NULL);
 
 #if WKU_USE_PTHREAD_SPECIFIC
     if (thread_logdata_key) {
