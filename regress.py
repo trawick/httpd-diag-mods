@@ -43,8 +43,8 @@ def get_cmd_output(args):
     try:
         rc = subprocess.call(args, stdout=logfile, stderr=subprocess.STDOUT)
     except:
-        print "couldn't run, error", sys.exc_info()[0]
-        raise
+        msg = "couldn't run, error", sys.exc_info()[0]
+        raise Exception(msg)
     logfile.close()
     msgs = open(logfilename).readlines()
     os.unlink(logfilename)
@@ -90,7 +90,7 @@ def test_httpd(section, httpd, skip_startstop):
             if rc != 0:
                 print 'httpd start failed:'
                 print msgs
-                raise
+                raise Exception('httpd start failed')
             add_to_log(msgs)
 
         while not is_active():
@@ -189,7 +189,7 @@ def test_httpd(section, httpd, skip_startstop):
             if rc != 0:
                 print 'httpd stop failed:'
                 print msgs
-                raise
+                raise Exception('httpd stop failed')
         while is_active():
             print '.',
             time.sleep(1)
