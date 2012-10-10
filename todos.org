@@ -56,3 +56,5 @@
 *** DONE Credit where credit is due
 http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-handlers.ogg
 mod_log_forensic, test_char.h
+*** TODO Publicize on freecode.com or similar
+*** TODO Move doc for old versions from people.apache.org, redirect from there to emptyhammock.com
