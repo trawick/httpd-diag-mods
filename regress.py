@@ -61,6 +61,32 @@ def is_active():
     s.close()
     return active
 
+def simple_request(addr, uri, req):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+    s.connect(addr)
+    s.send(req)
+
+    rsp = ''
+    while True:
+        try:
+            tmprsp = s.recv(4096)
+        except socket.error as e:
+            if e.errno == errno.ECONNRESET:
+                tmprsp = None
+            else:
+                raise
+        if tmprsp:
+            rsp += tmprsp
+        else:
+            break
+
+    s.close()
+
+    add_to_log("Response from %s request:" % uri)
+    add_to_log(rsp)
+
+    return rsp
+
 def test_httpd(section, httpd, skip_startstop):
     if is_active():
         raise Exception("some httpd is active, but we haven't started any server yet")
@@ -101,45 +127,14 @@ def test_httpd(section, httpd, skip_startstop):
             time.sleep(1)
         print
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-    s.connect(('127.0.0.1', 10080))
-    s.send('GET /backtrace/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\n\r\n')
-
-    rsp = ''
-    while True:
-        tmprsp = s.recv(4096)
-        if tmprsp:
-            rsp += tmprsp
-        else:
-            break
-
-    s.close()
-
-    add_to_log("Response from /backtrace/ request:")
-    add_to_log(rsp)
+    simple_request(('127.0.0.1', 10080), '/backtrace/',
+                   'GET /backtrace/ HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\n\r\n')
 
     if os.path.exists(wku_log):
         os.unlink(wku_log)
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
-    s.connect(('127.0.0.1', 10080))
-    s.send('GET /crash/foo\1\2\3/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
-
-    rsp = ''
-    while True:
-        try:
-            tmprsp = s.recv(1)
-            if tmprsp:
-                rsp += tmprsp
-            else:
-                break
-        except:
-            break
-
-    s.close()
-
-    add_to_log("Response from /crash/ request:")
-    add_to_log(rsp)
+    rsp = simple_request(('127.0.0.1', 10080), '/crash/',
+                         'GET /crash/foo\1\2\3/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
 
     crashing_pid = rsp.split(' ')[-1][:-4]
     add_to_log("Pid that crashed: >%s<" % crashing_pid)
