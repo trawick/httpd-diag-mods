@@ -70,7 +70,7 @@ def simple_request(addr, uri, req):
     while True:
         try:
             tmprsp = s.recv(4096)
-        except socket.error as e:
+        except socket.error, e:
             if e.errno == errno.ECONNRESET:
                 tmprsp = None
             else:
