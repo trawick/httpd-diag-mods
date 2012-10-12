@@ -19,6 +19,7 @@
 #include "apr_strings.h"
 
 #include "httpd.h"
+
 #include "http_config.h"
 #include "http_log.h"
 #include "http_protocol.h"
@@ -27,6 +28,15 @@
 #include "mod_backtrace.h"
 
 #include "diag_mod_version.h"
+
+#if DIAG_PLATFORM_UNIX && !defined AP_ENABLE_EXCEPTION_HOOK
+
+#error **************************************************************************
+#error You must rebuild httpd with the --enable-exception-hook configure argument
+#error in order to use this module.
+#error **************************************************************************
+
+#else
 
 #if DIAG_PLATFORM_UNIX
 #include <fcntl.h>
@@ -945,3 +955,5 @@ module AP_MODULE_DECLARE_DATA whatkilledus_module = {
     whatkilledus_cmds,
     whatkilledus_register_hooks
 };
+
+#endif
