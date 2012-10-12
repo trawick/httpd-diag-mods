@@ -31,10 +31,14 @@
 
 #if DIAG_PLATFORM_UNIX && !defined AP_ENABLE_EXCEPTION_HOOK
 
+#ifdef __GNUC__
 #error **************************************************************************
 #error You must rebuild httpd with the --enable-exception-hook configure argument
 #error in order to use this module.
 #error **************************************************************************
+#else
+#error You must rebuild httpd with the --enable-exception-hook configure argument in order to use this module.
+#endif
 
 #else
 
