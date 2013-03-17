@@ -99,7 +99,11 @@ def test_httpd(section, httpd, skip_startstop):
     if os.path.exists(err_log):
         os.unlink(err_log)
 
-    shutil.copy('diag.conf', '%s/conf/conf.d/' % (httpd))
+    conf_d = '%s/conf/conf.d/' % (httpd)
+    if not os.path.isdir(conf_d):
+        raise Exception("%s does not exist or is not a directory" % (conf_d))
+
+    shutil.copy('diag.conf', conf_d)
 
     (rc, version_output) = get_cmd_output([os.path.join(httpd, 'bin', httpd_exe), '-v'])
     add_to_log(version_output)
@@ -107,6 +111,9 @@ def test_httpd(section, httpd, skip_startstop):
     if 'Apache/2.2' in version_output[0]:
         httpdver = 22
     elif 'Apache/2.4' in version_output[0]:
+        httpdver = 24
+    elif 'Apache/2.5' in version_output[0]:
+        # at least until it makes a real difference
         httpdver = 24
     else:
         raise Exception("Unknown server version (%s)" % version_output[0])
