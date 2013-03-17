@@ -324,7 +324,7 @@ for httpd in httpd22_installs + httpd24_installs:
 
     for rl in required_lines:
         if not rl + '\n' in msgs:
-            print "fail, required line >%s< not found in >%s<" % (rl, lines)
+            print "fail, required line >%s< not found in >%s<" % (rl, msgs)
             assert False
             assert False
 
