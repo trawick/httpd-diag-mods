@@ -1,4 +1,4 @@
-# Copyright 2012 Jeff Trawick, http://emptyhammock.com/
+# Copyright 2012, 2013 Jeff Trawick, http://emptyhammock.com/
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ DEFBITS := -DDIAG_BITS_$(BITS)
 BASE_CFLAGS=$(DEFBITS)
 
 PLATFORM := $(shell uname -s)
+MACHINE  := $(shell uname -m)
 
 $(info Building for platform $(PLATFORM))
 
@@ -40,6 +41,10 @@ CC=gcc
 CFLAGS=  $(BASE_CFLAGS) $(GCC_CFLAGS) -rdynamic
 LDFLAGS= $(GCC_CFLAGS) -rdynamic
 LIBS=
+
+ifeq ($(MACHINE), armv6l)
+CFLAGS += -funwind-tables
+endif
 
 else
 
