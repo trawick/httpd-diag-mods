@@ -687,15 +687,26 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         stackframe.AddrFrame.Mode =
             stackframe.AddrStack.Mode = AddrModeFlat;
 
+#ifdef DIAG_BITS_64
+    stackframe.AddrPC.Offset    = context.Rip;
+    stackframe.AddrFrame.Offset = context.Rbp;
+    stackframe.AddrStack.Offset = context.Rsp;
+#else
     stackframe.AddrPC.Offset    = context.Eip;
     stackframe.AddrFrame.Offset = context.Ebp;
     stackframe.AddrStack.Offset = context.Esp;
+#endif
 
     if (!p->symbols_initialized) {
         SymInitialize(process, NULL, TRUE);
     }
 
-    while (StackWalk64(IMAGE_FILE_MACHINE_I386,
+    while (StackWalk64(
+#ifdef DIAG_BITS_64
+                       IMAGE_FILE_MACHINE_AMD64,
+#else
+                       IMAGE_FILE_MACHINE_I386,
+#endif
                        process, thread,
                        &stackframe,
                        &context,

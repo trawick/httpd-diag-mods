@@ -13,7 +13,11 @@
 # limitations under the License.
 #
 
-CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi
+# CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi
+# MACHINE = I386
+
+CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_64 /D _WINDOWS /Zi
+MACHINE = X64
 
 all: testdiag.exe testcrash.exe mod_backtrace.so mod_whatkilledus.so mod_crash.so
 
@@ -31,13 +35,13 @@ install-mod-crash: mod_crash.so
 	copy mod_crash.pdb $(HTTPD)\modules
 
 testdiag.exe: testdiag.obj diag.obj
-	link kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib
+	link kernel32.lib /nologo /debug /subsystem:console /machine:$(MACHINE) /PDB:testdiag.pdb /out:testdiag.exe testdiag.obj diag.obj dbghelp.lib
 
 testdiag.obj: testdiag.c diag.h
 	cl $(CFLAGS) /c /Fdtestdiag.pdb /Fotestdiag.obj testdiag.c
 
 testcrash.exe: testcrash.obj diag.obj
-	link kernel32.lib /nologo /debug /subsystem:console /machine:I386 /PDB:testcrash.pdb /out:testcrash.exe testcrash.obj diag.obj dbghelp.lib
+	link kernel32.lib /nologo /debug /subsystem:console /machine:$(MACHINE) /PDB:testcrash.pdb /out:testcrash.exe testcrash.obj diag.obj dbghelp.lib
 
 testcrash.obj: testcrash.c diag.h
 	cl $(CFLAGS) /c /Fdtestcrash.pdb /Fotestcrash.obj testcrash.c
@@ -46,19 +50,19 @@ diag.obj: diag.c diag.h
 	cl $(CFLAGS) /c /Fddiag.pdb /Fodiag.obj diag.c
 
 mod_backtrace.so: mod_backtrace.obj diag.obj
-	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:$(HTTPD)\lib /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
+	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:$(MACHINE) /libpath:$(HTTPD)\lib /PDB:mod_backtrace.pdb /out:mod_backtrace.so mod_backtrace.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
 
 mod_backtrace.obj: mod_backtrace.c diag.h mod_backtrace.h
 	cl $(CFLAGS) -I$(HTTPD)\include /c /Fdmod_backtrace.pdb /Fomod_backtrace.obj mod_backtrace.c
 
 mod_crash.so: mod_crash.obj
-	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:$(HTTPD)\lib /PDB:mod_crash.pdb /out:mod_crash.so mod_crash.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
+	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:$(MACHINE) /libpath:$(HTTPD)\lib /PDB:mod_crash.pdb /out:mod_crash.so mod_crash.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
 
 mod_crash.obj: mod_crash.c
 	cl $(CFLAGS) -I$(HTTPD)\include /c /Fdmod_crash.pdb /Fomod_crash.obj mod_crash.c
 
 mod_whatkilledus.so: mod_whatkilledus.obj diag.obj
-	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:I386 /libpath:$(HTTPD)\lib /PDB:mod_whatkilledus.pdb /out:mod_whatkilledus.so mod_whatkilledus.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
+	link kernel32.lib /nologo /debug /subsystem:windows /dll /machine:$(MACHINE) /libpath:$(HTTPD)\lib /PDB:mod_whatkilledus.pdb /out:mod_whatkilledus.so mod_whatkilledus.obj diag.obj libhttpd.lib libapr-1.lib libaprutil-1.lib dbghelp.lib
 
 mod_whatkilledus.obj: mod_whatkilledus.c diag.h diag.h mod_backtrace.h
 	cl $(CFLAGS) -I$(HTTPD)\include  /c /Fdmod_whatkilledus.pdb /Fomod_whatkilledus.obj mod_whatkilledus.c
