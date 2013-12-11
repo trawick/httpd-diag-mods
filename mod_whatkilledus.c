@@ -24,6 +24,10 @@
 #include "http_log.h"
 #include "http_protocol.h"
 #include "ap_mpm.h"
+#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+#include "mpm_common.h"
+#include "http_main.h" /*TEMPORARY*/
+#endif
 
 #include "mod_backtrace.h"
 
@@ -385,6 +389,68 @@ static void write_report(file_handle_t logfile,
     write_file(logfile, END_OF_LINE, strlen(END_OF_LINE));
 }
 
+static void set_request_logdata(const char *logdata)
+{
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        pthread_setspecific(*thread_logdata_key, logdata);
+    }
+#else
+    thread_logdata = logdata;
+#endif
+}
+
+static const char *get_request_logdata(void)
+{
+    const char *logdata;
+
+#if WKU_USE_PTHREAD_SPECIFIC
+    if (thread_logdata_key) {
+        logdata = pthread_getspecific(*thread_logdata_key);
+    }
+    else {
+        logdata = NULL;
+    }
+#else
+    logdata = thread_logdata;
+#endif
+    return logdata;
+}
+
+static apr_status_t clear_request_logdata_cleanup(void *unused)
+{
+    ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, ap_server_conf,
+                 "request pool cleaned up");
+    set_request_logdata(NULL);
+    return APR_SUCCESS;
+}
+
+#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+static void whatkilledus_suspend_connection(conn_rec *c, request_rec *r)
+{
+    const char *logdata;
+
+    logdata = get_request_logdata();
+    /* If we're not in the middle of a request we won't have logdata, but we
+     * want to clear anything in the conn_rec just in case.
+     */
+    ap_set_module_config(c->conn_config, &whatkilledus_module, (void *)logdata);
+    /* If a crash occurs before a resume, we don't know anything. */
+    set_request_logdata(NULL);
+}
+
+static void whatkilledus_resume_connection(conn_rec *c, request_rec *r)
+{
+    const char *logdata;
+
+    /* Restore information about the current request, if any.
+     */
+    logdata = ap_get_module_config(c->conn_config, &whatkilledus_module);
+    ap_set_module_config(c->conn_config, &whatkilledus_module, NULL);
+    set_request_logdata(logdata);
+}
+#endif /* has suspend/resume hooks */
+
 #if DIAG_PLATFORM_WINDOWS
 
 static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
@@ -424,16 +490,7 @@ static LONG WINAPI whatkilledus_crash_handler(EXCEPTION_POINTERS *ep)
     c.context = ep->ContextRecord;
     c.exception_record = ep->ExceptionRecord;
 
-#if WKU_USE_PTHREAD_SPECIFIC
-    if (thread_logdata_key) {
-        logdata = pthread_getspecific(*thread_logdata_key);
-    }
-    else {
-        logdata = NULL;
-    }
-#else
-    logdata = thread_logdata;
-#endif
+    logdata = get_request_logdata();
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -474,16 +531,7 @@ static int whatkilledus_fatal_exception(ap_exception_info_t *ei)
                  tm.tm_hour, tm.tm_min, tm.tm_sec);
     c.signal = ei->sig;
 
-#if WKU_USE_PTHREAD_SPECIFIC
-    if (thread_logdata_key) {
-        logdata = pthread_getspecific(*thread_logdata_key);
-    }
-    else {
-        logdata = NULL;
-    }
-#else
-    logdata = thread_logdata;
-#endif
+    logdata = get_request_logdata();
 
     write_report(logfile, &p, &c, buf, logdata);
 
@@ -555,18 +603,6 @@ static int copy_headers(void *user_data, const char *key, const char *value)
     chud->outch = add_string(chud->outch, chud->lastoutch, END_OF_LINE, NULL);
 
     return 1;
-}
-
-static apr_status_t clear_request_logdata(void *unused)
-{
-#if WKU_USE_PTHREAD_SPECIFIC
-    if (thread_logdata_key) {
-        pthread_setspecific(*thread_logdata_key, NULL);
-    }
-#else
-    thread_logdata = NULL;
-#endif
-    return APR_SUCCESS;
 }
 
 /* This follows mod_log_forensic's post-read-request hook.
@@ -763,16 +799,11 @@ static int whatkilledus_post_read_request(request_rec *r)
     chud.outch = add_string(chud.outch, chud.lastoutch, "Client connection:" END_OF_LINE, NULL);
     chud.outch = add_string(chud.outch, chud.lastoutch, connection, NULL);
 
-#if WKU_USE_PTHREAD_SPECIFIC
-    if (thread_logdata_key) {
-        pthread_setspecific(*thread_logdata_key, logdata);
-    }
-#else
-    thread_logdata = logdata;
-#endif
+    set_request_logdata(logdata);
 
     apr_pool_cleanup_register(r->pool, NULL,
-                              clear_request_logdata, apr_pool_cleanup_null);
+                              clear_request_logdata_cleanup,
+                              apr_pool_cleanup_null);
 
     return OK;
 }
@@ -879,6 +910,12 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
     ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_post_read_request(whatkilledus_post_read_request, NULL, NULL, APR_HOOK_REALLY_FIRST);
+#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+    ap_hook_suspend_connection(whatkilledus_suspend_connection, NULL, NULL,
+                               APR_HOOK_MIDDLE);
+    ap_hook_resume_connection(whatkilledus_resume_connection, NULL, NULL,
+                              APR_HOOK_MIDDLE);
+#endif
 }
 
 #if DIAG_PLATFORM_UNIX
