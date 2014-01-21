@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-BITS := $(shell $(HTTPD)/bin/httpd -V | grep Architecture | sed -e 's/^Architecture: *//' -e 's/-bit.*//')
+BITS := $(shell $(HTTPD)/bin/apachectl -V | grep Architecture | sed -e 's/^Architecture: *//' -e 's/-bit.*//')
 
 DEFBITS := -DDIAG_BITS_$(BITS)
 
