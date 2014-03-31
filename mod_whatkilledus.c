@@ -981,7 +981,7 @@ static const command_rec whatkilledus_cmds[] =
 #endif
     AP_INIT_ITERATE("WKUObscureInRequest", set_obscured_fields, NULL,
                     RSRC_CONF,
-                    "List request headers nad fields in the request whose values should be obscured in the log"),
+                    "List request headers and fields in the request whose values should be obscured in the log"),
     {NULL}
 };
 
