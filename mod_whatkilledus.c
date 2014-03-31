@@ -419,8 +419,6 @@ static const char *get_request_logdata(void)
 
 static apr_status_t clear_request_logdata_cleanup(void *unused)
 {
-    ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, ap_server_conf,
-                 "request pool cleaned up");
     set_request_logdata(NULL);
     return APR_SUCCESS;
 }
