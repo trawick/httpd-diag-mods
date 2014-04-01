@@ -225,9 +225,13 @@ static void fmt(void *user_data, const char *s)
             && s[4] == 'o'
             && s[5] == 'g'
             && s[6] == '_') {
+            li->kept = 0;
+            li->buffer[0] = '\0';
             return;
         }
         else if (!strcmp(s + 3, "run_error_log")) {
+            li->kept = 0;
+            li->buffer[0] = '\0';
             return;
         }
 #if DIAG_PLATFORM_FREEBSD
@@ -235,16 +239,22 @@ static void fmt(void *user_data, const char *s)
             /* with httpd 2.2.x, this function right before
              * log_error_core() may be the symbol retrieved
              */
+            li->kept = 0;
+            li->buffer[0] = '\0';
             return;
         }
 #endif
     }
 
     if (!memcmp(s, "SKIP_", 5)) {
+        li->kept = 0;
+        li->buffer[0] = '\0';
         return;
     }
 
     if (!strcmp(s, "log_error_core")) {
+        li->kept = 0;
+        li->buffer[0] = '\0';
         return;
     }
 
