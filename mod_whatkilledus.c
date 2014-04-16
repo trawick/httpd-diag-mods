@@ -24,9 +24,8 @@
 #include "http_log.h"
 #include "http_protocol.h"
 #include "ap_mpm.h"
-#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 33) /* suspend/resume connection hooks */
 #include "mpm_common.h"
-#include "http_main.h" /*TEMPORARY*/
 #endif
 
 #include "mod_backtrace.h"
@@ -64,7 +63,7 @@
 #include <pthread.h>
 #endif
 
-#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0)
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 0) /* 2.4 */
 APLOG_USE_MODULE(whatkilledus);
 #endif
 
@@ -423,7 +422,7 @@ static apr_status_t clear_request_logdata_cleanup(void *unused)
     return APR_SUCCESS;
 }
 
-#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 33)
 static void whatkilledus_suspend_connection(conn_rec *c, request_rec *r)
 {
     const char *logdata;
@@ -908,7 +907,7 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
     ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_post_read_request(whatkilledus_post_read_request, NULL, NULL, APR_HOOK_REALLY_FIRST);
-#if AP_MODULE_MAGIC_AT_LEAST(20131112, 1)
+#if AP_MODULE_MAGIC_AT_LEAST(20120211, 33)
     ap_hook_suspend_connection(whatkilledus_suspend_connection, NULL, NULL,
                                APR_HOOK_MIDDLE);
     ap_hook_resume_connection(whatkilledus_resume_connection, NULL, NULL,
