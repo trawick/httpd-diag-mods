@@ -19,10 +19,14 @@
 
 #include "diagplat.h"
 
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
+
 #if DIAG_PLATFORM_LINUX
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#endif
+
 #include <dlfcn.h>
 #endif
 
@@ -530,7 +534,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     unw_context_t ctx;
     unw_cursor_t csr;
     unw_word_t ip, offp;
-#if DIAG_PLATFORM_LINUX
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
     Dl_info info;
 #endif
 
@@ -576,7 +580,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         }
 
         module = module_path = NULL;
-#if DIAG_PLATFORM_LINUX
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
         if (p->backtrace_fields
             & (DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME)) {
             if ((rc = dladdr((void *)ip, &info)) != 0) {
