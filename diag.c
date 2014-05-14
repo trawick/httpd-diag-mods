@@ -17,6 +17,15 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#include "diagplat.h"
+
+#if DIAG_PLATFORM_LINUX
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+#endif
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -33,18 +42,25 @@
 #include <unistd.h>
 #endif
 
-#if DIAG_HAVE_EXECINFO_BACKTRACE
-#include <execinfo.h>
-#endif
+#if DIAG_HAVE_LIBUNWIND_BACKTRACE
 
-#if DIAG_PLATFORM_SOLARIS
+#define UNW_LOCAL_ONLY
+#include <libunwind.h>
+
+#elif DIAG_HAVE_EXECINFO_BACKTRACE
+
+#include <execinfo.h>
+
+#elif DIAG_PLATFORM_SOLARIS
+
 #include <ucontext.h>
 #include <dlfcn.h>
-#endif
 
-#if DIAG_PLATFORM_WINDOWS
+#elif DIAG_PLATFORM_WINDOWS
+
 #include <windows.h>
 #include <process.h>
+
 #endif
 
 static char *add_string(char *outch, const char *lastoutch,
@@ -332,6 +348,8 @@ static void output_frame(char *outch, char *lastoutch, int fields,
     }
 }
 
+#if !DIAG_HAVE_LIBUNWIND_BACKTRACE
+
 #if DIAG_PLATFORM_LINUX
 /* ./testdiag(diag_backtrace+0x75)[0x401824] */
 static void format_frameinfo(const char *s,
@@ -496,7 +514,101 @@ static void format_frameinfo(const char *s,
 }
 #endif /* FreeBSD */
 
-#if DIAG_HAVE_EXECINFO_BACKTRACE
+#endif /* !DIAG_HAVE_LIBUNWIND_BACKTRACE */
+
+#if DIAG_HAVE_LIBUNWIND_BACKTRACE
+
+int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
+{
+    char frame[128];
+    char addr_buf[20];
+    char offset_buf[20];
+    char name_buf[80];
+    char *name;
+    const char *module_path, *module;
+    int count, cur, rc;
+    unw_context_t ctx;
+    unw_cursor_t csr;
+    unw_word_t ip, offp;
+#if DIAG_PLATFORM_LINUX
+    Dl_info info;
+#endif
+
+    if (p->backtrace_count && p->backtrace_count < DIAG_BT_LIMIT) {
+        count = p->backtrace_count;
+    }
+    else {
+        count = DIAG_BT_LIMIT;
+    }
+    
+    rc = unw_getcontext(&ctx);
+    if (!rc) {
+        rc = unw_init_local(&csr, &ctx);
+    }
+
+    if (rc) {
+        /* XXX no way to report errors */
+        return 0;
+    }
+
+    cur = 0;
+    while ((rc = unw_step(&csr)) > 0) {
+
+        cur++;
+        if (cur > count) {
+            break;
+        }
+
+        unw_get_reg(&csr, UNW_REG_IP, &ip);
+
+        if (!ip) {
+            break;
+        }
+
+        add_int(addr_buf, addr_buf + sizeof addr_buf - 1, ip, 16);
+
+        rc = unw_get_proc_name(&csr, name_buf, sizeof name_buf, &offp);
+        if (rc && rc != UNW_ENOMEM) {
+            name = NULL;
+        }
+        else {
+            name = name_buf;
+        }
+
+        module = module_path = NULL;
+#if DIAG_PLATFORM_LINUX
+        if (p->backtrace_fields
+            & (DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME)) {
+            if ((rc = dladdr((void *)ip, &info)) != 0) {
+                module_path = info.dli_fname;
+                module = strrchr(module_path, '/');
+                if (module) {
+                    module += 1;
+                }
+            }
+        }
+#endif
+
+        add_int(offset_buf, offset_buf + sizeof offset_buf - 1,
+                offp, 16);
+        output_frame(frame, frame + sizeof frame - 1,
+                     p->backtrace_fields,
+                     module_path, module, name, offset_buf, addr_buf);
+
+        if (o->output_mode == DIAG_CALL_FN) {
+            o->output_fn(o->user_data, frame);
+        }
+        else {
+            write(o->outfile, frame, strlen(frame));
+            write(o->outfile, "\n", 1);
+        }
+    }
+
+    return 0;
+}
+
+#elif DIAG_HAVE_EXECINFO_BACKTRACE
+
 int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *c)
 {
     void *pointers[DIAG_BT_LIMIT];

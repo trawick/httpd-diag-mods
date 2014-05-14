@@ -68,6 +68,16 @@ endif
 
 endif
 
+ifeq ($(LIBUNWIND),yes)
+CFLAGS += -DDIAG_HAVE_LIBUNWIND_BACKTRACE=1
+LIBS = -lunwind
+
+ifeq ($(PLATFORM), Linux)
+LIBS += -ldl
+endif
+
+endif
+
 TARGETS = testdiag testcrash mod_backtrace.la mod_whatkilledus.la mod_crash.la
 
 all: $(TARGETS)
