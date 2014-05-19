@@ -13,11 +13,31 @@
 # limitations under the License.
 #
 
-# CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi
-# MACHINE = I386
+!IF !DEFINED(BUILD)
+
+# BUILD not set; if caller is using Visual Studio command prompt,
+# we can identify 64-bit from Platform=X64.  Otherwise, default to
+# 32-bit build.
+
+!IF "$(PLATFORM)" == "X64"
+BUILD = 64
+!ELSE
+BUILD = 32
+!ENDIF
+
+!ENDIF
+
+!IF "$(BUILD)" == "64"
 
 CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_64 /D _WINDOWS /Zi
 MACHINE = X64
+
+!ELSE
+
+CFLAGS = /nologo /MD /W3 /Od /D WIN32 /D DIAG_BITS_32 /D _WINDOWS /Zi
+MACHINE = I386
+
+!ENDIF
 
 all: testdiag.exe testcrash.exe mod_backtrace.so mod_whatkilledus.so mod_crash.so
 
