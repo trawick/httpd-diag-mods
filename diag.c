@@ -143,7 +143,7 @@ static char *add_pointer(char *outch, const char *lastoutch,
 #ifdef DIAG_BITS_64
     unsigned long long val = (unsigned long long)vpointer;
 #else
-    unsigned val = (unsigned)vpointer;
+    unsigned long val = (unsigned long)vpointer;
 #endif
     int radix = 16;
 
