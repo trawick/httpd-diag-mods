@@ -1,5 +1,5 @@
 mod_whatkilledus and mod_backtrace
-Copyright 2012 Jeff Trawick, http://emptyhammock.com/
+Copyright 2012, 2014 Jeff Trawick, http://emptyhammock.com/
 
 This product contains small pieces of mod_log_forensic as well as the
 contents of test_char.h, both developed at The Apache Software Foundation

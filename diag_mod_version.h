@@ -1,4 +1,4 @@
-/* Copyright 2012 Jeff Trawick, http://emptyhammock.com/
+/* Copyright 2012, 2014 Jeff Trawick, http://emptyhammock.com/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,6 @@
 #ifndef DIAG_MOD_VERSION_H
 #define DIAG_MOD_VERSION_H
 
-#define DIAG_MOD_VERSION "2.00"
+#define DIAG_MOD_VERSION "2.01"
 
 #endif

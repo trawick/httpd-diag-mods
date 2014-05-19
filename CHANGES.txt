@@ -1,3 +1,22 @@
+Changes with version 2.01
+
+*) mod_backtrace: Support libunwind on Linux and FreeBSD.  This provides
+   better resolution of function names, at least on Linux, so a raw
+   address will be provided in lieu of the function name in fewer
+   situations.
+
+*) mod_whatkilledus: In conjunction with Event MPM changes in httpd 2.4.10,
+   properly track request processing across threads with the Event MPM.
+   Previously, the wrong client and/or request might be logged as the
+   trigger for a crash (with the Event MPM only).
+
+*) mod_backtrace: Improve formatting of a backtrace for the error log
+   field.
+
+*) Build: Add -funwind-tables on ARM platform for better backtraces.
+
+*) mod_whatkilledus: Improve detection of httpd builds that don't have
+   exception hooks enabled.
 
 Changes with version 2.0
 

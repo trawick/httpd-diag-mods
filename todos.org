@@ -58,3 +58,6 @@ http://free-electrons.com/pub/video/2008/ols/ols2008-gilad-ben-yossef-fault-hand
 mod_log_forensic, test_char.h
 *** TODO Publicize on freecode.com or similar
 *** TODO Move doc for old versions from people.apache.org, redirect from there to emptyhammock.com
+* 2nd release tasks
+** TODO wait for httpd 2.4.10 release
+** TODO clean up CR-LF in sources
