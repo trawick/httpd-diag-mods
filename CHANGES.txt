@@ -1,9 +1,17 @@
 Changes with version 2.01
 
+*) mod_whatkilledus on Windows: Add directive WKUDisableWindowsErrorBox
+   to allow disabling the pop-up error handling dialog after a child process
+   crash.
+
+*) mod_whatkilledus on Windows: Handle exceptions in 64-bit builds.
+
 *) mod_backtrace: Support libunwind on Linux, FreeBSD, and OS X.  This 
    provides better resolution of function names, at least on Linux, so a raw
    address will be provided in lieu of the function name in fewer
-   situations.  OS X note: Fails silently with 32-bit builds.
+   situations.  OS X note: A libunwind build silently fails to capture a
+   backtrace with 32-bit builds, so use the default mechanism with 32-bit
+   builds on OS X.
 
 *) mod_whatkilledus: In conjunction with Event MPM changes in httpd 2.4.10,
    properly track request processing across threads with the Event MPM.

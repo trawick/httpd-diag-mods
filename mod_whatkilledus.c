@@ -92,6 +92,9 @@ typedef struct whatkilledus_server_t {
     unsigned int obscure_fragment: 1;
     unsigned int obscure_unparsed: 1;
     unsigned int obscure_parsed: 1;
+#if DIAG_PLATFORM_WINDOWS
+    unsigned int disable_error_box: 1;
+#endif
 } whatkilledus_server_t;
 
 module AP_MODULE_DECLARE_DATA whatkilledus_module;
@@ -824,14 +827,21 @@ static apr_status_t whatkilledus_child_term(void *unused)
 
 static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
 {
-    main_server = s;
-
 #if DIAG_PLATFORM_WINDOWS
+    whatkilledus_server_t *sconf = ap_get_module_config(s->module_config,
+                                                        &whatkilledus_module);
+
+    if (sconf->disable_error_box) {
+        SetErrorMode(SEM_NOGPFAULTERRORBOX);
+    }
+
     /* must back this out before this DLL is unloaded;
      * but previous exception filter might have been unloaded too
      */
     old_exception_filter = SetUnhandledExceptionFilter(whatkilledus_crash_handler);
 #endif
+
+    main_server = s;
 
 #if WKU_USE_PTHREAD_SPECIFIC
     thread_logdata_key = malloc(sizeof *thread_logdata_key);
@@ -972,6 +982,21 @@ static const char *set_obscured_fields(cmd_parms *cmd, void *dummy, const char *
     return NULL;
 }
 
+#if DIAG_PLATFORM_WINDOWS
+static const char *set_error_box_disable(cmd_parms *cmd, void *dummy, int arg)
+{
+    whatkilledus_server_t *conf = ap_get_module_config(cmd->server->module_config,
+                                                       &whatkilledus_module);
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
+    conf->disable_error_box = arg;
+    return NULL;
+}
+#endif
+
 static const command_rec whatkilledus_cmds[] =
 {
 #if DIAG_PLATFORM_UNIX
@@ -981,6 +1006,11 @@ static const command_rec whatkilledus_cmds[] =
     AP_INIT_ITERATE("WKUObscureInRequest", set_obscured_fields, NULL,
                     RSRC_CONF,
                     "List request headers and fields in the request whose values should be obscured in the log"),
+#if DIAG_PLATFORM_WINDOWS
+    AP_INIT_FLAG("WKUDisableWindowsErrorBox", set_error_box_disable, NULL,
+                 RSRC_CONF,
+                 "Optionally disable Windows error dialog after child process crash"),
+#endif
     {NULL}
 };
 
