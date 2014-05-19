@@ -24,7 +24,7 @@ MACHINE  := $(shell uname -m)
 
 $(info Building for platform $(PLATFORM))
 
-GCC_CFLAGS=-O0 -Wall
+GCC_CFLAGS=-O0 -Wall -m$(BITS)
 
 ifeq ($(PLATFORM), FreeBSD)
 
@@ -59,7 +59,7 @@ else
 
 CC=gcc
 CFLAGS=$(BASE_CFLAGS) $(GCC_CFLAGS)
-LDFLAGS=
+LDFLAGS=$(GCC_CFLAGS)
 LIBS=
 
 endif
