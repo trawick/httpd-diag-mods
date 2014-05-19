@@ -1,9 +1,10 @@
 Changes with version 2.01
 
-*) mod_backtrace: Support libunwind on Linux and FreeBSD.  This provides
-   better resolution of function names, at least on Linux, so a raw
+*) mod_backtrace: Support libunwind on Linux, FreeBSD, and OS X.  This 
+   provides better resolution of function names, at least on Linux, so a raw
    address will be provided in lieu of the function name in fewer
-   situations.
+   situations.  OS X note: Works on Mavericks, fails silently on Lion, not tested
+   on other versions.
 
 *) mod_whatkilledus: In conjunction with Event MPM changes in httpd 2.4.10,
    properly track request processing across threads with the Event MPM.

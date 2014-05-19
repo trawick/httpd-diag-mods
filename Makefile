@@ -70,7 +70,10 @@ endif
 
 ifeq ($(LIBUNWIND),yes)
 CFLAGS += -DDIAG_HAVE_LIBUNWIND_BACKTRACE=1
+
+ifneq ($(PLATFORM), Darwin)
 LIBS = -lunwind
+endif
 
 ifeq ($(PLATFORM), Linux)
 LIBS += -ldl

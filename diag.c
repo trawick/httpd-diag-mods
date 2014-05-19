@@ -19,7 +19,7 @@
 
 #include "diagplat.h"
 
-#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD || DIAG_PLATFORM_MACOSX
 
 #if DIAG_PLATFORM_LINUX
 #ifndef _GNU_SOURCE
@@ -534,7 +534,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     unw_context_t ctx;
     unw_cursor_t csr;
     unw_word_t ip, offp;
-#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD || DIAG_PLATFORM_MACOSX
     Dl_info info;
 #endif
 
@@ -580,7 +580,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         }
 
         module = module_path = NULL;
-#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD
+#if DIAG_PLATFORM_LINUX || DIAG_PLATFORM_FREEBSD || DIAG_PLATFORM_MACOSX
         if (p->backtrace_fields
             & (DIAG_BTFIELDS_MODULE_PATH | DIAG_BTFIELDS_MODULE_NAME)) {
             if ((rc = dladdr((void *)ip, &info)) != 0) {
