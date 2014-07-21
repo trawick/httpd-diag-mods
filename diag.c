@@ -651,7 +651,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
             free(strings);
         }
     }
-    return size;
+    return 0;
 }
 
 #elif DIAG_PLATFORM_SOLARIS
