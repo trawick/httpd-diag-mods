@@ -12,13 +12,13 @@ Testing .\testdiag.exe...
 testdiag rc 0
 ['Server version: Apache/2.2.22 (Win32)\n', 'Server built:   Jan 28 2012 11:16:39\n']
 Response from /backtrace/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:08:26 GMT
-Server: Apache/2.2.22 (Win32)
-Content-Length: 2109
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:08:26 GMT
+Server: Apache/2.2.22 (Win32)
+Content-Length: 2109
+Connection: close
+Content-Type: text/plain
+
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x6D4018A8
@@ -117,12 +117,12 @@ ap_regkey_value_remove+0xC7C 0x6FF1DF6C
 itow_s+0x4C 0x75691287
 
 Response from /crash/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:08:26 GMT
-Server: Apache/2.2.22 (Win32)
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:08:26 GMT
+Server: Apache/2.2.22 (Win32)
+Connection: close
+Content-Type: text/plain
+
 Crashing in process 6164...
 
 Pid that crashed: >6164<
@@ -141,13 +141,13 @@ Testing .\testdiag.exe...
 testdiag rc 0
 ['Server version: Apache/2.2.15-dev (Win32)\n', 'Server built:   Dec  5 2009 13:07:28\n']
 Response from /backtrace/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:10:09 GMT
-Server: Apache/2.2.15-dev (Win32)
-Content-Length: 2140
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:10:09 GMT
+Server: Apache/2.2.15-dev (Win32)
+Content-Length: 2140
+Connection: close
+Content-Type: text/plain
+
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x6D6318A8
@@ -246,12 +246,12 @@ worker_main+0xA0 0x6FF1E130
 endthreadex+0x44 0x74F23433
 
 Response from /crash/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:10:09 GMT
-Server: Apache/2.2.15-dev (Win32)
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:10:09 GMT
+Server: Apache/2.2.15-dev (Win32)
+Connection: close
+Content-Type: text/plain
+
 Crashing in process 7296...
 
 Pid that crashed: >7296<
@@ -270,13 +270,13 @@ Testing .\testdiag.exe...
 testdiag rc 0
 ['Server version: Apache/2.4.3 (Win32)\n', 'Server built:   Aug 18 2012 12:41:37\n']
 Response from /backtrace/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:11:37 GMT
-Server: Apache/2.4.3 (Win32)
-Content-Length: 2075
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:11:37 GMT
+Server: Apache/2.4.3 (Win32)
+Content-Length: 2075
+Connection: close
+Content-Type: text/plain
+
 ----------------------------------------------------
 mod_backtrace: DIAG_BTFIELDS_MODULE_PATH
 0x690C188C
@@ -375,12 +375,12 @@ ap_run_process_connection+0x25 0x6D345E15
 ap_regkey_value_remove+0x1182 0x6D369D32
 
 Response from /crash/ request:
-HTTP/1.1 200 OK
-Date: Thu, 06 Sep 2012 19:11:37 GMT
-Server: Apache/2.4.3 (Win32)
-Connection: close
-Content-Type: text/plain
-
+HTTP/1.1 200 OK
+Date: Thu, 06 Sep 2012 19:11:37 GMT
+Server: Apache/2.4.3 (Win32)
+Connection: close
+Content-Type: text/plain
+
 Crashing in process 4812...
 
 Pid that crashed: >4812<
