@@ -14,6 +14,7 @@
 #
 
 import ConfigParser
+import errno
 import os
 import shutil
 import socket
@@ -32,10 +33,12 @@ else:
     testcrash = './testcrash'
     testdiag = './testdiag'
 
+
 def add_to_log(arg):
     logfile = open("regress.log", "a")
     print >> logfile, arg
     logfile.close()
+
 
 def get_cmd_output(args):
     logfilename = "regress.tmp"
@@ -48,7 +51,8 @@ def get_cmd_output(args):
     logfile.close()
     msgs = open(logfilename).readlines()
     os.unlink(logfilename)
-    return (rc, msgs)
+    return rc, msgs
+
 
 def is_active():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -60,6 +64,7 @@ def is_active():
         pass
     s.close()
     return active
+
 
 def simple_request(addr, uri, req):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -87,21 +92,22 @@ def simple_request(addr, uri, req):
 
     return rsp
 
+
 def test_httpd(section, httpd, skip_startstop):
     if is_active():
         raise Exception("some httpd is active, but we haven't started any server yet")
 
     wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
-    err_log = os.path.join(httpd, 'logs', 'error' + log_ext);
+    err_log = os.path.join(httpd, 'logs', 'error' + log_ext)
 
     print section, httpd
 
     if os.path.exists(err_log):
         os.unlink(err_log)
 
-    conf_d = '%s/conf/conf.d/' % (httpd)
+    conf_d = '%s/conf/conf.d/' % httpd
     if not os.path.isdir(conf_d):
-        raise Exception("%s does not exist or is not a directory" % (conf_d))
+        raise Exception("%s does not exist or is not a directory" % conf_d)
 
     shutil.copy('diag.conf', conf_d)
 
@@ -120,7 +126,7 @@ def test_httpd(section, httpd, skip_startstop):
 
     if not skip_startstop:
         if sys.platform == 'win32':
-            print 'Start httpd from install %s now...' % (httpd)
+            print 'Start httpd from install %s now...' % httpd
         else:
             (rc, msgs) = get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'start'])
             if rc != 0:
@@ -141,7 +147,8 @@ def test_httpd(section, httpd, skip_startstop):
         os.unlink(wku_log)
 
     rsp = simple_request(('127.0.0.1', 10080), '/crash/',
-                         'GET /crash/foo\1\2\3/?queryarg=private HTTP/1.0\r\nConnection: close\r\nHost: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
+                         'GET /crash/foo\1\2\3/?queryarg=private HTTP/1.0\r\nConnection: close\r\n' +
+                         'Host: 127.0.0.1\r\nX-Jeff: Trawick\r\nFooHdr: FooVal\r\nBarHdr: \1\2\3\4\5\6\7\r\n\r\n')
 
     crashing_pid = rsp.split(' ')[-1][:-4]
     add_to_log("Pid that crashed: >%s<" % crashing_pid)
@@ -184,13 +191,13 @@ def test_httpd(section, httpd, skip_startstop):
     assert obscured_query_found
     assert client_conn_found
 
-    time.sleep(10) # child just crashed, may take a while for process to dump core
+    time.sleep(10)  # child just crashed, may take a while for process to dump core
 
     if not skip_startstop:
         if sys.platform == 'win32':
-            print 'Stop httpd from install %s now...' % (httpd)
+            print 'Stop httpd from install %s now...' % httpd
         else:
-            get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'stop'])
+            (rc, msgs) = get_cmd_output([os.path.join(httpd, 'bin', 'apachectl'), 'stop'])
             if rc != 0:
                 print 'httpd stop failed:'
                 print msgs
@@ -199,7 +206,7 @@ def test_httpd(section, httpd, skip_startstop):
             print '.',
             time.sleep(1)
         print
-        time.sleep(5);
+        time.sleep(5)
 
     errlog = open(err_log).readlines()
     add_to_log("%s:" % err_log)
@@ -216,9 +223,9 @@ def test_httpd(section, httpd, skip_startstop):
         if 'seg fault or similar nasty error' in l:
             print l
             assert False
-        elif 'mod_backtrace v2.00 from' in l:
+        elif 'mod_backtrace v2.01 from' in l:
             bt_version_found = True
-        elif 'mod_whatkilledus v2.00 from' in l:
+        elif 'mod_whatkilledus v2.01 from' in l:
             wku_version_found = True
         elif '---MoD_bAcKtRaCe---' in l:
             bt_eyecatcher_found = True
@@ -227,9 +234,9 @@ def test_httpd(section, httpd, skip_startstop):
                     bt_backtrace_found = True
                 elif 'diag_backtrace_init<diag_backtrace_init' in l:
                     bt_backtrace_found = True
-                elif 'backtrace_handler<ap_run_handler' in l: # Apachelounge build with no .pdb files
+                elif 'backtrace_handler<ap_run_handler' in l:  # Apachelounge build with no .pdb files
                     bt_backtrace_found = True
-                elif ' [0x' in l and '<0x' in l: # Ubuntu 11-64
+                elif ' [0x' in l and '<0x' in l:  # Ubuntu 11-64
                     bt_backtrace_found = True
         elif httpdver == 22 and 'mod_backtrace: ' in l and '<ap_' in l:
             bt_backtrace_found = True
@@ -256,83 +263,87 @@ def test_httpd(section, httpd, skip_startstop):
     assert child_pid_exit_found
     assert httpd_terminated_found
 
-if os.path.exists("regress.log"):
-    os.unlink("regress.log")
 
-config = ConfigParser.RawConfigParser()
-config.read('regress.cfg')
+def main():
+    if os.path.exists("regress.log"):
+        os.unlink("regress.log")
 
-hn = socket.gethostname()
-plat = sys.platform
+    config = ConfigParser.RawConfigParser()
+    config.read('regress.cfg')
 
-section = "%s_%s" % (hn, plat)
+    hn = socket.gethostname()
+    plat = sys.platform
 
-add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
+    section = "%s_%s" % (hn, plat)
 
-(rc, msgs) = get_cmd_output(['hg', 'identify', '-ni'])
-add_to_log('Code version:')
-add_to_log(msgs)
+    add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
 
-bldcmd = config.get(section, 'BUILD').split(' ')
-if config.has_option(section, 'HTTPD22_INSTALLS'):
-    httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
-else:
-    httpd22_installs = []
-
-if config.has_option(section, 'HTTPD24_INSTALLS'):
-    httpd24_installs = config.get(section, 'HTTPD24_INSTALLS').split(' ')
-else:
-    httpd24_installs = []
-
-skip_bld = 0
-skip_startstop = 0
-
-for httpd in httpd22_installs + httpd24_installs:
-
-    if not skip_bld:
-        print "Building for %s..." % (httpd)
-        add_to_log("Building for %s..." % (httpd))
-
-        os.putenv('HTTPD', httpd)
-        (rc, build_msgs) = get_cmd_output(bldcmd)
-
-        add_to_log(build_msgs)
-        add_to_log("Build rc: %d" % (rc))
-
-        if rc != 0:
-            print "rc:", rc
-            sys.exit(1)
-
-    print "Testing %s..." % (testcrash)
-    add_to_log("Testing %s..." % (testcrash))
-
-    (rc, msgs) = get_cmd_output([testcrash])
+    (rc, msgs) = get_cmd_output(['hg', 'identify', '-ni'])
+    add_to_log('Code version:')
     add_to_log(msgs)
-    add_to_log("testcrash rc %d" % rc)
 
-    if sys.platform == 'win32':
-        required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
+    bldcmd = config.get(section, 'BUILD').split(' ')
+    if config.has_option(section, 'HTTPD22_INSTALLS'):
+        httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
     else:
-        required_lines = ['Invalid memory address: 0xDEADBEEF']
+        httpd22_installs = []
 
-    for rl in required_lines:
-        if not rl + '\n' in msgs:
-            print "fail, required line >%s< not found in >%s<" % (rl, msgs)
-            assert False
+    if config.has_option(section, 'HTTPD24_INSTALLS'):
+        httpd24_installs = config.get(section, 'HTTPD24_INSTALLS').split(' ')
+    else:
+        httpd24_installs = []
 
-    print "Testing %s..." % (testdiag)
-    add_to_log("Testing %s..." % (testdiag))
+    skip_bld = 0
+    skip_startstop = 0
 
-    (rc, msgs) = get_cmd_output([testdiag])
-    add_to_log(msgs)
-    add_to_log("testdiag rc %d" % rc)
+    for httpd in httpd22_installs + httpd24_installs:
 
-    required_lines = ['testdiag: ONELINER', 'y<x<w']
+        if not skip_bld:
+            print "Building for %s..." % httpd
+            add_to_log("Building for %s..." % httpd)
 
-    for rl in required_lines:
-        if not rl + '\n' in msgs:
-            print "fail, required line >%s< not found in >%s<" % (rl, msgs)
-            assert False
-            assert False
+            os.putenv('HTTPD', httpd)
+            (rc, build_msgs) = get_cmd_output(bldcmd)
 
-    test_httpd(section, httpd, skip_startstop)
+            add_to_log(build_msgs)
+            add_to_log("Build rc: %d" % rc)
+
+            if rc != 0:
+                print "rc:", rc
+                sys.exit(1)
+
+        print "Testing %s..." % testcrash
+        add_to_log("Testing %s..." % testcrash)
+
+        (rc, msgs) = get_cmd_output([testcrash])
+        add_to_log(msgs)
+        add_to_log("testcrash rc %d" % rc)
+
+        if sys.platform == 'win32':
+            required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
+        else:
+            required_lines = ['Invalid memory address: 0xDEADBEEF']
+
+        for rl in required_lines:
+            if not rl + '\n' in msgs:
+                print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                assert False
+
+        print "Testing %s..." % testdiag
+        add_to_log("Testing %s..." % testdiag)
+
+        (rc, msgs) = get_cmd_output([testdiag])
+        add_to_log(msgs)
+        add_to_log("testdiag rc %d" % rc)
+
+        required_lines = ['testdiag: ONELINER', 'y<x<w']
+
+        for rl in required_lines:
+            if not rl + '\n' in msgs:
+                print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                assert False
+
+        test_httpd(section, httpd, skip_startstop)
+
+if __name__ == '__main__':
+    main()
