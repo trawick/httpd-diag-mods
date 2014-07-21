@@ -111,7 +111,9 @@ static void *create_backtrace_server_conf(apr_pool_t *p, server_rec *s)
 static void *merge_backtrace_server_conf(apr_pool_t *p, void *basev, void *overridesv)
 {
     backtrace_server_t *base = (backtrace_server_t *)basev;
+#if MODBT_HAVE_ERRORLOG_HOOK
     backtrace_server_t *overrides = (backtrace_server_t *)overridesv;
+#endif
     backtrace_server_t *conf = (backtrace_server_t *)apr_pmemdup(p, base, sizeof(*conf));
 
 #if MODBT_HAVE_ERRORLOG_HOOK
