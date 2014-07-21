@@ -518,6 +518,11 @@ static void banner(server_rec *s)
 {
     const char *userdata_key = "backtrace_banner";
     void *data;
+#if DIAG_HAVE_LIBUNWIND_BACKTRACE
+    const char *impl = "(using libunwind)";
+#else
+    const char *impl = "";
+#endif
 
     apr_pool_userdata_get(&data, userdata_key, s->process->pool);
     if (data) {
@@ -542,8 +547,8 @@ static void banner(server_rec *s)
      * for this module.
      */
     ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
-                 "mod_backtrace v%s from http://emptyhammock.com/",
-                 DIAG_MOD_VERSION);
+                 "mod_backtrace v%s from http://emptyhammock.com/ %s",
+                 DIAG_MOD_VERSION, impl);
 }
 
 static int backtrace_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
