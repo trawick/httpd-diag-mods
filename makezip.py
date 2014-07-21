@@ -9,10 +9,10 @@ bin_files = ['dist']
 
 version = '2.00'
 
-dirname = 'wku_bt-%s' % (version)
+dirname = 'wku_bt-%s' % version
 
 if os.path.exists(dirname):
-    raise Exception("%s should not already exist" % (dirname))
+    raise Exception("%s should not already exist" % dirname)
 
 if os.path.exists(dirname + '.zip'):
     raise Exception("zip should not already exist")
