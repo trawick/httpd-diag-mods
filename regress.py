@@ -282,7 +282,15 @@ def main():
     add_to_log('Code version:')
     add_to_log(msgs)
 
-    bldcmd = config.get(section, 'BUILD').split(' ')
+    bldcmds = []
+    if config.has_option(section, 'BUILD'):
+        bldcmd = config.get(section, 'BUILD').split(' ')
+        bldcmds.append(bldcmd)
+    if config.has_option(section, 'BUILD_LIBUNWIND'):
+        bldcmd = config.get(section, 'BUILD_LIBUNWIND').split(' ')
+        bldcmds.append(bldcmd)
+    assert len(bldcmds) > 0
+
     if config.has_option(section, 'HTTPD22_INSTALLS'):
         httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
     else:
@@ -298,52 +306,53 @@ def main():
 
     for httpd in httpd22_installs + httpd24_installs:
 
-        if not skip_bld:
-            print "Building for %s..." % httpd
-            add_to_log("Building for %s..." % httpd)
+        for bldcmd in bldcmds:
+            if not skip_bld:
+                print "Building for %s... (%s)" % (httpd, bldcmd)
+                add_to_log("Building for %s... (%s)" % (httpd, bldcmd))
 
-            os.putenv('HTTPD', httpd)
-            (rc, build_msgs) = get_cmd_output(bldcmd)
+                os.putenv('HTTPD', httpd)
+                (rc, build_msgs) = get_cmd_output(bldcmd)
 
-            add_to_log(build_msgs)
-            add_to_log("Build rc: %d" % rc)
+                add_to_log(build_msgs)
+                add_to_log("Build rc: %d" % rc)
 
-            if rc != 0:
-                print "rc:", rc
-                sys.exit(1)
+                if rc != 0:
+                    print "rc:", rc
+                    sys.exit(1)
 
-        print "Testing %s..." % testcrash
-        add_to_log("Testing %s..." % testcrash)
+            print "Testing %s..." % testcrash
+            add_to_log("Testing %s..." % testcrash)
 
-        (rc, msgs) = get_cmd_output([testcrash])
-        add_to_log(msgs)
-        add_to_log("testcrash rc %d" % rc)
+            (rc, msgs) = get_cmd_output([testcrash])
+            add_to_log(msgs)
+            add_to_log("testcrash rc %d" % rc)
 
-        if sys.platform == 'win32':
-            required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
-        else:
-            required_lines = ['Invalid memory address: 0xDEADBEEF']
+            if sys.platform == 'win32':
+                required_lines = ['Exception code:    EXCEPTION_ACCESS_VIOLATION']
+            else:
+                required_lines = ['Invalid memory address: 0xDEADBEEF']
 
-        for rl in required_lines:
-            if not rl + '\n' in msgs:
-                print "fail, required line >%s< not found in >%s<" % (rl, msgs)
-                assert False
+            for rl in required_lines:
+                if not rl + '\n' in msgs:
+                    print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                    assert False
 
-        print "Testing %s..." % testdiag
-        add_to_log("Testing %s..." % testdiag)
+            print "Testing %s..." % testdiag
+            add_to_log("Testing %s..." % testdiag)
 
-        (rc, msgs) = get_cmd_output([testdiag])
-        add_to_log(msgs)
-        add_to_log("testdiag rc %d" % rc)
+            (rc, msgs) = get_cmd_output([testdiag])
+            add_to_log(msgs)
+            add_to_log("testdiag rc %d" % rc)
 
-        required_lines = ['testdiag: ONELINER', 'y<x<w']
+            required_lines = ['testdiag: ONELINER', 'y<x<w']
 
-        for rl in required_lines:
-            if not rl + '\n' in msgs:
-                print "fail, required line >%s< not found in >%s<" % (rl, msgs)
-                assert False
+            for rl in required_lines:
+                if not rl + '\n' in msgs:
+                    print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                    assert False
 
-        test_httpd(section, httpd, skip_startstop)
+            test_httpd(section, httpd, skip_startstop)
 
 if __name__ == '__main__':
     main()
