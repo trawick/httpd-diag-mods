@@ -22,6 +22,8 @@ import subprocess
 import sys
 import time
 
+import diag_version
+
 if sys.platform == 'win32':
     log_ext = '.log'
     httpd_exe = 'httpd.exe'
@@ -223,9 +225,9 @@ def test_httpd(section, httpd, skip_startstop):
         if 'seg fault or similar nasty error' in l:
             print l
             assert False
-        elif 'mod_backtrace v2.01 from' in l:
+        elif 'mod_backtrace v%s from' % diag_version.version in l:
             bt_version_found = True
-        elif 'mod_whatkilledus v2.01 from' in l:
+        elif 'mod_whatkilledus v%s from' % diag_version.version in l:
             wku_version_found = True
         elif '---MoD_bAcKtRaCe---' in l:
             bt_eyecatcher_found = True
