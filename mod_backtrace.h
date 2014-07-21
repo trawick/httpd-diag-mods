@@ -57,7 +57,7 @@ typedef struct {
 
 APR_DECLARE_OPTIONAL_FN(void, backtrace_describe_exception,
                         (bt_param_t *, diag_context_t *));
-APR_DECLARE_OPTIONAL_FN(void, backtrace_get_backtrace,
+APR_DECLARE_OPTIONAL_FN(int, backtrace_get_backtrace,
                         (bt_param_t *, diag_context_t *));
 
 #ifdef __cplusplus

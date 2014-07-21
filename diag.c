@@ -551,8 +551,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     }
 
     if (rc) {
-        /* XXX no way to report errors */
-        return 0;
+        return DIAG_ERR_INIT;
     }
 
     cur = 0;

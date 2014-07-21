@@ -181,7 +181,7 @@ static void backtrace_describe_exception(bt_param_t *p, diag_context_t *c)
     diag_describe(&o, c);
 }
 
-static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
+static int backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
 {
     diag_backtrace_param_t dp = {0};
     diag_output_t o = {0};
@@ -202,7 +202,7 @@ static void backtrace_get_backtrace(bt_param_t *p, diag_context_t *c)
     }
     
     init_diag_output(p, &o);
-    diag_backtrace(&o, &dp, c);
+    return diag_backtrace(&o, &dp, c);
 }
 
 typedef struct {
@@ -302,9 +302,13 @@ static void SKIP_mini_backtrace(char *buf, int buflen, int to_keep)
     p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
     p.backtrace_count = to_keep + 7;
 
-    diag_backtrace(&o, &p, NULL);
-    if (buf[strlen(buf) - 1] == '<') {
-        buf[strlen(buf) - 1] = '\0';
+    if (diag_backtrace(&o, &p, NULL) == 0) {
+        if (buf[strlen(buf) - 1] == '<') {
+            buf[strlen(buf) - 1] = '\0';
+        }
+    }
+    else {
+        buf[0] = '\0';
     }
 }
 
@@ -422,6 +426,7 @@ static void backtrace(request_rec *r)
 {
     diag_backtrace_param_t p = {0};
     diag_output_t o = {0};
+    int rc = 0;
 
     p.symbols_initialized = 1;
     p.backtrace_count = 10;
@@ -435,7 +440,7 @@ static void backtrace(request_rec *r)
     ap_rputs("----------------------------------------------------\n", r); \
     ap_rputs("mod_backtrace: " #btfields "\n", r); \
     p.backtrace_fields = (btfields);               \
-    diag_backtrace(&o, &p, NULL)
+    rc += diag_backtrace(&o, &p, NULL)
 
     TESTCASE(DIAG_BTFIELDS_MODULE_PATH);
     TESTCASE(DIAG_BTFIELDS_MODULE_NAME);
@@ -445,6 +450,10 @@ static void backtrace(request_rec *r)
     TESTCASE(DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET);
     TESTCASE(DIAG_BTFIELDS_ADDRESS);
     TESTCASE(DIAG_BTFIELDS_ADDRESS | DIAG_BTFIELDS_FUNCTION | DIAG_BTFIELDS_FN_OFFSET);
+
+    if (rc) {
+        ap_rputs("\nSome call to mod_backtrace failed!\n", r);
+    }
 }
 
 static int backtrace_handler(request_rec *r)

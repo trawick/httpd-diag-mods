@@ -76,8 +76,18 @@ typedef struct diag_context_t {
 
 #endif
 
+#define DIAG_ERR_INIT 1
+
+/* Currently, this cannot fail and always returns 0. */
 extern int diag_describe(diag_output_t *, diag_context_t *);
+
+/* diag_backtrace() return codes:
+ * 0:             no error
+ * DIAG_ERR_INIT: some type of initialization error occurred
+ */
 extern int diag_backtrace(diag_output_t *, diag_backtrace_param_t *, diag_context_t *);
+
+/* Currently, this cannot fail and always returns 0. */
 extern int diag_backtrace_init(int symbols_initialized);
 
 #ifdef __cplusplus

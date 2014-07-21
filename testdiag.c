@@ -43,6 +43,7 @@ int y(void)
 {
     diag_backtrace_param_t p = {0};
     diag_output_t o = {0};
+    int rc;
 
 #if DIAG_PLATFORM_WINDOWS
     o.outfile = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -54,9 +55,10 @@ int y(void)
     printf("---------------------------------------------------\n"); \
     printf("testdiag: " #btfields "\n");                             \
     p.backtrace_fields = (btfields);                                 \
-    diag_backtrace(&o, &p, NULL);                                    \
+    rc += diag_backtrace(&o, &p, NULL);                              \
     printf("\n")
 
+    rc = 0;
     o.output_mode = DIAG_WRITE_FD;
     TESTCASE(DIAG_BTFIELDS_ALL);
 
@@ -85,11 +87,15 @@ int y(void)
         o.output_fn = line_fmt;
         p.backtrace_fields = DIAG_BTFIELDS_FUNCTION;
         p.backtrace_count = 3;
-        diag_backtrace(&o, &p, NULL);
+        rc += diag_backtrace(&o, &p, NULL);
         if (linebuf[strlen(linebuf) - 1] == '<') {
             linebuf[strlen(linebuf) - 1] = '\0';
         }
         printf("%s\n", linebuf);
+    }
+
+    if (rc) {
+        fprintf(stderr, "Some call to diag_backtrace() failed.\n");
     }
 
     return 0;
