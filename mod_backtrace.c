@@ -280,7 +280,9 @@ static void fmt(void *user_data, const char *s)
 
     if (strlen(li->buffer) + strlen(s) < li->len) {
         strcat(li->buffer, s);
-        strcat(li->buffer, "<");
+        if (strlen(li->buffer) < li->len) {
+            strcat(li->buffer, "<");
+        }
     }
 }
 
