@@ -32,7 +32,7 @@ ifeq ($(PLATFORM), FreeBSD)
 ifeq ($(CLANG), yes)
 
 CC=cc
-CFLAGS = $(BASE_CFLAGS) $(CLANG_CFLAGS) -rdynamic
+CFLAGS = $(BASE_CFLAGS) $(CLANG_CFLAGS)
 LDFLAGS = $(CLANG_CFLAGS) -rdynamic
 
 else
