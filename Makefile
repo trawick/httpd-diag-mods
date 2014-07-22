@@ -43,9 +43,19 @@ LDFLAGS = $(GCC_CFLAGS) -rdynamic
 
 endif
 
+ifeq ($(LIBUNWIND), yes)
+
+CFLAGS  += -I/usr/local/include
+LDFLAGS += -L/usr/local/lib
+LIBS=-lunwind
+
+else
+
 CFLAGS  += -I/usr/local/include
 LDFLAGS += -L/usr/local/lib
 LIBS=-lexecinfo
+
+endif
 
 else
 
