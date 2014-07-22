@@ -276,7 +276,11 @@ def main():
     hn = socket.gethostname()
     plat = sys.platform
 
+    if sys.platform == 'win32' and 'Platform' in os.environ:
+        plat += '-' + os.environ['Platform']
+
     section = "%s_%s" % (hn, plat)
+        
 
     add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
 
@@ -291,7 +295,7 @@ def main():
     if config.has_option(section, 'BUILD_LIBUNWIND'):
         bldcmd = config.get(section, 'BUILD_LIBUNWIND').split(' ')
         bldcmds.append(bldcmd)
-    assert len(bldcmds) > 0
+    assert len(bldcmds) > 0, 'Did not find BUILD or BUILD_LIBUNWIND settings for %s' % section
 
     if config.has_option(section, 'HTTPD22_INSTALLS'):
         httpd22_installs = config.get(section, 'HTTPD22_INSTALLS').split(' ')
@@ -337,7 +341,7 @@ def main():
 
             for rl in required_lines:
                 if not rl + '\n' in msgs:
-                    print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                    print 'fail, required line "%s" not found in "%s"' % (rl, msgs)
                     assert False
 
             print "Testing %s..." % testdiag
@@ -351,7 +355,7 @@ def main():
 
             for rl in required_lines:
                 if not rl + '\n' in msgs:
-                    print "fail, required line >%s< not found in >%s<" % (rl, msgs)
+                    print 'fail, required line "%s" not found in "%s"' % (rl, msgs)
                     assert False
 
             test_httpd(section, httpd, skip_startstop)
