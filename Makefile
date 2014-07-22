@@ -25,12 +25,26 @@ MACHINE  := $(shell uname -m)
 $(info Building for platform $(PLATFORM))
 
 GCC_CFLAGS=-O0 -Wall -m$(BITS)
+CLANG_CFLAGS=$(GCC_CFLAGS)
 
 ifeq ($(PLATFORM), FreeBSD)
 
+ifeq ($(CLANG), yes)
+
+CC=cc
+CFLAGS = $(BASE_CFLAGS) $(CLANG_CFLAGS) -rdynamic
+LDFLAGS = $(CLANG_CFLAGS) -rdynamic
+
+else
+
 CC=gcc
-CFLAGS = $(BASE_CFLAGS) $(GCC_CFLAGS) -I/usr/local/include -rdynamic
-LDFLAGS= $(GCC_CFLAGS) -L/usr/local/lib -rdynamic
+CFLAGS = $(BASE_CFLAGS) $(GCC_CFLAGS) -rdynamic
+LDFLAGS = $(GCC_CFLAGS) -rdynamic
+
+endif
+
+CFLAGS  += -I/usr/local/include
+LDFLAGS += -L/usr/local/lib
 LIBS=-lexecinfo
 
 else
