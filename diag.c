@@ -840,8 +840,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
         char *outch = buf;
         char *lastoutch = buf + sizeof buf - 1;
 
-        cur++;
-        if (cur > count) { /* avoid loop on corrupted chain, respect caller's wishes */
+        if (cur + 1 > count) { /* avoid loop on corrupted chain, respect caller's wishes */
             break;
         }
         symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
@@ -860,6 +859,13 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
 
         add_int(address_buf, address_buf + sizeof address_buf - 1,
                 stackframe.AddrPC.Offset, 16);
+
+        if (function && !strcmp(function, "diag_backtrace")) {
+            /* filter outselves out */
+            continue;
+        }
+
+        cur++; /* gonna keep this frame, so count it */
 
         output_frame(outch, lastoutch, p->backtrace_fields,
                      NULL, /* no module path */
