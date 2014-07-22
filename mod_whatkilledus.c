@@ -858,14 +858,14 @@ static void whatkilledus_child_init(apr_pool_t *p, server_rec *s)
                               whatkilledus_child_term, apr_pool_cleanup_null);
 }
 
-static void banner(server_rec *s)
+static int banner(server_rec *s)
 {
     const char *userdata_key = "whatkilledus_banner";
     void *data;
 
     apr_pool_userdata_get(&data, userdata_key, s->process->pool);
     if (data) {
-        return;
+        return 0;
     }
 
     apr_pool_userdata_set((const void *)1, userdata_key,
@@ -874,7 +874,7 @@ static void banner(server_rec *s)
 #if DIAG_PLATFORM_WINDOWS
     if (getenv("AP_PARENT_PID")) {
         /* don't repeat the message in child processes */
-        return;
+        return 0;
     }
 #endif
     /* In the event that you find this message distasteful or otherwise
@@ -888,10 +888,24 @@ static void banner(server_rec *s)
     ap_log_error(APLOG_MARK, APLOG_NOTICE, 0, s,
                  "mod_whatkilledus v%s from http://emptyhammock.com/",
                  DIAG_MOD_VERSION);
+    return 1;
+}
+
+static int whatkilledus_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp)
+{
+    /* clear during restart to handle configuration being removed IFF somebody
+     * statically links this with httpd, in which case the DSO unload+load around
+     * restart won't be clearing these variables ;)
+     */
+    logfilename = NULL;
+    exception_hook_enabled = 0;
+    return OK;
 }
 
 static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp, server_rec *s)
 {
+    int time_to_spam_error_log;
+
 #if DIAG_PLATFORM_UNIX
     if (!exception_hook_enabled) {
         ap_log_error(APLOG_MARK, APLOG_ERR, 0, s,
@@ -900,8 +914,19 @@ static int whatkilledus_post_config(apr_pool_t *pconf, apr_pool_t *plog, apr_poo
     }
 #endif
 
-    banner(s);
-    logfilename = ap_server_root_relative(pconf, DEFAULT_REL_LOGFILENAME);
+    time_to_spam_error_log = banner(s);
+
+    if (!logfilename) {
+        logfilename = DEFAULT_REL_LOGFILENAME;
+    }
+
+    logfilename = ap_server_root_relative(pconf, logfilename);
+
+    if (time_to_spam_error_log) {
+        ap_log_error(APLOG_MARK, APLOG_INFO, 0, s,
+                     LOG_PREFIX "Crash reports will be written to log file %s",
+                     logfilename);
+    }
 
     return OK;
 }
@@ -914,6 +939,7 @@ static void whatkilledus_register_hooks(apr_pool_t *p)
 #endif
     ap_hook_optional_fn_retrieve(whatkilledus_optional_fn_retrieve, NULL, NULL,
                                  APR_HOOK_MIDDLE);
+    ap_hook_pre_config(whatkilledus_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_post_config(whatkilledus_post_config, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_child_init(whatkilledus_child_init, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_post_read_request(whatkilledus_post_read_request, NULL, NULL, APR_HOOK_REALLY_FIRST);
@@ -937,6 +963,17 @@ static const char *check_exception_hook(cmd_parms *cmd, void *dummy, const char 
     return DECLINE_CMD;
 }
 #endif
+
+static const char *set_log_file(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
+    logfilename = arg;
+    return NULL;
+}
 
 static const char *set_obscured_fields(cmd_parms *cmd, void *dummy, const char *arg)
 {
@@ -1003,6 +1040,8 @@ static const command_rec whatkilledus_cmds[] =
     AP_INIT_TAKE1("EnableExceptionHook", check_exception_hook, NULL, RSRC_CONF,
                   "Check if EnableExceptionHook is On"),
 #endif
+    AP_INIT_TAKE1("WKULogfile", set_log_file, NULL, RSRC_CONF,
+                  "Set name of whatkilledus log file"),
     AP_INIT_ITERATE("WKUObscureInRequest", set_obscured_fields, NULL,
                     RSRC_CONF,
                     "List request headers and fields in the request whose values should be obscured in the log"),

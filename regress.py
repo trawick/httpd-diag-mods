@@ -104,7 +104,7 @@ def test_httpd(section, httpd, skip_startstop):
     if is_active():
         raise Exception("some httpd is active, but we haven't started any server yet")
 
-    wku_log = os.path.join(httpd, 'logs', 'whatkilledus' + log_ext)
+    wku_log = os.path.join(httpd, 'logs', 'whatkilledus_regress' + log_ext)
     err_log = os.path.join(httpd, 'logs', 'error' + log_ext)
 
     print section, httpd
