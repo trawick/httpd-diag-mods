@@ -61,3 +61,16 @@ mod_log_forensic, test_char.h
 * 2nd release tasks
 ** DONE wait for httpd 2.4.10 release
 ** DONE clean up CR-LF in sources
+** TODO allow APXS= to be specified
+** TODO final CHANGES
+** TODO test on Solaris
+** TODO test on FreeBSD 9
+** TODO document how to build, including how to build on Linux with old gcc that doesn't support thread-specific data
+(add -DWKU_USE_PTHREAD_SPECIFIC=1 to CFLAGS manually)
+*** TODO README should contain a synopsis, so that a README inside a tarball matches the tarball even if the web page is subsequently updated with incompatible procedures for building a later tarball
+** TODO retest everywhere
+** TODO build binaries for Windows
+** TODO tarballs available, website updates
+** TODO announce on users@httpd.apache.org
+* 3rd release tasks
+** TODO use libunwind automatically?
