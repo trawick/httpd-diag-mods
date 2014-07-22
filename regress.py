@@ -38,7 +38,12 @@ else:
 
 def add_to_log(arg):
     logfile = open("regress.log", "a")
-    print >> logfile, arg
+
+    if isinstance(arg, basestring):
+        print >> logfile, arg
+    else:
+        for l in arg:
+            print >> logfile, '  ' + l.rstrip()
     logfile.close()
 
 
