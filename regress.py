@@ -358,6 +358,12 @@ def main():
                     print 'fail, required line "%s" not found in "%s"' % (rl, msgs)
                     assert False
 
+            disallowed_lines = ['diag_backtrace']  # This function should be filtered out.
+            for dl in disallowed_lines:
+                if dl + '\n' in msgs:
+                    print 'fail, disallowed line "%s" found in "%s"' % (dl, msgs)
+                    assert False
+
             test_httpd(section, httpd, skip_startstop)
 
 if __name__ == '__main__':
