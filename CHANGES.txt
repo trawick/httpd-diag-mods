@@ -1,5 +1,8 @@
 Changes with version 2.01
 
+*) Build: Support "make APXS=/path/to/apxs" for building with non-default
+   install layouts.
+
 *) Build: Support Clang on FreeBSD 10.
 
 *) mod_whatkilledus: The name of the log file can now be configured with
