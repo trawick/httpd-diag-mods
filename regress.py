@@ -234,6 +234,9 @@ def test_httpd(section, httpd, skip_startstop):
             if httpdver == 24:
                 if '<ap_run_handler<ap_invoke_handler<' in l:
                     bt_backtrace_found = True
+                elif 'ap_run_handler<ap_invoke_handler<' in l:
+                    # FreeBSD 10, libexecinfo
+                    bt_backtrace_found = True
                 elif 'diag_backtrace_init<diag_backtrace_init' in l:
                     bt_backtrace_found = True
                 elif 'backtrace_handler<ap_run_handler' in l:  # Apachelounge build with no .pdb files
