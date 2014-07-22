@@ -266,10 +266,14 @@ def test_httpd(section, httpd, skip_startstop):
     assert wku_version_found
     assert bt_version_found
     assert bt_eyecatcher_found
-    assert bt_backtrace_found
     assert child_pid_exit_found
     assert httpd_terminated_found
 
+    if not bt_backtrace_found:
+        print 'The backtrace for an error message was not found.  Possibly this is httpd on Windows with no .pdb files???'
+        return 1
+
+    return 0
 
 def main():
     if os.path.exists("regress.log"):
@@ -314,6 +318,8 @@ def main():
 
     skip_bld = 0
     skip_startstop = 0
+
+    errors = 0
 
     for httpd in httpd22_installs + httpd24_installs:
 
@@ -369,7 +375,10 @@ def main():
                     print 'fail, disallowed line "%s" found in "%s"' % (dl, msgs)
                     assert False
 
-            test_httpd(section, httpd, skip_startstop)
+            errors += test_httpd(section, httpd, skip_startstop)
+
+    if errors != 0:
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
