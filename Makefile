@@ -30,6 +30,10 @@ endif
 
 BITS := $(shell $(APACHECTL) -V | grep Architecture | sed -e 's/^Architecture: *//' -e 's/-bit.*//')
 
+ifeq ($(BITS),)
+$(error $(APACHECTL) -V failed)
+endif
+
 DEFBITS := -DDIAG_BITS_$(BITS)
 
 BASE_CFLAGS=$(DEFBITS)
