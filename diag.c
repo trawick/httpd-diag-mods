@@ -630,6 +630,7 @@ int diag_backtrace(diag_output_t *o, diag_backtrace_param_t *p, diag_context_t *
     size = backtrace(pointers, DIAG_BT_LIMIT);
     if (size > 0) {
         if (o->output_mode == DIAG_WRITE_FD) {
+            /* XXX we won't be able to filter out diag_backtrace() */
             backtrace_symbols_fd(pointers, size, o->outfile);
         }
         else {
