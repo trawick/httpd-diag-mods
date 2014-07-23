@@ -324,6 +324,11 @@ def main():
     else:
         httpd24_installs = []
 
+    if config.has_option(section, 'SKIP_LIBUNWIND'):
+       skip_with_unwind = config.get(section, 'SKIP_LIBUNWIND').split(' ')
+    else:
+       skip_with_unwind = []
+
     skip_bld = 0
     skip_startstop = 0
 
@@ -332,6 +337,10 @@ def main():
     for httpd in httpd22_installs + httpd24_installs:
 
         for bldcmd in bldcmds:
+
+            if 'LIBUNWIND=yes' in bldcmd and httpd in skip_with_unwind:
+                continue
+
             if not skip_bld:
                 print "Building for %s... (%s)" % (httpd, bldcmd)
                 add_to_log("Building for %s... (%s)" % (httpd, bldcmd))
