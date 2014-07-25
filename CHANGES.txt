@@ -1,41 +1,45 @@
 Changes with version 2.01
 
-*) Build: Support "make APXS=/path/to/apxs" for building with non-default
-   install layouts.
+*) mod_whatkilledus improvements:
 
-*) Build: Support Clang on FreeBSD 10.
+   The name of the log file can now be configured with the WKULogfile
+   directive.
 
-*) mod_whatkilledus: The name of the log file can now be configured with
-   the WKULogfile directive.
+   On Windows: Add directive WKUDisableWindowsErrorBox to allow disabling
+   the pop-up error handling dialog after a child process crash.
 
-*) mod_whatkilledus on Windows: Add directive WKUDisableWindowsErrorBox
-   to allow disabling the pop-up error handling dialog after a child process
-   crash.
+   On Windows: Handle exceptions in 64-bit builds.
 
-*) mod_whatkilledus on Windows: Handle exceptions in 64-bit builds.
-
-*) mod_backtrace: Support libunwind on Linux, FreeBSD, and OS X.  This 
-   provides better resolution of function names, at least on Linux and
-   FreeBSD, so a raw address will be provided in lieu of the function 
-   name in fewer situations.  OS X note: A libunwind build silently fails
-   to capture a backtrace with 32-bit builds, so use the default mechanism
-   with 32-bit builds on OS X.
-
-*) mod_whatkilledus: In conjunction with Event MPM changes in httpd 2.4.10,
+   With Event MPM on Unix: When building with httpd 2.4.10 or later,
    properly track request processing across threads with the Event MPM.
    Previously, the wrong client and/or request might be logged as the
    trigger for a crash (with the Event MPM only).
 
-*) mod_backtrace: Filter out internal functions from backtraces so that
-   only the caller's stack frames are reported.
+*) mod_backtrace improvements:
 
-*) mod_backtrace: Improve formatting of a backtrace for the error log
-   field.
+   Support libunwind on Linux, FreeBSD, and OS X.  This provides better 
+   resolution of function names, at least on Linux and FreeBSD, so a raw 
+   address will be provided in lieu of the function name in fewer 
+   situations.  OS X note: A libunwind build silently fails to capture a
+   backtrace with 32-bit builds, so use the default mechanism with 32-bit 
+   builds on OS X.  (Add "LIBUNWIND=yes" to the make invocation.)
 
-*) Build: Add -funwind-tables on ARM platform for better backtraces.
+   Filter out internal functions from backtraces so that only the caller's
+   stack frames are reported.
 
-*) mod_whatkilledus: Improve detection of httpd builds that don't have
-   exception hooks enabled.
+   Improve formatting of a backtrace for the error log field.
+
+*) Build improvements:
+
+   Support "make APXS=/path/to/apxs" for building with non-default
+   install layouts.
+
+   Support Clang on FreeBSD 10.  (Add "CLANG=yes" to the make invocation.)
+
+   Add -funwind-tables on ARM platform for better backtraces.
+
+   mod_whatkilledus fails to build in a less mysterious way when using
+   an httpd build that doesn't have exception hooks enabled.
 
 Changes with version 2.0
 
