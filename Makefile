@@ -43,7 +43,13 @@ MACHINE  := $(shell uname -m)
 
 $(info Building for platform $(PLATFORM))
 
-GCC_CFLAGS=-O0 -Wall -m$(BITS)
+ifneq ($(MBITS), no)
+MBITS_OPT = -m$(BITS)
+else
+MBITS_OPT =
+endif
+
+GCC_CFLAGS=-O0 -Wall $(MBITS_OPT)
 CLANG_CFLAGS=$(GCC_CFLAGS)
 
 ifeq ($(PLATFORM), FreeBSD)
