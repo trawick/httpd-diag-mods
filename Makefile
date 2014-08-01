@@ -58,7 +58,7 @@ CLANG_CFLAGS=$(GCC_CFLAGS)
 ifeq ($(PLATFORM), FreeBSD)
 
 ifeq ($(CLANG),)
-MAYBE_CLANG = $(shell $(CC) --version | grep clang | sed -e 's/^.*clang.*$/clang/')
+MAYBE_CLANG = $(shell $(CC) --version | grep clang | sed -e 's/^.*clang.*$$/clang/')
 ifeq ($(MAYBE_CLANG), clang)
 CLANG = yes
 endif
