@@ -14,7 +14,7 @@
 #
 
 # User can specify APXS or HTTPD.  APXS is preferred, since it will work
-# with more layouts.  With HTTPD, we assume the default layout.
+# with more layouts.  With HTTPD, we must assume the default layout.
 
 ifeq ($(APXS),)
 ifeq ($(HTTPD),)
@@ -28,10 +28,19 @@ ifeq ($(APACHECTL),)
 APACHECTL = $(shell $(APXS) -q sbindir)/apachectl
 endif
 
+ifeq ($(BITS),)
 BITS := $(shell $(APACHECTL) -V | grep Architecture | sed -e 's/^Architecture: *//' -e 's/-bit.*//')
+endif
 
 ifeq ($(BITS),)
 $(error $(APACHECTL) -V failed)
+endif
+
+# can't do this only if CC is unset because of make's default CC setting
+CC = $(shell $(APXS) -q CC)
+
+ifeq ($(CC),)
+$(error $(APXS) -q CC failed)
 endif
 
 DEFBITS := -DDIAG_BITS_$(BITS)
@@ -43,26 +52,25 @@ MACHINE  := $(shell uname -m)
 
 $(info Building for platform $(PLATFORM))
 
-ifneq ($(MBITS), no)
-MBITS_OPT = -m$(BITS)
-else
-MBITS_OPT =
-endif
-
-GCC_CFLAGS=-O0 -Wall $(MBITS_OPT)
+GCC_CFLAGS=-O0 -Wall
 CLANG_CFLAGS=$(GCC_CFLAGS)
 
 ifeq ($(PLATFORM), FreeBSD)
 
+ifeq ($(CLANG),)
+MAYBE_CLANG = $(shell $(CC) --version | grep clang | sed -e 's/^.*clang.*$/clang/')
+ifeq ($(MAYBE_CLANG), clang)
+CLANG = yes
+endif
+endif
+
 ifeq ($(CLANG), yes)
 
-CC=cc
 CFLAGS = $(BASE_CFLAGS) $(CLANG_CFLAGS)
 LDFLAGS = $(CLANG_CFLAGS) -rdynamic
 
 else
 
-CC=gcc
 CFLAGS = $(BASE_CFLAGS) $(GCC_CFLAGS) -rdynamic
 LDFLAGS = $(GCC_CFLAGS) -rdynamic
 
@@ -86,7 +94,6 @@ else
 
 ifeq ($(PLATFORM), Linux)
 
-CC=gcc
 CFLAGS=  $(BASE_CFLAGS) $(GCC_CFLAGS) -rdynamic
 LDFLAGS= $(GCC_CFLAGS) -rdynamic
 LIBS=
@@ -99,14 +106,12 @@ else
 
 ifeq ($(PLATFORM), SunOS)
 
-CC=cc
 CFLAGS=$(BASE_CFLAGS) -DSOLARIS
 LDFLAGS=
 LIBS=
 
 else
 
-CC=gcc
 CFLAGS=$(BASE_CFLAGS) $(GCC_CFLAGS)
 LDFLAGS=$(GCC_CFLAGS)
 LIBS=
