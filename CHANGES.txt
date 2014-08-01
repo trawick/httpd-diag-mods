@@ -13,7 +13,8 @@ Changes with version 2.01
    With Event MPM on Unix: When building with httpd 2.4.10 or later,
    properly track request processing across threads with the Event MPM.
    Previously, the wrong client and/or request might be logged as the
-   trigger for a crash (with the Event MPM only).
+   trigger for a crash (with the Event MPM only).  The change is not
+   effective when building with httpd 2.4.9 or earlier.
 
 *) mod_backtrace improvements:
 
