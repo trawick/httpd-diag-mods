@@ -898,7 +898,9 @@ static int whatkilledus_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool
      * restart won't be clearing these variables ;)
      */
     logfilename = NULL;
+#if DIAG_PLATFORM_UNIX
     exception_hook_enabled = 0;
+#endif
     return OK;
 }
 
