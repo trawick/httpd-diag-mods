@@ -280,10 +280,12 @@ def test_httpd(section, httpd, skip_startstop):
     assert httpd_terminated_found
 
     if not bt_backtrace_found:
-        print 'The backtrace for an error message was not found.  Possibly this is httpd on Windows with no .pdb files???'
+        print 'The backtrace for an error message was not found.'
+        print 'Possibly this is httpd on Windows with no .pdb files???'
         return 1
 
     return 0
+
 
 def main():
     if os.path.exists("regress.log"):
@@ -299,7 +301,6 @@ def main():
         plat += '-' + os.environ['Platform']
 
     section = "%s_%s" % (hn, plat)
-        
 
     add_to_log('Starting tests on ' + section + ' at ' + time.ctime())
 
@@ -327,9 +328,9 @@ def main():
         httpd24_installs = []
 
     if config.has_option(section, 'SKIP_LIBUNWIND'):
-       skip_with_unwind = config.get(section, 'SKIP_LIBUNWIND').split(' ')
+        skip_with_unwind = config.get(section, 'SKIP_LIBUNWIND').split(' ')
     else:
-       skip_with_unwind = []
+        skip_with_unwind = []
 
     skip_bld = 0
     skip_startstop = 0
