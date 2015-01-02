@@ -67,13 +67,78 @@ mod_log_forensic, test_char.h
 ** DONE test on Lion and Mavericks
 ** DONE test on Raspberry Pi
 ** DONE final CHANGES -- sort by topic (no need to preserve order)
-** TODO document how to build, including how to build on Linux with old gcc that doesn't support thread-specific data
+** DONE build binaries for Windows
+** DONE build tarballs
+** DONE retest from tarball everywhere
+*** DONE Linux
+*** DONE FreeBSD
+*** DONE Windows
+** DONE document how to build
+** TODO document how to build on Linux with old gcc that doesn't support thread-specific data
 (add -DWKU_USE_PTHREAD_SPECIFIC=1 to CFLAGS manually)
 *** TODO README should contain a synopsis, so that a README inside a tarball matches the tarball even if the web page is subsequently updated with incompatible procedures for building a later tarball
-** TODO build binaries for Windows then tarballs
-** TODO retest from tarball everywhere
-** TODO tarballs available, website updates
-** TODO announce on users@httpd.apache.org
+** DONE tarballs available, website updates
+** DONE announce on users@httpd.apache.org
 * 3rd release tasks
+** TODO Decide what to do with this old text from the web page:
+    <h2>Future plans</h2>
+
+    <p>Here are some possible work items for the future:</p>
+
+    <h3>Windows</h3>
+
+    <ul>
+      <li>Prepare 64-bit binaries for Apache httpd 2.2 and 2.4.</li>
+      <li>Add more information about the exception to the mod_whatkilledus log.</li>
+      <li>Obtain the module name for each frame in the backtrace.</li>
+    </ul>
+
+    <h3>Unix</h3>
+
+    <ul>
+      <li>Implement low-level APIs to control core dumps, and exploit
+      those APIs in mod_whatkilledus in order to provide such features
+      as informing about core dump enablement, limiting the number of
+      core dumps created, etc.</li>
+      <li>Update low-level APIs to include more information about the
+      cause of the crash.  These can be enabled in the modules for
+      httpd after future changes to the httpd APIs.
+    </ul>
+
+    <h3>General</h3>
+
+    <ul>
+      <li>Clean up and formalize the low-level <em>diag</em> APIs for
+      handling the system-specific details (crash description,
+      backtrace) so that other programs may use them.</li>
+      <li>Clean up and formalize the mod_backtrace APIs so that other
+      Apache httpd modules can use them.</li>
+      <li>Allow the mod_whatkilledus log file to be configured.</li>
+      <li>Add more configurability for error log backtrace
+      selection.</li>
+      <li>Add more granular control over obscuring of request details
+      that can be logged, such as obscuring an individual cookie or
+      query argument and leaving others visible.</li>
+    </ul>
+
+    <h3>Desired changes to Apache httpd</h3>
+
+    <ul>
+      <li>Windows: Implement the exception hook API.  Currently
+      mod_whatkilledus handles this internally on the Windows
+      platform, but an exception hook would provide a framework for
+      multiple modules to provide insight into crashes or clean up
+      critical resources without conflicting with each other.</li>
+      <li>Unix: Update httpd's signal handler setup and signal handler
+      implementation to provide more information to exception hooks.
+      Structures like siginfo_t and ucontext_t could provide more
+      information about the cause of the crash and, in some limited
+      circumstances, allow a better backtrace to be generated.</li>
+    </ul>
+
+    <p>If you'd like to sponsor specific enhancements whether or not
+    they are listed above, please let me know.</p>
+
 ** TODO move to Github
+** TODO automated tarball test
 ** TODO config.sh which uses libunwind automatically?
