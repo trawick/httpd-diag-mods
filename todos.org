@@ -76,7 +76,7 @@ mod_log_forensic, test_char.h
 ** DONE document how to build
 ** TODO document how to build on Linux with old gcc that doesn't support thread-specific data
 (add -DWKU_USE_PTHREAD_SPECIFIC=1 to CFLAGS manually)
-*** TODO README should contain a synopsis, so that a README inside a tarball matches the tarball even if the web page is subsequently updated with incompatible procedures for building a later tarball
+** TODO README should contain a synopsis, so that a README inside a tarball matches the tarball even if the web page is subsequently updated with incompatible procedures for building a later tarball
 ** DONE tarballs available, website updates
 ** DONE announce on users@httpd.apache.org
 * 3rd release tasks
@@ -142,3 +142,5 @@ mod_log_forensic, test_char.h
 ** TODO move to Github
 ** TODO automated tarball test
 ** TODO config.sh which uses libunwind automatically?
+** TODO See e-mail and patch from Tianyin Xu, sent to info@emptyhammock.com.
+
